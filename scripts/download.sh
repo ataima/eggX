@@ -45,6 +45,7 @@ return 0
 # verify pgp sign 
 #$1 file
 #$2 remote file.sig
+#$3 project
 function check_pgp(){
 local RES=0
 local KEYS=""
@@ -60,7 +61,7 @@ if [ ! -f  $1.sig ]; then
 				continue
 			fi
 			if [ $RES -eq 1 ]; then 
-				RES=0
+				RES=99
 				break
 			fi
 			if [ $RES -eq 0 ]; then 
@@ -69,17 +70,18 @@ if [ ! -f  $1.sig ]; then
 			fi		
 		done
 		if [ $RES -eq 1 ]; then
-			print_c "$GREEN_LIGHT" "   - SIG check source OK" "$YELLOW" $1	
+			print_c "$GREEN_LIGHT" "   - SIG check source OK" "$YELLOW" $3	
 			chmod 444 $1
 		else
-			print_c "$RED_LIGHT" "   - SIG check source FAIL" "$YELLOW" $1	
+			print_c "$RED_LIGHT" "   - SIG check source FAIL" "$YELLOW" $3	
 			rm -f  "$1.sig"
+			rm -f "$1"
 		fi
 	else
 		rm -f  "$1.sig"
 	fi
 else
-print_c "$GREEN_LIGHT" "   - SIG check source OK" "$YELLOW" $1	
+print_c "$GREEN_LIGHT" "   - SIG check source OK" "$YELLOW" $3	
 fi	
 return $RES
 }
@@ -89,6 +91,7 @@ return $RES
 # verify md5 sum 
 #$1 file
 #$2 remote file.md5
+#$3 project
 function check_md5sum(){
 local RES=0
 if [ ! -f  $1.md5 ]; then 
@@ -99,18 +102,20 @@ if [ ! -f  $1.md5 ]; then
 		local req=$(cat "$1.md5" )
 		equs $sum $req
 		if [ $? -eq 1 ]; then
-			print_c "$GREEN_LIGHT" "   - MD5 check source OK" "$YELLOW" $1
+			print_c "$GREEN_LIGHT" "   - MD5 check source OK" "$YELLOW" $3
 			chmod 444 $1
 			RES=1
 		else
-			print_c "$RED_LIGHT" "   - MD5 check source FAIL" "$YELLOW" $1	 
+			print_c "$RED_LIGHT" "   - MD5 check source FAIL" "$YELLOW" $3	 
 			rm -f "$1.md5"
+			rm -f "$1"
+			RES=99
 		fi 
 	else
 		rm -f  "$1.md5"
 	fi
 else
-print_c "$GREEN_LIGHT" "   - MD5 check source OK" "$YELLOW" $1	
+print_c "$GREEN_LIGHT" "   - MD5 check source OK" "$YELLOW" $3	
 fi
 return $RES
 }
@@ -118,6 +123,7 @@ return $RES
 # verify sha1 sum 
 #$1 file
 #$2 remote file.sha1
+#$3 project
 function check_sha1sum(){
 local RES=0
 if [ ! -f  $1.sha1 ]; then
@@ -128,46 +134,53 @@ if [ ! -f  $1.sha1 ]; then
 		local req=$(cat "$1.sha1" )
 		equs $sum $req
 		if [ $? -eq 1 ]; then
-			print_c "$GREEN_LIGHT" "   - SHA1 check source OK" "$YELLOW" $1
+			print_c "$GREEN_LIGHT" "   - SHA1 check source OK" "$YELLOW" $3
 			chmod 444 $1
 			RES=1
 		else
-			print_c "$RED_LIGHT" "   - SHA1 check source FAIL" "$YELLOW" $1	
+			print_c "$RED_LIGHT" "   - SHA1 check source FAIL" "$YELLOW" $3	
 			rm -f "$1.sha1"
+			rm -f "$1"
+			RES=99
 		fi 
 	else
 		rm -f  "$1.sha1"	
 	fi
 else
-print_c "$GREEN_LIGHT" "   - MD5 check source OK" "$YELLOW" $1	
+print_c "$GREEN_LIGHT" "   - MD5 check source OK" "$YELLOW" $3
 fi
 return $RES
 }
 
 #$1 filename 
 #$2 remote repository
+#$3 project
 function check_sign(){
+local RES=0
 local ASIGN="sig md5 sha1"
 local i=""
 for i in $ASIGN; do
  case $i in
 	"sig")
-	check_pgp $1 $2
-	if [ $? -eq 1 ]; then break; fi
+	check_pgp $1 $2 $3
+	RES=$?	
 	;;
 	"md5")
-	check_md5sum $1 $2
-	if [ $? -eq 1 ]; then break; fi
+	check_md5sum $1 $2 $3
+	RES=$?
 	;;
 	"sha1")
-	check_sha1sum $1 $2
-	if [ $? -eq 1 ]; then break; fi
+	check_sha1sum $1 $2 $3
+	RES=$?
 	;;
 	*)
-	error_c "Unknow sign " "$i - project : $1"
+	error_c "Unknow sign " "$i - project : $3"
 	;;
 esac 
+if [ $RES -eq 1 ]; then break; fi
+if [ $RES -eq 99 ]; then break; fi
 done
+return $RES
 }
 
 
@@ -176,6 +189,7 @@ done
 # $2 link
 # $3 filename 
 function wget_packet(){
+local RES=0
 print_c "$GREEN_LIGHT" "   - Download source" "$YELLOW" $i
 if [ ! -d  $REPO/$1/logs ]; then 
 	mkdir -p  $REPO/$1/logs
@@ -186,7 +200,11 @@ local PNAME="$2/$3"
 rm -f $REPO/$1/logs/$LOG/*
 wget  --show-progress -q -o "$REPO/$1/logs/$LOG" "$PNAME" -O "$REPO/$1/$3"
 if [ -f  "$REPO/$1/$3" ]; then
-	check_sign "$REPO/$1/$3" "$PNAME"
+	check_sign "$REPO/$1/$3" "$PNAME" "$1"
+	RES=$?
+	if [ $RES -eq 99 ]; then 
+		wget_packet $1 $2 $3
+	fi
 fi
 }
 
@@ -198,7 +216,11 @@ fi
 function wget_update_packet(){
 local PNAME="$2/$3"
 if [ -f  "$REPO/$1/$3" ]; then
-	check_sign "$REPO/$1/$3" "$PNAME"
+	check_sign "$REPO/$1/$3" "$PNAME" "$1"
+	RES=$?
+	if [ $RES -eq 99 ]; then 
+		wget_packet $1 $2 $3
+	fi
 fi
 }
 
@@ -226,7 +248,10 @@ git    co "$PNAME"  "$REPO/$1/$3"
 function file_packet(){
 print_c "$GREEN_LIGHT" "   - File copy source $3" "$YELLOW" $1
 local PNAME="$2/$3"
-cp -a "$PNAME" "$REPO/$1/$3"
+rsync -ry "$PNAME" "$REPO/$1/$3"
+if [ $? -ne 0 ]; then
+	error_c "Cannot copy file $3" " project $1"
+fi
 }
 
 #$1 projects
@@ -384,7 +409,7 @@ for i in $ALL_PACKETS; do
 	print_c "$GREEN_LIGHT" "Source Check for project" "$YELLOW" $i
 	verify_packet $i
 	verify_patch $i
-done
+done	
 }
 
 
@@ -407,8 +432,15 @@ done
 
 
 # sort list of packets
+if [ "$1" == "-D" ]; then 
+	set -x
+fi
+echo $REPO $ROOT $OREPO
 for key in $ALL_PACKETS; do MAP[$key]="$key"; done  
 rsync -ry $OREPO $ROOT
+if [ $? -ne 0 ]; then
+	error_c "Cannot work sync repository"
+fi
 download_sign_key
 download_all_packets
 

@@ -1,4 +1,4 @@
 #!/bin/sh
-ROOT="/home/finsoft/ebuild"
+ROOT="$HOME/ebuild"
 REPO="$ROOT/repo"
 SOURCES="$ROOT/sources"
