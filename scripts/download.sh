@@ -246,10 +246,28 @@ svn   -q co "$PNAME"  "$REPO/$1/$3"
 # $1 project name
 # $2 link
 # $3 filename 
+function svn_update_packet(){
+print_c "$GREEN_LIGHT" "   - Svn update source" "$YELLOW" $1
+local PNAME="$2/$3"
+svn   -q update "$PNAME"  "$REPO/$1/$3"
+}
+
+# $1 project name
+# $2 link
+# $3 filename 
 function git_packet(){
 print_c "$GREEN_LIGHT" "   - Git checkout source" "$YELLOW" $1
 local PNAME="$2/$3"
 git    co "$PNAME"  "$REPO/$1/$3"
+}
+
+# $1 project name
+# $2 link
+# $3 filename 
+function git_update_packet(){
+print_c "$GREEN_LIGHT" "   - Git update source" "$YELLOW" $1
+local PNAME="$2/$3"
+git    pull  "$PNAME"  "$REPO/$1/$3"
 }
 
 # $1 project name
@@ -310,7 +328,7 @@ case  $2 in
 	svn_update_packet $1 $3 $4
 	;;
 	"FILE")
-	file_update_packet $1 $3 $4
+	file_packet $1 $3 $4
 	;;
 	*)
 	error_c "Unknow method to update sources " "$2 - project : $1"
@@ -322,10 +340,16 @@ esac
 #$2 mode : wget svn git etc
 #$3 remote link to download the packet
 #$4 packet name 
+#$5 action 99=force 1=normal 2=update
 function download_action(){
+if [ "$5" == 99 ]; then
+	dolog "Remove file $REPO/$1/$4 to execute force action"
+	rm -f  "$REPO/$1/$4"
+fi
+
 if [ -f "$REPO/$1/$4" ] ; then 
 	dolog "File $REPO/$1/$4 exist : check sign"
-	is_updated $1 $2 $3 $4
+	is_updated $1 $2 $3 $4 
 else
 	dolog "Download $REPO/$1/$4 "
 	download_packet $1 $2 $3 $4
@@ -335,6 +359,7 @@ fi
 
 
 # $1 packet name
+# $2 action 99=force 1=check normal 2=update 
 function verify_patch(){
 local tmp=""
 local REMOTE=""
@@ -346,6 +371,7 @@ if [ $? -eq 1 ]; then
 #load prj/conf.egg to download the packet
 #conf.h REMOTE link packet name md5sum
 	if [ -f $REPO/$1/conf.egg ]; then		
+		dolog "Read conf.egg from project $1 : action PATCH"
 		while IFS='' read -r line || [[ -n "$line" ]]; do
 			tmp=$(echo  $line | grep PATCH )
 			if [ "$tmp" != "" ]; then 
@@ -365,7 +391,7 @@ if [ $? -eq 1 ]; then
 					error_c "Missing  packet name " "project : $1"
 				fi		
 				print_c "$GREEN_LIGHT" "   - Download Patch $PACKET" "$YELLOW" $1
-				download_action "$1" "$MODE"  "$REMOTE" "$PACKET"
+				download_action "$1" "$MODE"  "$REMOTE" "$PACKET" "$2"
 			fi
 		done < "$REPO/$1/conf.egg"			
 	else
@@ -377,8 +403,65 @@ fi
 }
 
 
+
+# $1 packet name force skip check update
+
+function download_request(){
+local RES=1000
+local tmp=""
+local MODE=""
+check_project $1
+if [ $? -eq 1 ]; then
+#exist project name <name> in repo 
+#load prj/conf.egg to download the packet
+#conf.h REMOTE link packet name md5sum
+	if [ -f $REPO/$1/conf.egg ]; then
+		dolog "Read conf.egg from project $1 : action DOWNLOAD"
+		while IFS='' read -r line || [[ -n "$line" ]]; do
+			tmp=$(echo  $line | grep DOWNLOAD )	
+			if [ "$tmp" != "" ]; then 
+				MODE=$(echo $tmp | awk '{ print $2 }')
+				equs "$MODE"  
+				if [ $? -eq 1 ]; then 
+					error_c "Missing  download status mode" "project : $1"
+				fi	
+				 case $MODE in
+					"FORCE")
+					RES=99	
+					;;
+					"SKIP")
+					RES=0
+					;;
+					"CHECK")
+					RES=1
+					;;
+					"UPDATE")
+					RES=2
+					;;
+					*)
+					error_c "Unknow status Mode " "$MODE - project : $1"
+					;;
+				esac 
+				break;
+			fi	
+		done < "$REPO/$1/conf.egg"	
+		if [  $RES -eq 1000 ]; then
+			error_c "midding DOWNLOAD mode in conf.egg:" " - project : $1"
+		fi
+	else
+		error_c "Missing conf.egg file " "project : $1"
+	fi
+else
+	error_c "Missing project in $REPO " "project : $1"
+fi
+return $RES
+}
+
+
 # $1 packet name
+# $2 action 99=force 1=check normal 2=update 
 function verify_packet(){
+local RES=0
 local tmp=""
 local REMOTE=""
 local MODE=""
@@ -389,28 +472,33 @@ if [ $? -eq 1 ]; then
 #load prj/conf.egg to download the packet
 #conf.h REMOTE link packet name md5sum
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1"
-		tmp=$( cat  $REPO/$1/conf.egg | grep "REMOTE" )
-		equs "$tmp"
-		if [ $? -eq 1 ]; then 
-			error_c "Missing remote repository " "project : $1"
+		dolog "Read conf.egg from project $1 : action REMOTE"
+		while IFS='' read -r line || [[ -n "$line" ]]; do
+			tmp=$(echo  $line | grep REMOTE )		
+			if [ "$tmp" != "" ]; then 
+				MODE=$(echo $tmp | awk '{ print $2 }')
+				equs "$MODE"  
+				if [ $? -eq 1 ]; then 
+					error_c "Missing  download mode" "project : $1"
+				fi
+				REMOTE=$(echo $tmp | awk '{ print $3 }')
+				equs "$REMOTE" 
+				if [ $? -eq 1 ]; then 
+					error_c "Missing remote repository name" "project : $1"
+				fi
+				PACKET=$(echo $tmp | awk '{ print $4 }')
+				equs "$PACKET" 
+				if [ $? -eq 1 ]; then 
+					error_c "Missing  packet name " "project : $1"
+				fi		
+				download_action "$1" "$MODE"  "$REMOTE" "$PACKET" "$2"
+				RES=1
+				break;
+			fi
+		done < "$REPO/$1/conf.egg"	
+		if [ $RES -ne 1 ]; then
+			error_c "Missing REMOTE key in conf.egg " "project : $1"
 		fi
-		MODE=$(echo $tmp | awk '{ print $2 }')
-		equs "$MODE"  
-		if [ $? -eq 1 ]; then 
-			error_c "Missing  download mode" "project : $1"
-		fi
-		REMOTE=$(echo $tmp | awk '{ print $3 }')
-		equs "$REMOTE" 
-		if [ $? -eq 1 ]; then 
-			error_c "Missing remote repository name" "project : $1"
-		fi
-		PACKET=$(echo $tmp | awk '{ print $4 }')
-		equs "$PACKET" 
-		if [ $? -eq 1 ]; then 
-			error_c "Missing  packet name " "project : $1"
-		fi		
-		download_action "$1" "$MODE"  "$REMOTE" "$PACKET"
 	else
 		error_c "Missing conf.egg file " "project : $1"
 	fi
@@ -421,11 +509,18 @@ fi
 
 # download if need source packets
 function download_all_packets(){
+local RES=0
 local i=""
 for i in $ALL_PACKETS; do
 	print_c "$GREEN_LIGHT" "Source Check for project" "$YELLOW" $i
-	verify_packet $i
-	verify_patch $i
+	download_request $i
+	RES=$?
+	if [ "$RES"  -ne 0 ]; then 
+	verify_packet $i $RES
+	verify_patch $i $RES
+	else
+	print_c "$GREEN_LIGHT" "   - SKIP Download STAGE" "$YELLOW" $i	
+	fi
 done	
 }
 

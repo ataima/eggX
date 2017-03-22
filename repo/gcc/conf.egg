@@ -1,2 +1,3 @@
+DOWNLOAD    CHECK
 REMOTE   	WGET  	ftp://ftp.gnu.org/gnu/gcc/gcc-6.3.0  		gcc-6.3.0.tar.gz     
  
