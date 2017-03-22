@@ -240,7 +240,13 @@ fi
 function svn_packet(){
 print_c "$GREEN_LIGHT" "   - Svn checkout source" "$YELLOW" $1
 local PNAME="$2/$3"
-svn   -q co "$PNAME"  "$REPO/$1/$3"
+if [ ! -d "$SOURCES/$1" ]; then 
+	mkdir  -p  "$SOURCES/$1"
+fi
+svn   -q co $PNAME  "$SOURCES/$1"
+if [ $? -ne 0 ]; then 
+	error_c "Svn Checkout error " "   project $1"
+fi 
 }
 
 # $1 project name
@@ -249,7 +255,18 @@ svn   -q co "$PNAME"  "$REPO/$1/$3"
 function svn_update_packet(){
 print_c "$GREEN_LIGHT" "   - Svn update source" "$YELLOW" $1
 local PNAME="$2/$3"
-svn   -q update "$PNAME"  "$REPO/$1/$3"
+if [ ! -d "$SOURCES/$1" ]; then 
+	mkdir  -p "$SOURCES/$1"
+	svn   -q co $PNAME  $SOURCES/$1
+	if [ $? -ne 0 ]; then 
+		error_c "Svn Checkout error " "   project $1"
+	fi 
+else
+	svn   -q update  $SOURCES/$1
+	if [ $? -ne 0 ]; then 
+		error_c "Svn Update error " "   project $1"
+	fi 
+fi
 }
 
 # $1 project name
@@ -346,14 +363,47 @@ if [ "$5" == 99 ]; then
 	dolog "Remove file $REPO/$1/$4 to execute force action"
 	rm -f  "$REPO/$1/$4"
 fi
-
-if [ -f "$REPO/$1/$4" ] ; then 
-	dolog "File $REPO/$1/$4 exist : check sign"
-	is_updated $1 $2 $3 $4 
-else
-	dolog "Download $REPO/$1/$4 "
-	download_packet $1 $2 $3 $4
-fi
+case $2 in
+	"WGET")
+	if [ -f "$REPO/$1/$4" ] ; then 
+		dolog "File $REPO/$1/$4 exist : check sign"
+		is_updated $1 $2 $3 $4 
+	else
+		dolog "Download $REPO/$1/$4 "
+		download_packet $1 $2 $3 $4
+	fi
+	;;
+	"GIT")
+	if [ -d "$SOURCES/$1" ] ; then 
+		dolog "File $SOURCES/$1 exist : check sign"
+		is_updated $1 $2 $3 $4 
+	else
+		dolog "Download $SOURCES/$1 "
+		download_packet $1 $2 $3 $4
+	fi
+	;;
+	"SVN")
+	if [ -d "$SOURCES/$1" ] ; then 
+		dolog "File $SOURCES/$1 exist : check sign"
+		is_updated $1 $2 $3 $4 
+	else
+		dolog "Download $SOURCES/$1 "
+		download_packet $1 $2 $3 $4
+	fi
+	;;
+	"FILE")
+	if [ -d "$SOURCES/$1" ] ; then 
+		dolog "File $SOURCES/$1 exist : check sign"
+		is_updated $1 $2 $3 $4 
+	else
+		dolog "Download $SOURCES/$1 "
+		download_packet $1 $2 $3 $4
+	fi
+	;;
+	*)
+	error_c "Unknow method to get sources " "$2 - project : $1"
+	;;
+esac
 }
 
 

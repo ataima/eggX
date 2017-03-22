@@ -1,4 +1,4 @@
-DOWNLOAD 	CHECK
+DOWNLOAD 	SKIP
 REMOTE   	WGET  	ftp://ftp.gnu.org/gnu/binutils 	binutils-2.28.tar.bz2     
 
  
