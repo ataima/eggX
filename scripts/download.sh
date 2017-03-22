@@ -359,9 +359,16 @@ esac
 #$4 packet name 
 #$5 action 99=force 1=normal 2=update
 function download_action(){
-if [ "$5" == 99 ]; then
-	dolog "Remove file $REPO/$1/$4 to execute force action"
-	rm -f  "$REPO/$1/$4"
+if [ "$5" == 99 ]; then	
+	if [ -f "$REPO/$1/$4" ]; then 
+		dolog "Remove file $REPO/$1/$4 to execute force action"
+		rm -f  "$REPO/$1/$4"
+	fi
+	if [ -d "$SOURCES/$1" ]; then 
+		dolog "Remove path $SOURCES/$1 to execute force action"
+		rm -rf  "$SOURCES/$1"
+	fi
+	
 fi
 case $2 in
 	"WGET")
