@@ -7,7 +7,7 @@ source "$SCRIPT_DIR/conf.sh"
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
 
-OREPO=$SCRIPT_DIR/../repo
+OREPO=$SCRIPT_DIR/../repo/.
 
 declare -A MAP    
 
@@ -50,6 +50,7 @@ function check_pgp(){
 local RES=0
 local KEYS=""
 if [ ! -f  $1.sig ]; then 
+	dolog "Download sign file : $1.sig"
 	wget  --show-progress -q "$2.sig" -O "$1.sig"
 	tmp=$( ls -al  "$1.sig"  |  awk  '{print $5}' )
 	if [  $tmp -ne 0  ]; then
@@ -61,10 +62,12 @@ if [ ! -f  $1.sig ]; then
 				continue
 			fi
 			if [ $RES -eq 1 ]; then 
+				dolog "Gpg sign  fail redo download : $1.sig"
 				RES=99
 				break
 			fi
 			if [ $RES -eq 0 ]; then 
+				dolog "Gpg sign  ok : $1.sig"
 				RES=1
 				break
 			fi		
@@ -82,6 +85,7 @@ if [ ! -f  $1.sig ]; then
 	fi
 else
 print_c "$GREEN_LIGHT" "   - SIG check source OK" "$YELLOW" $3	
+RES=1
 fi	
 return $RES
 }
@@ -95,6 +99,7 @@ return $RES
 function check_md5sum(){
 local RES=0
 if [ ! -f  $1.md5 ]; then 
+	dolog "Download md5 file : $1.md5"
 	wget  --show-progress -q "$2.md5" -O "$1.md5"
 	tmp=$( ls -al  "$1.md5"  |  awk  '{print $5}' )
 	if [  $tmp -ne 0 ]; then
@@ -116,6 +121,7 @@ if [ ! -f  $1.md5 ]; then
 	fi
 else
 print_c "$GREEN_LIGHT" "   - MD5 check source OK" "$YELLOW" $3	
+RES=1
 fi
 return $RES
 }
@@ -127,6 +133,7 @@ return $RES
 function check_sha1sum(){
 local RES=0
 if [ ! -f  $1.sha1 ]; then
+	dolog "Download sha1 file : $1.sha1"
 	wget  --show-progress -q "$2.sha1" -O "$1.sha1"
 	tmp=$( ls -al  "$1.sha1"  |  awk  '{print $5}' )
 	if [  $tmp -ne 0 ]; then
@@ -147,7 +154,8 @@ if [ ! -f  $1.sha1 ]; then
 		rm -f  "$1.sha1"	
 	fi
 else
-print_c "$GREEN_LIGHT" "   - MD5 check source OK" "$YELLOW" $3
+print_c "$GREEN_LIGHT" "   - SHA1 check source OK" "$YELLOW" $3
+RES=1
 fi
 return $RES
 }
@@ -177,8 +185,9 @@ for i in $ASIGN; do
 	error_c "Unknow sign " "$i - project : $3"
 	;;
 esac 
-if [ $RES -eq 1 ]; then break; fi
-if [ $RES -eq 99 ]; then break; fi
+if [ $RES -eq 1 ] || [ $RES -eq 99 ]; then 
+	break
+fi
 done
 return $RES
 }
@@ -198,6 +207,7 @@ local LOG=$(date +%d-%m-%y-%H:%M:%S)-log.txt
 local tmp=$(touch $REPO/$1/logs/$LOG)
 local PNAME="$2/$3"
 rm -f $REPO/$1/logs/$LOG/*
+dolog "Created download log file : $REPO/$1/logs/$LOG"
 wget  --show-progress -q -o "$REPO/$1/logs/$LOG" "$PNAME" -O "$REPO/$1/$3"
 if [ -f  "$REPO/$1/$3" ]; then
 	check_sign "$REPO/$1/$3" "$PNAME" "$1"
@@ -261,15 +271,19 @@ fi
 function download_packet(){
 case  $2 in
 	"WGET")
+	dolog "Method to get source is : wget for project $1"
 	wget_packet $1 $3 $4
 	;;
 	"GIT")
+	dolog "Method to get source is : git for project $1"
 	git_packet $1 $3 $4
 	;;
 	"SVN")
+	dolog "Method to get source is : svn for project $1"
 	svn_packet $1 $3 $4
 	;;
 	"FILE")
+	dolog "Method to get source is : rsync for project $1"
 	file_packet $1 $3 $4
 	;;
 	*)
@@ -310,8 +324,10 @@ esac
 #$4 packet name 
 function download_action(){
 if [ -f "$REPO/$1/$4" ] ; then 
+	dolog "File $REPO/$1/$4 exist : check sign"
 	is_updated $1 $2 $3 $4
 else
+	dolog "Download $REPO/$1/$4 "
 	download_packet $1 $2 $3 $4
 fi
 }
@@ -373,6 +389,7 @@ if [ $? -eq 1 ]; then
 #load prj/conf.egg to download the packet
 #conf.h REMOTE link packet name md5sum
 	if [ -f $REPO/$1/conf.egg ]; then
+		dolog "Read conf.egg from project $1"
 		tmp=$( cat  $REPO/$1/conf.egg | grep "REMOTE" )
 		equs "$tmp"
 		if [ $? -eq 1 ]; then 
@@ -419,28 +436,70 @@ function download_sign_key(){
 local KEYS="ftp://ftp.gnu.org/gnu/gnu-keyring.gpg "
 
 if [ ! -d $ROOT/keys ]; then 
+	dolog "Create dir for gpg keys"
 	mkdir -p $ROOT/keys
 fi
 
 for i in $KEYS; do
 	key=$(basename "$i") 
 	if [ ! -f "$ROOT/keys/$key" ]; then 
+		dolog "Download keys from $i"
 		wget --show-progress -q "$i" -O "$ROOT/keys/$key"
 	fi
 done
 }
 
+# none 
+function check_work_dir(){
+#ROOT
+if [ ! -d "$ROOT" ]; then 
+	mkdir -p "$ROOT"
+fi
+#set log to download
+LOGFILE="$LOGFILE""-download.txt"
+touch "$LOGFILE"
+#REPO
+if [ ! -d "$REPO" ]; then 
+	dolog "Create $REPO path"
+	mkdir -p "$REPO"
+fi
+#SOURCES
+if [ ! -d "$SOURCES" ]; then 
+	dolog "Create $SOURCES path"
+	mkdir -p "$SOURCES"
+fi
+#IMAGES
+if [ ! -d "$IMAGES" ]; then 
+	dolog "Create $IMAGES path"
+	mkdir -p "$IMAGES"
+fi
 
+}
+
+#  $1 arg $1
+#  $2 arg $2
+#  $3 arg $3
+#  $4 arg $4
+function init(){
+check_work_dir
 # sort list of packets
 if [ "$1" == "-D" ]; then 
 	set -x
+	dolog "Set Debug ON"
 fi
-echo $REPO $ROOT $OREPO
+#sort project in repo to bin search
 for key in $ALL_PACKETS; do MAP[$key]="$key"; done  
-rsync -ry $OREPO $ROOT
+# sync repo file to build path 
+dolog "Force resync work repo"
+rsync -ry $OREPO $REPO
 if [ $? -ne 0 ]; then
-	error_c "Cannot work sync repository"
+	error_c "Cannot  sync work repository"
 fi
+#download all key to verify sign
 download_sign_key
+}
+
+
+init $1 $2 $3 $4
 download_all_packets
 

@@ -19,10 +19,19 @@ YELLOW=" -e \E[1;33m"
 BLACK=" -e \E[0;30m"
 REPLACE=" -e \E[0m"
 
+#$1.... string to log
+function dolog(){
+	if [ -f "$LOGFILE" ] && [ "$1" != "" ]; then 
+			echo "$1" "$2" "$3" "$4" >> "$LOGFILE"
+	fi
+}
+
+
 #$1 color
 #$2   string
 function print_c(){
 echo -e $(echo $1) "$2" $(echo $3) "$4"$(echo $5) "$6" $(echo $REPLACE)
+dolog "$2" "$4" "$6"
 }
 
 
@@ -37,6 +46,9 @@ print_c "$YELLOW" "   -  $2" "$BLUE_LIGHT" "$3"
 print_c "$WHITE" "--------------------------------------------------"
 exit 1
 }
+
+
+
 
 # $1  string 
 # $2  string

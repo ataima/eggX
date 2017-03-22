@@ -1,0 +1,17 @@
+download.sh :
+conf.egg SECTIONS:
+1)DOWNLOAD   1 field with ... :
+		-FORCE     always download the source
+		-SKIP      not execute nothing
+		-CHECK     check sign source if avaiable 
+		-UPDATE    update source (only SVN-GIT-FILE )
+
+	
+2)REMOTE  3 fields with ... :
+		1) -WGET, SVN, GIT, FILE : method to dwnload the source
+		2) - link to path  to download (file,ftp,git,http...)
+		3) - filename to download ( or svn -git project..)
+
+	
+	
+			
