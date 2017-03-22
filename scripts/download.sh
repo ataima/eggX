@@ -8,7 +8,7 @@ source "$SCRIPT_DIR/conf.sh"
 source "$SCRIPT_DIR/functions.sh"
 
 OREPO=$SCRIPT_DIR/../repo/.
-
+RKEYS=$SCRIPT_DIR/../Keys
 declare -A MAP    
 
 ALL_PACKETS=$(ls $OREPO )
@@ -54,7 +54,7 @@ if [ ! -f  $1.sig ]; then
 	wget  --show-progress -q "$2.sig" -O "$1.sig"
 	tmp=$( ls -al  "$1.sig"  |  awk  '{print $5}' )
 	if [  $tmp -ne 0  ]; then
-		KEYS=$(ls $ROOT/keys/*.gpg )
+		KEYS=$(ls $RKEYS/*.gpg )
 		for i in $KEYS; do
 			gpg --verify --keyring "$i" "$1.sig"
 			RES=$?
@@ -262,7 +262,7 @@ if [ ! -d "$SOURCES/$1" ]; then
 		error_c "Svn Checkout error " "   project $1"
 	fi 
 else
-	svn   -q update  $SOURCES/$1
+	svn   update  $SOURCES/$1
 	if [ $? -ne 0 ]; then 
 		error_c "Svn Update error " "   project $1"
 	fi 
@@ -587,16 +587,16 @@ done
 function download_sign_key(){
 local KEYS="ftp://ftp.gnu.org/gnu/gnu-keyring.gpg "
 
-if [ ! -d $ROOT/keys ]; then 
+if [ ! -d $RKEYS ]; then 
 	dolog "Create dir for gpg keys"
-	mkdir -p $ROOT/keys
+	mkdir -p $RKEYS
 fi
 
 for i in $KEYS; do
 	key=$(basename "$i") 
-	if [ ! -f "$ROOT/keys/$key" ]; then 
+	if [ ! -f "$RKEYS/$key" ]; then 
 		dolog "Download keys from $i"
-		wget --show-progress -q "$i" -O "$ROOT/keys/$key"
+		wget --show-progress -q "$i" -O "$RKEYS/$key"
 	fi
 done
 }
