@@ -55,3 +55,8 @@ INPUT PARAMETER
 -D or --debug set debug on 
 -F or --force <project> force the download of project
 -G or --gpg <link >   get a new gpg key to verify sign : default gnu keys already inported as default..
+
+
+
+TO DO:
+PASSWORD : for SVN or GIT

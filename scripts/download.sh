@@ -247,13 +247,18 @@ fi
 # $1 project name
 # $2 link
 # $3 filename 
+# $4 password svn
 function svn_packet(){
+local RPWD=""
 print_c "$GREEN_LIGHT" "   - Svn checkout source" "$YELLOW" $1
 local PNAME="$2/$3"
 if [ ! -d "$SOURCES/$1" ]; then 
 	mkdir  -p  "$SOURCES/$1"
 fi
-svn   -q co $PNAME  "$SOURCES/$1"
+if [ "$4" !=  "" ]; then
+	RPWD="--non-interactive --password=$4"
+fi
+svn   -q co $PNAME  $SOURCES/$1 $RPWD
 if [ $? -ne 0 ]; then 
 	error_c "Svn Checkout error " "   project $1"
 fi 
@@ -262,12 +267,17 @@ fi
 # $1 project name
 # $2 link
 # $3 filename 
+# $4 password optional
 function svn_update_packet(){
+local RPWD=""
 print_c "$GREEN_LIGHT" "   - Svn update source" "$YELLOW" $1
 local PNAME="$2/$3"
+if [ "$4" !=  "" ]; then
+	RPWD="--non-interactive --password=$4"
+fi
 if [ ! -d "$SOURCES/$1" ]; then 
 	mkdir  -p "$SOURCES/$1"
-	svn   -q co $PNAME  $SOURCES/$1
+	svn   -q co $PNAME  $SOURCES/$1 $RPWD
 	if [ $? -ne 0 ]; then 
 		error_c "Svn Checkout error " "   project $1"
 	fi 
@@ -275,13 +285,13 @@ else
 	if [ -d ".svn" ]; then 
 		local PWD=$(pwd)
 		cd "$SOURCES/$1"
-		svn   update  
+		svn   update  $RPWD
 		if [ $? -ne 0 ]; then 
 			error_c "Svn Update error " "   project $1"
 		fi 
 		cd "$PWD"
 	else
-		svn   -q co $PNAME  $SOURCES/$1
+		svn   -q co $PNAME  $SOURCES/$1  $RPWD
 		if [ $? -ne 0 ]; then 
 			error_c "Svn Checkout error " "   project $1"
 		fi 	
@@ -371,6 +381,7 @@ rm -rf /tmp/$3
 #$2 mode : wget svn git etc
 #$3 remote link to download the packet
 #$4 packet name 
+#$5 password ssh
 function download_packet(){
 case  $2 in
 	"WGET")
@@ -379,15 +390,15 @@ case  $2 in
 	;;
 	"GIT")
 	dolog "Method to get source is : git for project $1"
-	git_packet $1 $3 $4
+	git_packet $1 $3 $4 $5
 	;;
 	"SVN")
 	dolog "Method to get source is : svn for project $1"
-	svn_packet $1 $3 $4
+	svn_packet $1 $3 $4 $5 
 	;;
 	"FILE")
 	dolog "Method to get source is : rsync for project $1"
-	file_packet $1 $3 $4
+	file_packet $1 $3 $4 
 	;;
 	"APT")
 	dolog "Method to get source is : apt-get for project $1"
@@ -405,16 +416,17 @@ esac
 #$2 mode : wget svn git etc
 #$3 remote link to download the packet
 #$4 packet name 
+#$5 password ssh
 function is_updated(){
 case  $2 in
 	"WGET")
 	wget_update_packet $1 $3 $4
 	;;
 	"GIT")
-	git_update_packet $1 $3 $4
+	git_update_packet $1 $3 $4 $5
 	;;
 	"SVN")
-	svn_update_packet $1 $3 $4
+	svn_update_packet $1 $3 $4 $5 
 	;;
 	"FILE")
 	file_packet $1 $3 $4
@@ -427,12 +439,44 @@ case  $2 in
 esac 
 }
 
+
+
+# if present key PASSWORD (svn.. to do ) xx return xx 
+function get_password(){
+local TPWD="";
+check_project $1
+if [ $? -eq 1 ]; then
+	if [ -f $REPO/$1/conf.egg ]; then		
+		dolog "Read conf.egg from project $1 : action GET PASSWORD"
+		while IFS='' read -r line || [[ -n "$line" ]]; do
+			tmp=$(echo  $line | grep PASSWORD )
+			if [ "$tmp" != "" ]; then 
+				TPWD=$(echo $tmp | awk '{ print $2 }')
+				equs "$TPWD"  
+				if [ $? -eq 1 ]; then 
+					error_c "Set SSH PASSWORD to null!" "project : $1"
+				fi
+				break;
+			fi
+		done < "$REPO/$1/conf.egg"			
+	else
+		error_c "Missing conf.egg file " "project : $1"
+	fi
+else
+	error_c "Missing project in $REPO " "project : $1"
+fi
+echo "$TPWD"
+}
+
+
 #$1 projects
 #$2 mode : wget svn git etc
 #$3 remote link to download the packet
 #$4 packet name 
 #$5 action 99=force 1=normal 2=update
 function download_action(){
+local PWD_SVN=""
+
 if [ "$5" == 99 ]; then	
 	if [ -f "$REPO/$1/$4" ]; then 
 		dolog "Remove file $REPO/$1/$4 to execute force action"
@@ -444,21 +488,27 @@ if [ "$5" == 99 ]; then
 	fi
 	
 fi
+
+# if mode == SVN , GIT test if needed password
+if [ "$2" == "SVN" ]; then	 
+	PWD_SVN=$(get_password "$1" )
+fi
+
 if [ "$2" == "WGET" ]; then 
 	if [ -f "$REPO/$1/$4" ] ; then 
 		dolog "File $REPO/$1/$4 exist : check sign"
 		is_updated $1 $2 $3 $4 
 	else
 		dolog "Download $REPO/$1/$4 "
-		download_packet $1 $2 $3 $4
+		download_packet $1 $2 $3 $4 
 	fi
 else
 	if [ -d "$SOURCES/$1" ] ; then 
 		dolog "File $SOURCES/$1 exist : check sign"
-		is_updated $1 $2 $3 $4 
+		is_updated $1 $2 $3 $4  $PWD_SVN
 	else
 		dolog "Download $SOURCES/$1 "
-		download_packet $1 $2 $3 $4
+		download_packet $1 $2 $3 $4  $PWD_SVN
 	fi
 fi
 }
