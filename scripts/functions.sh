@@ -19,6 +19,8 @@ YELLOW=" -e \E[1;33m"
 BLACK=" -e \E[0;30m"
 REPLACE=" -e \E[0m"
 
+
+
 #$1.... string to log
 function dolog(){
 	if [ -f "$LOGFILE" ] && [ "$1" != "" ]; then 
@@ -68,4 +70,23 @@ if [ "$1" != "$2" ]; then
 	RES=1
 fi
 return $RES
+}
+
+#global variable for input arg
+# collection of input option all string with -xx
+OPT_ARGV=""
+#all argv not in -
+ARGV=""
+# called with "$@"
+function input_arg(){
+OPT_ARGV=""
+ARGV=""
+local i=""
+for i in "$@" ; do
+	if [ ${i:0:1} == "-" ]; then
+		OPT_ARGV+=" $i"
+	else
+		ARGV+=" $i"
+	fi
+done
 }

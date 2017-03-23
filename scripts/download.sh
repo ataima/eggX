@@ -215,6 +215,16 @@ if [ -f  "$REPO/$1/$3" ]; then
 	if [ $RES -eq 99 ]; then 
 		wget_packet $1 $2 $3
 	fi
+	if [ $RES -eq 1 ]; then 
+		if [ ! -d "$SOURCES/$1" ]; then 
+			mkdir -p "$SOURCES/$1"
+		fi
+		dolog "Untar file $REPO/$1/$3 "
+		tar -xf "$REPO/$1/$3" -C  "$SOURCES/$1"
+		if [ $? -ne 0 ]; then
+			error_c "Unable to untar file " "$REPO/$1/$3 project $1"
+		fi
+	fi
 fi
 }
 
@@ -262,10 +272,20 @@ if [ ! -d "$SOURCES/$1" ]; then
 		error_c "Svn Checkout error " "   project $1"
 	fi 
 else
-	svn   update  $SOURCES/$1
-	if [ $? -ne 0 ]; then 
-		error_c "Svn Update error " "   project $1"
-	fi 
+	if [ -d ".svn" ]; then 
+		local PWD=$(pwd)
+		cd "$SOURCES/$1"
+		svn   update  
+		if [ $? -ne 0 ]; then 
+			error_c "Svn Update error " "   project $1"
+		fi 
+		cd "$PWD"
+	else
+		svn   -q co $PNAME  $SOURCES/$1
+		if [ $? -ne 0 ]; then 
+			error_c "Svn Checkout error " "   project $1"
+		fi 	
+	fi
 fi
 }
 
@@ -273,18 +293,38 @@ fi
 # $2 link
 # $3 filename 
 function git_packet(){
-print_c "$GREEN_LIGHT" "   - Git checkout source" "$YELLOW" $1
+print_c "$GREEN_LIGHT" "   - Git clone source" "$YELLOW" $1
 local PNAME="$2/$3"
-git    co "$PNAME"  "$REPO/$1/$3"
+if [ ! -d "$SOURCES/$1" ]; then 
+	mkdir  -p  "$SOURCES/$1"
+fi
+git   clone $PNAME  "$SOURCES/$1"
+if [ $? -ne 0 ]; then 
+	error_c "Git Clone error " "   project $1"
+fi 
 }
 
 # $1 project name
 # $2 link
 # $3 filename 
 function git_update_packet(){
-print_c "$GREEN_LIGHT" "   - Git update source" "$YELLOW" $1
+print_c "$GREEN_LIGHT" "   - Git pull source" "$YELLOW" $1
 local PNAME="$2/$3"
-git    pull  "$PNAME"  "$REPO/$1/$3"
+local PWD=$(pwd)
+if [ ! -d "$SOURCES/$1" ]; then 
+	mkdir  -p "$SOURCES/$1"
+	git   clone $PNAME  "$SOURCES/$1"
+	if [ $? -ne 0 ]; then 
+		error_c "Git clone error " "   project $1"
+	fi 
+else
+	cd "$SOURCES/$1"
+	git pull origin master
+	if [ $? -ne 0 ]; then 
+		error_c "Git Update error " "   project $1"
+	fi 
+	cd "$PWD"
+fi
 }
 
 # $1 project name
@@ -297,6 +337,34 @@ rsync -ry "$PNAME" "$REPO/$1/$3"
 if [ $? -ne 0 ]; then
 	error_c "Cannot copy file $3" " project $1"
 fi
+}
+
+# $1 project name
+# $2 source path with source created
+# $3 filename
+apt_packet(){
+print_c "$GREEN_LIGHT" "   - File copy source $3" "$YELLOW" $1
+local PWD=$(pwd)
+rm -rf /tmp/$3
+mkdir -p /tmp/$3
+cd  /tmp/$3
+dolog "Download packet $3 with apt-get"
+apt-get source $3
+if [ $? -ne  0 ] ; then 
+	error_c "apt-get  fail to download source packet" " project $1"
+fi
+if [ -d $2 ]; then 
+	dolog "Copy source from apt-get"
+	if [ ! -d "$SOURCES/$1" ]; then
+		mkdir -p "$SOURCES/$1"
+	fi
+	cp -a /tmp/$3/$2/* "$SOURCES/$1"
+	if [ $? -ne  0 ] ; then 
+		error_c "Cannot copy downloaded source " " project $1"
+	fi
+fi
+cd $PWD
+rm -rf /tmp/$3
 }
 
 #$1 projects
@@ -320,6 +388,10 @@ case  $2 in
 	"FILE")
 	dolog "Method to get source is : rsync for project $1"
 	file_packet $1 $3 $4
+	;;
+	"APT")
+	dolog "Method to get source is : apt-get for project $1"
+	apt_packet $1 $3 $4
 	;;
 	*)
 	error_c "Unknow method to get sources " "$2 - project : $1"
@@ -347,6 +419,8 @@ case  $2 in
 	"FILE")
 	file_packet $1 $3 $4
 	;;
+	"APT")
+	;;
 	*)
 	error_c "Unknow method to update sources " "$2 - project : $1"
 	;;
@@ -370,8 +444,7 @@ if [ "$5" == 99 ]; then
 	fi
 	
 fi
-case $2 in
-	"WGET")
+if [ "$2" == "WGET" ]; then 
 	if [ -f "$REPO/$1/$4" ] ; then 
 		dolog "File $REPO/$1/$4 exist : check sign"
 		is_updated $1 $2 $3 $4 
@@ -379,8 +452,7 @@ case $2 in
 		dolog "Download $REPO/$1/$4 "
 		download_packet $1 $2 $3 $4
 	fi
-	;;
-	"GIT")
+else
 	if [ -d "$SOURCES/$1" ] ; then 
 		dolog "File $SOURCES/$1 exist : check sign"
 		is_updated $1 $2 $3 $4 
@@ -388,29 +460,7 @@ case $2 in
 		dolog "Download $SOURCES/$1 "
 		download_packet $1 $2 $3 $4
 	fi
-	;;
-	"SVN")
-	if [ -d "$SOURCES/$1" ] ; then 
-		dolog "File $SOURCES/$1 exist : check sign"
-		is_updated $1 $2 $3 $4 
-	else
-		dolog "Download $SOURCES/$1 "
-		download_packet $1 $2 $3 $4
-	fi
-	;;
-	"FILE")
-	if [ -d "$SOURCES/$1" ] ; then 
-		dolog "File $SOURCES/$1 exist : check sign"
-		is_updated $1 $2 $3 $4 
-	else
-		dolog "Download $SOURCES/$1 "
-		download_packet $1 $2 $3 $4
-	fi
-	;;
-	*)
-	error_c "Unknow method to get sources " "$2 - project : $1"
-	;;
-esac
+fi
 }
 
 
@@ -628,17 +678,10 @@ fi
 
 }
 
-#  $1 arg $1
-#  $2 arg $2
-#  $3 arg $3
-#  $4 arg $4
+
+#none
 function init(){
 check_work_dir
-# sort list of packets
-if [ "$1" == "-D" ]; then 
-	set -x
-	dolog "Set Debug ON"
-fi
 #sort project in repo to bin search
 for key in $ALL_PACKETS; do MAP[$key]="$key"; done  
 # sync repo file to build path 
@@ -652,6 +695,60 @@ download_sign_key
 }
 
 
-init $1 $2 $3 $4
-download_all_packets
+function usage(){
+	print_c "$BLUE_LIGHT" "usage : ./download.sh <opt> <args>"
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-F or --force : force download mode, require one args" 
+	print_c  "$PURPLE" "ARGS" "$GREEN" "args for options"
+	exit 1
+}
 
+
+
+function main(){
+local FORCE=0
+input_arg "$@"
+if [ "$OPT_ARGV" != "" ]; then
+	for i in $OPT_ARGV; do
+	print_c "$GREEN_LIGHT" "Check option " "$YELLOW"  "$i"
+	case $i in 
+		-D|--debug)
+		set -x
+		dolog "Set Debug ON"
+		;;
+		-F|--force)
+		FORCE=99
+		;;
+		*)
+		error_c "Command line" " unknow option $i"
+		;;
+	esac
+	if [ "$i" == "-D" ]; then 
+			set -x
+			dolog "Set Debug ON"
+	fi
+	done
+fi
+
+if [ $FORCE -eq 99 ] && [ "$ARGV" == "" ]; then
+	usage
+fi
+
+if [ "$ARGV" != "" ]; then
+	for i in $ARGV; do
+	print_c "$GREEN_LIGHT" "argv " "$YELLOW"  "$i"
+	done
+fi
+init 
+if [  $FORCE -eq 0 ]; then
+	download_all_packets
+else
+	for i in $ARGV; do
+		verify_packet $i $FORCE
+		verify_patch $i $FORCE
+	done 
+fi
+}
+
+
+main "$@"
