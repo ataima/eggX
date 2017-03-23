@@ -77,16 +77,20 @@ return $RES
 OPT_ARGV=""
 #all argv not in -
 ARGV=""
+#number of input in ARGV
+ARGN=0
 # called with "$@"
 function input_arg(){
 OPT_ARGV=""
 ARGV=""
+ARGN=0
 local i=""
 for i in "$@" ; do
 	if [ ${i:0:1} == "-" ]; then
 		OPT_ARGV+=" $i"
 	else
 		ARGV+=" $i"
+		ARGN=$((ARGN+1))
 	fi
 done
 }

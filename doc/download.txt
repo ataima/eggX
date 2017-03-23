@@ -29,7 +29,7 @@ example REMOTE setup
 REMOTE  WGET ftp://ftp.example    packet1.tar.gz  : get from ftp://ftp.example packet1.tar.gz if exist 
     packet1.tar.gz.sign or packet1.tar.gz.md5 or packet1.tar.gz.sha1 download it ad check the file. For 
     gpg sign is needed also the certificate You can add a specific gertificate to do :
-    ./download -G (or --gpg ) <link to site > <certificate file >  . The certificates are stored in eggX/Keys
+    ./download -G (or --gpg ) <link to key file >  . The certificates are stored in eggX/Keys
     
 REMOTE  FILE  mydir    file  : copy single file from mydir/file to source
 
@@ -54,4 +54,4 @@ to copy to sources path
 INPUT PARAMETER
 -D or --debug set debug on 
 -F or --force <project> force the download of project
--G or --gpg <link >  < key> : get a new gpg key to verify sign : default gnu keys already inported as default..
+-G or --gpg <link >   get a new gpg key to verify sign : default gnu keys already inported as default..

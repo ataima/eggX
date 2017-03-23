@@ -633,7 +633,7 @@ done
 
 
 
-
+# $1 requested
 function download_sign_key(){
 local KEYS="ftp://ftp.gnu.org/gnu/gnu-keyring.gpg "
 
@@ -641,14 +641,33 @@ if [ ! -d $RKEYS ]; then
 	dolog "Create dir for gpg keys"
 	mkdir -p $RKEYS
 fi
-
-for i in $KEYS; do
-	key=$(basename "$i") 
+if [ "$1" == "" ]; then
+	for i in $KEYS; do
+		key=$(basename "$i") 
+		if [ ! -f "$RKEYS/$key" ]; then 
+			dolog "Download keys from $i"
+			wget --show-progress -q "$i" -O "$RKEYS/$key"
+			if [ -s "$RKEYS/$key" ]; then
+				dolog "Download keys from $i Okey"	
+			else		
+				rm -f "$RKEYS/$key"
+				error_c "Download gpg certificate" "$key"						
+			fi
+		fi
+	done
+else
+	key=$(basename "$1") 
 	if [ ! -f "$RKEYS/$key" ]; then 
-		dolog "Download keys from $i"
-		wget --show-progress -q "$i" -O "$RKEYS/$key"
+		dolog "Download keys from $1"
+		wget --show-progress -q "$1" -O "$RKEYS/$key"
+		if  [  -s "$RKEYS/$key" ]; then
+			dolog "Download keys from $1 Okey"
+		else
+			rm -f "$RKEYS/$key"
+			error_c "Download gpg certificate" "$key"		
+		fi
 	fi
-done
+fi
 }
 
 # none 
@@ -699,6 +718,7 @@ function usage(){
 	print_c "$BLUE_LIGHT" "usage : ./download.sh <opt> <args>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-F or --force : force download mode, require one args" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-G or --gpg : load a key to test gpg sign, require one args" 
 	print_c  "$PURPLE" "ARGS" "$GREEN" "args for options"
 	exit 1
 }
@@ -707,6 +727,7 @@ function usage(){
 
 function main(){
 local FORCE=0
+local GPG=0
 input_arg "$@"
 if [ "$OPT_ARGV" != "" ]; then
 	for i in $OPT_ARGV; do
@@ -719,18 +740,21 @@ if [ "$OPT_ARGV" != "" ]; then
 		-F|--force)
 		FORCE=99
 		;;
+		-G|--gpg)
+		GPG=1
+		;;
 		*)
 		error_c "Command line" " unknow option $i"
 		;;
 	esac
-	if [ "$i" == "-D" ]; then 
-			set -x
-			dolog "Set Debug ON"
-	fi
 	done
 fi
 
 if [ $FORCE -eq 99 ] && [ "$ARGV" == "" ]; then
+	usage
+fi
+
+if [ $GPG -eq 1 ] && [ $ARGN -ne 1 ]; then
 	usage
 fi
 
@@ -740,13 +764,18 @@ if [ "$ARGV" != "" ]; then
 	done
 fi
 init 
-if [  $FORCE -eq 0 ]; then
-	download_all_packets
+
+if [ $GPG -eq 1 ]; then
+	download_sign_key "$ARGV"
 else
-	for i in $ARGV; do
-		verify_packet $i $FORCE
-		verify_patch $i $FORCE
-	done 
+	if [  $FORCE -eq 0 ]; then
+		download_all_packets
+	else
+		for i in $ARGV; do
+			verify_packet $i $FORCE
+			verify_patch $i $FORCE
+		done 
+	fi
 fi
 }
 
