@@ -6,6 +6,10 @@ SCRIPT_DIR=$(pwd)
 source "$SCRIPT_DIR/conf.sh"
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
+# include reverse patch creator
+source "$SCRIPT_DIR/create_patch.sh"
+
+
 
 OREPO=$SCRIPT_DIR/../repo/.
 RKEYS=$SCRIPT_DIR/../Keys
@@ -514,6 +518,18 @@ fi
 }
 
 
+# $1 packet name
+# $2 filename  
+function apply_patch(){
+local PATCH="$REPO/$1/$2"
+local SRC="$SOURCES/$1"
+patch -s  --directory="$SRC"  --input="$PATCH"
+if [ $? -ne 0 ]; then
+	error_c "On apply patch " "   - $2 project $1"
+else
+	print_c "$GREEN_LIGHT" "   - Apply patch $2" "$YELLOW" $1
+fi
+}
 
 # $1 packet name
 # $2 action 99=force 1=check normal 2=update 
@@ -548,7 +564,11 @@ if [ $? -eq 1 ]; then
 					error_c "Missing  packet name " "project : $1"
 				fi		
 				print_c "$GREEN_LIGHT" "   - Download Patch $PACKET" "$YELLOW" $1
-				download_action "$1" "$MODE"  "$REMOTE" "$PACKET" "$2"
+				#always check else rm sources path
+				download_action "$1" "$MODE"  "$REMOTE" "$PACKET" 1
+				if [ $2 -eq 99 ]; then 
+				apply_patch "$1" "$PACKET"
+				fi
 			fi
 		done < "$REPO/$1/conf.egg"			
 	else
@@ -747,6 +767,45 @@ fi
 
 }
 
+#$1 project name
+function backup_packet() {
+local DEST="$REPOBACKUP/$1"
+local SOURCE="$SOURCES/$1"
+if [ ! -d "$DEST" ]; then
+	mkdir -p "$DEST"
+fi
+local name="$DEST/$1_"$(date +%d-%m-%y-%H-%M-%S ).tar.bz2
+echo "tar -cjSf ""$name" "$SOURCE" 
+tar -cjSf "$name" "$SOURCE"   
+if [ $? -ne 0 ]; then
+	error_c "On create Tar backup file " "    - project $1"
+fi
+md5sum "$name" > "$name".md5
+if [ $? -ne 0 ]; then
+	error_c "On create Md5 sign file " "    - project $1"
+fi
+print_c "$GREEN_LIGHT" "Done source backup  " "$YELLOW"  " $i"
+}
+
+
+#$@ none or project nn nn nn....
+function backup_source() {
+if [ ! -d "$BACKUP" ]; then 
+	mkdir -p "$BACKUP"
+fi
+
+local ALL="$@"
+if [  "$ALL" == "" ]; then 
+ALL=$(ls "$SOURCES")
+fi
+
+for i in $ALL ; do
+	print_c "$GREEN_LIGHT" "Create source backup  " "$YELLOW"  " $i"
+	backup_packet "$i"
+done
+
+}
+
 
 #none
 function init(){
@@ -769,6 +828,8 @@ function usage(){
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-F or --force : force download mode, require one args" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-G or --gpg : load a key to test gpg sign, require one args" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-C or --createpatch : create with svn, git or diff a patch from current source" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-B or --backup : create backup of source as pair of <prj>.tar.bz2 <prj>sign" 	
 	print_c  "$PURPLE" "ARGS" "$GREEN" "args for options"
 	exit 1
 }
@@ -778,6 +839,8 @@ function usage(){
 function main(){
 local FORCE=0
 local GPG=0
+local BACKUP=0
+local CPATCH=0
 input_arg "$@"
 if [ "$OPT_ARGV" != "" ]; then
 	for i in $OPT_ARGV; do
@@ -793,7 +856,14 @@ if [ "$OPT_ARGV" != "" ]; then
 		-G|--gpg)
 		GPG=1
 		;;
+		-C|--createpatch)
+		CPATCH=1
+		;;
+		-B|--backup)
+		BACKUP=1
+		;;
 		*)
+		usage
 		error_c "Command line" " unknow option $i"
 		;;
 	esac
@@ -808,24 +878,32 @@ if [ $GPG -eq 1 ] && [ $ARGN -ne 1 ]; then
 	usage
 fi
 
+
+
+
 if [ "$ARGV" != "" ]; then
 	for i in $ARGV; do
 	print_c "$GREEN_LIGHT" "argv " "$YELLOW"  "$i"
 	done
 fi
+
 init 
 
 if [ $GPG -eq 1 ]; then
 	download_sign_key "$ARGV"
 else
-	if [  $FORCE -eq 0 ]; then
-		download_all_packets
+	if [ $BACKUP -eq 1 ]; then
+	backup_source "$ARGV"
 	else
-		for i in $ARGV; do
-			verify_packet $i $FORCE
-			verify_patch $i $FORCE
-		done 
-	fi
+		if [  $FORCE -eq 0 ]; then
+			download_all_packets
+		else
+			for i in $ARGV; do
+				verify_packet $i $FORCE
+				verify_patch $i $FORCE
+			done 
+		fi
+	fi	
 fi
 }
 
