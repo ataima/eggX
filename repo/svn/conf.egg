@@ -1,0 +1,3 @@
+DOWNLOAD 	CHECK
+REMOTE   	SVN http://svn.apache.org/repos/asf          subversion/trunk 
+PATCH            FILE    /home/angelo			      p1.patch
