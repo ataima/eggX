@@ -1,4 +1,4 @@
-download.sh :
+sources.sh :
 conf.egg SECTIONS:
 1)DOWNLOAD   1 field with ... :
 		-FORCE     always download the source
@@ -55,7 +55,8 @@ INPUT PARAMETER
 -D or --debug set debug on 
 -F or --force <project> force the download of project
 -G or --gpg <link >   get a new gpg key to verify sign : default gnu keys already inported as default..
-
+-C or --createpatch : create with svn, git or diff a patch from current source" 
+-B or --backup : create backup of source as pair of <prj>.tar.bz2 <prj>sign" 
 
 
 TO DO:

@@ -1,4 +1,7 @@
 DOWNLOAD 	SKIP
 REMOTE   	WGET  	ftp://ftp.gnu.org/gnu/binutils 	binutils-2.28.tar.bz2     
-
+NATIVE		amd64
+CROSS		arm32
+CROSS              arm64
+CROSS		ppc
  

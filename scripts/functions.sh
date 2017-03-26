@@ -51,6 +51,16 @@ exit 1
 
 
 
+#$1   string
+#$2   string
+#$3   string
+function warning_c(){
+print_c "$WHITE" "--------------------------------------------------"
+print_c "$RED_LIGHT" "WARNING : " "$BLUE_LIGHT" " - $1" 
+print_c "$GREEN_LIGHT" "   -  $2" "$BLUE_LIGHT" "$3"
+print_c "$WHITE" "--------------------------------------------------"
+}
+
 
 # $1  string 
 # $2  string

@@ -1,18 +1,15 @@
 #!/bin/sh 
 
-SCRIPT_DIR=$(pwd)
-
 # include configuration
 source "$SCRIPT_DIR/conf.sh"
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
-# include reverse patch creator
-source "$SCRIPT_DIR/create_patch.sh"
+
+SCRIPT_DIR=$OROOT/scripts
+OREPO=$OROOT/repo/.
+RKEYS=$OROOT/Keys
 
 
-
-OREPO=$SCRIPT_DIR/../repo/.
-RKEYS=$SCRIPT_DIR/../Keys
 declare -A MAP    
 
 ALL_PACKETS=$(ls $OREPO )
@@ -767,6 +764,114 @@ fi
 
 }
 
+#$1  projects
+#$2   WGET,SVN ...MODE
+#$3   DEST file
+function patch_reverse_action (){
+local PWD=$(pwd)
+if [ ! -d $SOURCES/$1 ]; then
+	error_c " Missing projects ! " "   - project $1"
+fi
+
+cd  $SOURCES/$1
+
+case  $2 in
+	"WGET")
+	warning_c "wget create a patch not implemented " " - project : $1"
+	;;
+	"GIT")
+	git diff > $3
+	;;
+	"SVN")
+	svn diff > $3
+	;;
+	"FILE")
+	warning_c "file create a patch not implemented " " - project : $1"
+	;;
+	"APT")
+	warning_c "apt create a patch not implemented " " - project : $1"
+	;;
+	*)
+	error_c "Unknow method to create a patch " "$2 - project : $1"
+	;;
+esac 
+
+cd $PWD
+}
+
+
+
+# $1 packet name
+# $2 dest patch 
+function generate_patch(){
+local RES=0
+local tmp=""
+local REMOTE=""
+local MODE=""
+local PACKET=""
+check_project $1
+if [ $? -eq 1 ]; then
+#exist project name <name> in repo 
+#load prj/conf.egg to download the packet
+#conf.h REMOTE link packet name md5sum
+	if [ -f $REPO/$1/conf.egg ]; then
+		dolog "Read conf.egg from project $1 : action REMOTE"
+		while IFS='' read -r line || [[ -n "$line" ]]; do
+			tmp=$(echo  $line | grep REMOTE )		
+			if [ "$tmp" != "" ]; then 
+				MODE=$(echo $tmp | awk '{ print $2 }')
+				equs "$MODE"  
+				if [ $? -eq 1 ]; then 
+					error_c "Missing  download mode" "project : $1"
+				fi
+				REMOTE=$(echo $tmp | awk '{ print $3 }')
+				equs "$REMOTE" 
+				if [ $? -eq 1 ]; then 
+					error_c "Missing remote repository name" "project : $1"
+				fi
+				PACKET=$(echo $tmp | awk '{ print $4 }')
+				equs "$PACKET" 
+				if [ $? -eq 1 ]; then 
+					error_c "Missing  packet name " "project : $1"
+				fi		
+				patch_reverse_action "$1" "$MODE"  "$2"
+				RES=1
+				break;
+			fi
+		done < "$REPO/$1/conf.egg"	
+		if [ $RES -ne 1 ]; then
+			error_c "Missing REMOTE key in conf.egg " "project : $1"
+		fi
+	else
+		error_c "Missing conf.egg file " "project : $1"
+	fi
+else
+	error_c "Missing project in $REPO " "project : $1"
+fi
+}
+
+
+
+#$1 project name
+function create_patch_packet() {
+local DEST="$REPO/$1"
+local SOURCE="$SOURCES/$1"
+if [ ! -d "$DEST" ]; then
+	error_c "missing repo dir for " "  - project $1"
+fi
+local name="$DEST/$1_"$(date +%d-%m-%y-%H-%M-%S ).patch
+generate_patch "$1" "$name"
+if [ $? -ne 0 ]; then
+	error_c "On create patch from source " "    - project $1"
+fi
+md5sum "$name" > "$name".md5
+if [ $? -ne 0 ]; then
+	error_c "On create Md5 sign file " "    - project $1"
+fi
+print_c "$GREEN_LIGHT" "Done create patch  " "$YELLOW"  " $i"
+}
+
+
 #$1 project name
 function backup_packet() {
 local DEST="$REPOBACKUP/$1"
@@ -802,6 +907,22 @@ fi
 for i in $ALL ; do
 	print_c "$GREEN_LIGHT" "Create source backup  " "$YELLOW"  " $i"
 	backup_packet "$i"
+done
+
+}
+
+
+#$@ none or project nn nn nn....
+function create_patch_source() {
+
+local ALL="$@"
+if [  "$ALL" == "" ]; then 
+ALL=$(ls "$SOURCES")
+fi
+
+for i in $ALL ; do
+	print_c "$GREEN_LIGHT" "Create patch from source  " "$YELLOW"  " $i"
+	create_patch_packet "$i"
 done
 
 }
@@ -895,15 +1016,19 @@ else
 	if [ $BACKUP -eq 1 ]; then
 	backup_source "$ARGV"
 	else
-		if [  $FORCE -eq 0 ]; then
-			download_all_packets
+		if [ $CPATCH -eq 1 ]; then
+		create_patch_source "$ARGV"
 		else
-			for i in $ARGV; do
-				verify_packet $i $FORCE
-				verify_patch $i $FORCE
-			done 
+			if [  $FORCE -eq 0 ]; then
+				download_all_packets
+			else
+				for i in $ARGV; do
+					verify_packet $i $FORCE
+					verify_patch $i $FORCE
+				done 
+			fi
 		fi
-	fi	
+	fi		
 fi
 }
 
