@@ -13,7 +13,7 @@ RKEYS=$OROOT/Keys
 
 declare -A MAP    
 
-ALL_PACKETS=$(ls $ORExml_valuePO )
+ALL_PACKETS=$(ls $OROOT/repo )
 
 # if repo non exist create
 function check_repository(){
@@ -727,8 +727,7 @@ fi
 
 # none 
 function check_work_dir(){
-#ALL_PACKETS
-ALL_PACKETS=$(ls $OROOT/repo)
+
 #ROOT
 if [ ! -d "$ROOT" ]; then 
 	mkdir -p "$ROOT"
@@ -750,6 +749,11 @@ fi
 if [ ! -d "$IMAGES" ]; then 
 	dolog "Create $IMAGES path"
 	mkdir -p "$IMAGES"
+fi
+#BUILD
+if [ ! -d "$BUILD" ]; then 
+	dolog "Create $BUILD path"
+	mkdir -p "$BUILD"
 fi
 
 }

@@ -1,54 +1,43 @@
 sources.sh :
-conf.egg SECTIONS:
-1)DOWNLOAD   1 field with ... :
+conf.egg xml structure:
+
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>svn</name>
+		<download>check</download>		
+		<remote>
+			<method>svn</method>
+			<url>http://svn.apache.org/repos/asf </url>
+			<file>subversion/trunk</file>
+			<password>pippo</password>			
+		</remote>
+		<patch id="0">
+			<method>file</method>
+			<url> /home/angelo </url>
+			<file>p1.patch</file>
+			<password>pippo</password>	
+		</patch>
+	</project>
+</egg>
+
+egg.project.name = project name must be equal to path in repo
+egg.project.download =
 		-FORCE     always download the source
 		-SKIP      not execute nothing
 		-CHECK     check sign source if avaiable 
 		-UPDATE    update source (only SVN-GIT-FILE )
 
-	
-2)REMOTE  3 fields with ... :
-		1) -WGET, SVN, GIT, FILE ,APT: method to dwnload the source
-		2) - link to path  to download (file,ftp,git,http...)
-		3) - filename to download ( or svn - git project..)
-
-example DOWNLOAD setup
-
-DOWNLOAD FORCE : alway download source using the method to download in the REOMKITE cmd
-
-DOWNLOAD SKIP :     After one time download can skip this step ...
-			
-DOWNLOAD CHECK :    alway test source check. If present a sign  file check it (if fail download ..)
-                                       for git/svn execute update...
-
-DOWNLOAD CHECK :   is the same of CHECK .( TO DO action !!)
+egg.project.remote.method=WGET, SVN, GIT, FILE ,APT: method to dwnload the source
+egg.project.remote.url=link to path  to download (file,ftp,git,http...)
+egg.project.remote.file=filename to download ( or svn - git project..)
+egg.project.remote.password = optional password for svn git 
 
 
-example REMOTE setup
-
-REMOTE  WGET ftp://ftp.example    packet1.tar.gz  : get from ftp://ftp.example packet1.tar.gz if exist 
-    packet1.tar.gz.sign or packet1.tar.gz.md5 or packet1.tar.gz.sha1 download it ad check the file. For 
-    gpg sign is needed also the certificate You can add a specific gertificate to do :
-    ./download -G (or --gpg ) <link to key file >  . The certificates are stored in eggX/Keys
-    
-REMOTE  FILE  mydir    file  : copy single file from mydir/file to source
-
-REMOTE  FILE  mydir    path  : copy full path from mydir/path
-
-REMOTE  FILE  user@192.168.10.10:/home/    src/  : copy src from  192.168.10.10
-
-FILE use rsymc -sy to copy any kind of input .... remeber this....
-
-
-REMOTE  SVN  svn+ssh://user@192.168.10.10:/svnroot/    test/branch/george  : copy from svn repository at 
-192.168.10.10 via ssh the project test from branch george
-
-
-REMOTE GIT https://github.com/ataima 	eggX               : download project eggX from github
-
-
-REMOTE APT dialog-* 	dialog : download source via apt-get source dialog. The fields dialog-* set the forder 
-to copy to sources path
+egg.project.patch id="xx".method=WGET, SVN, GIT, FILE ,APT: method to dwnload the source
+egg.project.patch id="xx".url=link to path  to download (file,ftp,git,http...)
+egg.project.patch id="xx".file=filename to download ( or svn - git project..)
+egg.project.patch id="xx".password = optional password for svn git 
 
 
 INPUT PARAMETER
@@ -57,7 +46,3 @@ INPUT PARAMETER
 -G or --gpg <link >   get a new gpg key to verify sign : default gnu keys already inported as default..
 -C or --createpatch : create with svn, git or diff a patch from current source" 
 -B or --backup : create backup of source as pair of <prj>.tar.bz2 <prj>sign" 
-
-
-TO DO:
-PASSWORD : for SVN or GIT
