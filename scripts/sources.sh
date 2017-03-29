@@ -1,18 +1,19 @@
 #!/bin/sh 
 
 # include configuration
-source "$SCRIPT_DIR/conf.sh"
+source "$(pwd)/conf.sh"
 # include io functions
-source "$SCRIPT_DIR/functions.sh"
+source "$(pwd)/functions.sh"
 
 SCRIPT_DIR=$OROOT/scripts
 OREPO=$OROOT/repo/.
 RKEYS=$OROOT/Keys
 
 
+
 declare -A MAP    
 
-ALL_PACKETS=$(ls $OREPO )
+ALL_PACKETS=$(ls $ORExml_valuePO )
 
 # if repo non exist create
 function check_repository(){
@@ -449,17 +450,11 @@ check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then		
 		dolog "Read conf.egg from project $1 : action GET PASSWORD"
-		while IFS='' read -r line || [[ -n "$line" ]]; do
-			tmp=$(echo  $line | grep PASSWORD )
-			if [ "$tmp" != "" ]; then 
-				TPWD=$(echo $tmp | awk '{ print $2 }')
-				equs "$TPWD"  
-				if [ $? -eq 1 ]; then 
-					error_c "Set SSH PASSWORD to null!" "project : $1"
-				fi
-				break;
-			fi
-		done < "$REPO/$1/conf.egg"			
+		TPWD=$(xml_value $1 '/eggX/project/download/password')
+		equs "$TPWD"  
+		if [ $? -eq 1 ]; then 
+			error_c "Set SSH PASSWORD to null!" "project : $1"
+		fi
 	else
 		error_c "Missing conf.egg file " "project : $1"
 	fi
@@ -542,32 +537,26 @@ if [ $? -eq 1 ]; then
 #conf.h REMOTE link packet name md5sum
 	if [ -f $REPO/$1/conf.egg ]; then		
 		dolog "Read conf.egg from project $1 : action PATCH"
-		while IFS='' read -r line || [[ -n "$line" ]]; do
-			tmp=$(echo  $line | grep PATCH )
-			if [ "$tmp" != "" ]; then 
-				MODE=$(echo $tmp | awk '{ print $2 }')
-				equs "$MODE"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  download mode" "project : $1"
-				fi
-				REMOTE=$(echo $tmp | awk '{ print $3 }')
-				equs "$REMOTE" 
-				if [ $? -eq 1 ]; then 
-					error_c "Missing remote repository name" "project : $1"
-				fi
-				PACKET=$(echo $tmp | awk '{ print $4 }')
-				equs "$PACKET" 
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  packet name " "project : $1"
-				fi		
-				print_c "$GREEN_LIGHT" "   - Download Patch $PACKET" "$YELLOW" $1
-				#always check else rm sources path
-				download_action "$1" "$MODE"  "$REMOTE" "$PACKET" 1
-				if [ $2 -eq 99 ]; then 
-				apply_patch "$1" "$PACKET"
-				fi
-			fi
-		done < "$REPO/$1/conf.egg"			
+		MODE=$(xml_value $1 "/eggX/project/patch/method")
+		equs "$MODE"  
+		if [ $? -eq 1 ]; then 
+			error_c "Missing  patch download mode" "project : $1"
+		fi
+		REMOTE=$(xml_value $1 "/eggX/project/patch/url")
+		equs "$REMOTE" 
+		if [ $? -eq 1 ]; then 
+			error_c "Missing patch remote repository name" "project : $1"
+		fi
+		PACKET=$(xml_value $1 "/eggX/project/patch/file")
+		equs "$PACKET" 
+		if [ $? -eq 1 ]; then 
+			error_c "Missing  patch packet name " "project : $1"
+		fi	
+		MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
+		download_action "$1" "$MODE"  "$REMOTE" "$PACKET" 1
+		if [ $2 -eq 99 ]; then 
+		apply_patch "$1" "$PACKET"
+		fi		
 	else
 		error_c "Missing conf.egg file " "project : $1"
 	fi
@@ -591,34 +580,30 @@ if [ $? -eq 1 ]; then
 #conf.h REMOTE link packet name md5sum
 	if [ -f $REPO/$1/conf.egg ]; then
 		dolog "Read conf.egg from project $1 : action DOWNLOAD"
-		while IFS='' read -r line || [[ -n "$line" ]]; do
-			tmp=$(echo  $line | grep DOWNLOAD )	
-			if [ "$tmp" != "" ]; then 
-				MODE=$(echo $tmp | awk '{ print $2 }')
-				equs "$MODE"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  download status mode" "project : $1"
-				fi	
-				 case $MODE in
-					"FORCE")
-					RES=99	
-					;;
-					"SKIP")
-					RES=0
-					;;
-					"CHECK")
-					RES=1
-					;;
-					"UPDATE")
-					RES=2
-					;;
-					*)
-					error_c "Unknow status Mode " "$MODE - project : $1"
-					;;
-				esac 
-				break;
-			fi	
-		done < "$REPO/$1/conf.egg"	
+		MODE=$(xml_value $1 "/eggX/project/download")
+		equs "$MODE"  
+		if [ $? -eq 1 ]; then 
+			error_c "Missing  download mode" "project : $1"
+		fi
+		MODE=$(echo "$MODE" | tr '[:lower:]' '[:upper:]')
+		 case $MODE in
+			"FORCE")
+			RES=99	
+			;;
+			"SKIP")
+			RES=0
+			;;
+			"CHECK")
+			RES=1
+			;;
+			"UPDATE")
+			RES=2
+			;;
+			*)
+			error_c "Unknow status Mode " "$MODE - project : $1"
+			;;
+		esac 
+					
 		if [  $RES -eq 1000 ]; then
 			error_c "midding DOWNLOAD mode in conf.egg:" " - project : $1"
 		fi
@@ -646,30 +631,25 @@ if [ $? -eq 1 ]; then
 #load prj/conf.egg to download the packet
 #conf.h REMOTE link packet name md5sum
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action REMOTE"
-		while IFS='' read -r line || [[ -n "$line" ]]; do
-			tmp=$(echo  $line | grep REMOTE )		
-			if [ "$tmp" != "" ]; then 
-				MODE=$(echo $tmp | awk '{ print $2 }')
-				equs "$MODE"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  download mode" "project : $1"
-				fi
-				REMOTE=$(echo $tmp | awk '{ print $3 }')
-				equs "$REMOTE" 
-				if [ $? -eq 1 ]; then 
-					error_c "Missing remote repository name" "project : $1"
-				fi
-				PACKET=$(echo $tmp | awk '{ print $4 }')
-				equs "$PACKET" 
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  packet name " "project : $1"
-				fi		
-				download_action "$1" "$MODE"  "$REMOTE" "$PACKET" "$2"
-				RES=1
-				break;
-			fi
-		done < "$REPO/$1/conf.egg"	
+		dolog "Read conf.egg from project $1 : action REMOTE"		
+		MODE=$(xml_value $1 "/eggX/project/remote/method")
+		equs "$MODE"  
+		if [ $? -eq 1 ]; then 
+			error_c "Missing  download mode" "project : $1"
+		fi
+		REMOTE=$(xml_value $1 "/eggX/project/remote/url")
+		equs "$REMOTE" 
+		if [ $? -eq 1 ]; then 
+			error_c "Missing remote repository name" "project : $1"
+		fi
+		PACKET=$(xml_value $1 "/eggX/project/remote/file")
+		equs "$PACKET" 
+		if [ $? -eq 1 ]; then 
+			error_c "Missing  packet name " "project : $1"
+		fi		
+		MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
+		download_action "$1" "$MODE"  "$REMOTE" "$PACKET" "$2"
+		RES=1	
 		if [ $RES -ne 1 ]; then
 			error_c "Missing REMOTE key in conf.egg " "project : $1"
 		fi
@@ -739,6 +719,8 @@ fi
 
 # none 
 function check_work_dir(){
+#ALL_PACKETS
+ALL_PACKETS=$(ls $OROOT/repo)
 #ROOT
 if [ ! -d "$ROOT" ]; then 
 	mkdir -p "$ROOT"
@@ -816,29 +798,23 @@ if [ $? -eq 1 ]; then
 #conf.h REMOTE link packet name md5sum
 	if [ -f $REPO/$1/conf.egg ]; then
 		dolog "Read conf.egg from project $1 : action REMOTE"
-		while IFS='' read -r line || [[ -n "$line" ]]; do
-			tmp=$(echo  $line | grep REMOTE )		
-			if [ "$tmp" != "" ]; then 
-				MODE=$(echo $tmp | awk '{ print $2 }')
-				equs "$MODE"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  download mode" "project : $1"
-				fi
-				REMOTE=$(echo $tmp | awk '{ print $3 }')
-				equs "$REMOTE" 
-				if [ $? -eq 1 ]; then 
-					error_c "Missing remote repository name" "project : $1"
-				fi
-				PACKET=$(echo $tmp | awk '{ print $4 }')
-				equs "$PACKET" 
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  packet name " "project : $1"
-				fi		
-				patch_reverse_action "$1" "$MODE"  "$2"
-				RES=1
-				break;
-			fi
-		done < "$REPO/$1/conf.egg"	
+		MODE=$(xml_value $1 "/eggX/project/remote/method")
+		equs "$MODE"  
+		if [ $? -eq 1 ]; then 
+			error_c "Missing  download mode" "project : $1"
+		fi
+		REMOTE=$(xml_value $1 "/eggX/project/remote/url")
+		equs "$REMOTE" 
+		if [ $? -eq 1 ]; then 
+			error_c "Missing remote repository name" "project : $1"
+		fi
+		PACKET=$(xml_value $1 "/eggX/project/remote/file")
+		equs "$PACKET" 
+		if [ $? -eq 1 ]; then 
+			error_c "Missing  packet name " "project : $1"
+		fi	
+		patch_reverse_action "$1" "$MODE"  "$2"
+		RES=1
 		if [ $RES -ne 1 ]; then
 			error_c "Missing REMOTE key in conf.egg " "project : $1"
 		fi
@@ -968,6 +944,7 @@ if [ "$OPT_ARGV" != "" ]; then
 	print_c "$GREEN_LIGHT" "Check option " "$YELLOW"  "$i"
 	case $i in 
 		-D|--debug)
+		export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 		set -x
 		dolog "Set Debug ON"
 		;;

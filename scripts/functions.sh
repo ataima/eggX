@@ -104,3 +104,15 @@ for i in "$@" ; do
 	fi
 done
 }
+
+#$1 project
+#$2 xml node 
+#return value
+function xml_value(){
+ local PRJ=$(xmlstarlet sel -t  -v '/eggX/project/name' -n $REPO/$1/conf.egg)
+ if [ "$PRJ" != "$1" ];then
+	error_c "Conf file conf.egg for project $PRJ" "    - project $1"
+ fi 
+ local VALUE=$(xmlstarlet sel -t  -v "$2" -n $REPO/$1/conf.egg)
+ echo $VALUE
+}

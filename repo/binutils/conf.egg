@@ -1,7 +1,12 @@
-DOWNLOAD 	SKIP
-REMOTE   	WGET  	ftp://ftp.gnu.org/gnu/binutils 	binutils-2.28.tar.bz2     
-NATIVE		amd64
-CROSS		arm32
-CROSS              arm64
-CROSS		ppc
- 
+<?xml version="1.0"?>
+<eggX>
+	<project>
+		<name>binutils</name>
+		<download>force</download>
+		<remote>
+			<method>wget</method>
+			<url>ftp://ftp.gnu.org/gnu/binutils</url>
+			<file>binutils-2.28.tar.bz2</file>
+		</remote>
+	</project>
+</eggX>
