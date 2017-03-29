@@ -1,3 +1,13 @@
-DOWNLOAD 	CHECK
-REMOTE   	WGET  	ftp://ftp.gnu.org/gnu/ncurses/  		ncurses-6.0.tar.gz     
- 
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>ncurses</name>
+		<download>check</download>		
+		<remote>
+			<method>wget</method>
+			<url>ftp://ftp.gnu.org/gnu/ncurses/ </url>
+			<file>ncurses-6.0.tar.gz</file>
+			<password>pippo</password>			
+		</remote>		
+	</project>
+</egg>

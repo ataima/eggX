@@ -1,12 +1,13 @@
 <?xml version="1.0"?>
-<eggX>
+<egg>
 	<project>
 		<name>binutils</name>
-		<download>force</download>
+		<download>check</download>		
 		<remote>
 			<method>wget</method>
 			<url>ftp://ftp.gnu.org/gnu/binutils</url>
 			<file>binutils-2.28.tar.bz2</file>
-		</remote>
+			<password>binutils-2.28.tar.bz2</password>			
+		</remote>		
 	</project>
-</eggX>
+</egg>

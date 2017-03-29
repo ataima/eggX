@@ -1,3 +1,13 @@
-DOWNLOAD    SKIP
-REMOTE   	WGET  	ftp://ftp.gnu.org/gnu/gcc/gcc-6.3.0  		gcc-6.3.0.tar.gz     
- 
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>gcc</name>
+		<download>check</download>		
+		<remote>
+			<method>wget</method>
+			<url>ftp://ftp.gnu.org/gnu/gcc/gcc-6.3.0</url>
+			<file>gcc-6.3.0.tar.gz</file>
+			<password>pippo</password>			
+		</remote>		
+	</project>
+</egg>

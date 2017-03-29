@@ -1,3 +1,19 @@
-DOWNLOAD 	CHECK
-REMOTE   	SVN http://svn.apache.org/repos/asf          subversion/trunk 
-PATCH            FILE    /home/angelo			      p1.patch
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>svn</name>
+		<download>check</download>		
+		<remote>
+			<method>svn</method>
+			<url>http://svn.apache.org/repos/asf </url>
+			<file>subversion/trunk</file>
+			<password>pippo</password>			
+		</remote>
+		<patch id="0">
+			<method>file</method>
+			<url> /home/angelo </url>
+			<file>p1.patch</file>
+			<password>pippo</password>	
+		</patch>
+	</project>
+</egg>

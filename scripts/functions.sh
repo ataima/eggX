@@ -109,10 +109,24 @@ done
 #$2 xml node 
 #return value
 function xml_value(){
- local PRJ=$(xmlstarlet sel -t  -v '/eggX/project/name' -n $REPO/$1/conf.egg)
- if [ "$PRJ" != "$1" ];then
-	error_c "Conf file conf.egg for project $PRJ" "    - project $1"
- fi 
+ local PRJ=$(xmlstarlet sel -t  -v '/egg/project/name' -n $REPO/$1/conf.egg)
+ if [ "$PRJ" == "$1" ];then	
  local VALUE=$(xmlstarlet sel -t  -v "$2" -n $REPO/$1/conf.egg)
  echo $VALUE
+ else
+	echo "Conf.egg referred to project $PRJ"
+ fi
+}
+
+
+#$1 project
+#$2 xml node
+#return num node match
+function xml_count(){
+declare -i RES=0
+local PRJ=$(xmlstarlet sel -t  -v '/egg/project/name' -n $REPO/$1/conf.egg)
+ if [ "$PRJ" != "$1" ];then	
+RES=$(xmlstarlet sel -t  -v "count($2)" -n $REPO/$1/conf.egg)
+fi
+return $RES
 }
