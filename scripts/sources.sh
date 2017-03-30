@@ -541,7 +541,7 @@ if [ $? -eq 1 ]; then
 		xml_count $1 "/egg/project/patch"
 		tmp=$?
 		if [ $tmp -ne 0 ]; then
-			while [ $i -le $tmp ]; do
+			while [ $i -lt $tmp ]; do
 				MODE=$(xml_value $1 "/egg/project/patch[@id='$i']/method")
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 

@@ -125,7 +125,7 @@ function xml_value(){
 function xml_count(){
 declare -i RES=0
 local PRJ=$(xmlstarlet sel -t  -v '/egg/project/name' -n $REPO/$1/conf.egg)
- if [ "$PRJ" != "$1" ];then	
+ if [ "$PRJ" == "$1" ];then	
 RES=$(xmlstarlet sel -t  -v "count($2)" -n $REPO/$1/conf.egg)
 fi
 return $RES

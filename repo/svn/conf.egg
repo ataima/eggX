@@ -7,13 +7,11 @@
 			<method>svn</method>
 			<url>http://svn.apache.org/repos/asf </url>
 			<file>subversion/trunk</file>
-			<password>pippo</password>			
 		</remote>
 		<patch id="0">
 			<method>file</method>
-			<url> /home/angelo </url>
+			<url>/home/finsoft </url>
 			<file>p1.patch</file>
-			<password>pippo</password>	
 		</patch>
 	</project>
 </egg>
