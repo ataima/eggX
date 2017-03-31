@@ -11,8 +11,34 @@
 		</remote>	
 		<build>
 			<step id="0">
+			<priority>0</priority>
 			<name> prepare_gcc_native</name>
-			<arch>native</arch>			
+			<arch>native</arch>
+		        <cross>i686-elf</cross>		
+			<extra_conf id="0">--disable-nls</extra_conf>	
+			<extra_conf id="1">--disable-libquadmath</extra_conf>
+			<pre_conf id="0">
+				<mode>code</mode>
+				<value>echo "pre configure start ......"</value>
+			</pre_conf>
+			<pre_conf id="1">
+				<mode>code</mode>
+				<value>echo "pre configure stop ......"</value>
+			</pre_conf>
+			<post_conf id="0">
+				<mode>code</mode>
+				<value>echo "post configure start ......"</value>
+			</post_conf>
+			<post_conf id="1">
+				<mode>code</mode>
+				<value>echo "post configure stop ......"</value>
+			</post_conf>
+			</step>
+			<step id="1">
+			<priority>1</priority>
+			<name> prepare_gcc_cross</name>
+			<arch>native</arch>
+			<cross>arm_none_eabi</cross>			
 			</step>
 		</build>
 	</project>

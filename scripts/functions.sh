@@ -61,6 +61,7 @@ print_c "$GREEN_LIGHT" "   -  $2" "$BLUE_LIGHT" "$3"
 print_c "$WHITE" "--------------------------------------------------"
 }
 
+#COPYTODEFAULTSCRIPT DO NOT REMOVE MARK TO COPY FUNCTION.Sh IN default_Script
 
 # $1  string 
 # $2  string
@@ -129,4 +130,28 @@ local PRJ=$(xmlstarlet sel -t  -v '/egg/project/name' -n $REPO/$1/conf.egg)
 RES=$(xmlstarlet sel -t  -v "count($2)" -n $REPO/$1/conf.egg)
 fi
 return $RES
+}
+
+
+
+#$1 projects
+#$2 title to echo...
+#$3 file to write 
+function prepare_script(){
+local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $(pwd)/functions.sh | sed -e 's/ /\n/g' | head -n 1)
+LINE=$((LINE-1))
+head $(pwd)/functions.sh -n $LINE >> $3
+echo "print_c $GREEN_LIGTH $2 $YELLOW $1" >> $3
+echo "" >> $3
+echo "" >> $3
+}
+
+
+#$1 projects
+#$2 title to echo...
+#$3 file to write 
+function end_script(){
+echo "print_c $GREEN_LIGTH $2 $YELLOW $1" >> $3
+echo "" >> $3
+echo "" >> $3
 }

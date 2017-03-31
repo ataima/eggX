@@ -13,5 +13,19 @@
 			<url>/home/finsoft </url>
 			<file>p1.patch</file>
 		</patch>
+		<build>
+			<step id="0">
+			<priority>1</priority>
+			<name> prepare_gcc_native</name>
+			<arch>native</arch>
+		        <cross>i686-elf</cross>			
+			</step>
+			<step id="1">
+			<priority>1</priority>
+			<name> prepare_gcc_cross</name>
+			<arch>native</arch>
+			<cross>arm_none_eabi</cross>			
+			</step>
+		</build>		
 	</project>
 </egg>
