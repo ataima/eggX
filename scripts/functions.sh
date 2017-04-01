@@ -61,7 +61,7 @@ print_c "$GREEN_LIGHT" "   -  $2" "$BLUE_LIGHT" "$3"
 print_c "$WHITE" "--------------------------------------------------"
 }
 
-#COPYTODEFAULTSCRIPT DO NOT REMOVE MARK TO COPY FUNCTION.Sh IN default_Script
+#COPYTODEFAULTSCRIPT DO NOT REMOVE MARK TO COPY FUNCTION.Sh IN default_script
 
 # $1  string 
 # $2  string
@@ -78,6 +78,18 @@ return $RES
 function noequs(){
 local RES=0
 if [ "$1" != "$2" ]; then
+	RES=1
+fi
+return $RES
+}
+
+
+# $1  string 
+# $2  array string
+function range_multi(){
+local RES=0
+local AA=$(echo $2 | grep $1)
+if [ "AA" != "" ]; then
 	RES=1
 fi
 return $RES
@@ -113,9 +125,15 @@ function xml_value(){
  local PRJ=$(xmlstarlet sel -t  -v '/egg/project/name' -n $REPO/$1/conf.egg)
  if [ "$PRJ" == "$1" ];then	
  local VALUE=$(xmlstarlet sel -t  -v "$2" -n $REPO/$1/conf.egg)
+ if [  "${VALUE:0:1}" == "$" ]; then 
+ #if a env variable
+ local UV=$(echo $VALUE | sed -e 's/\$//g')
+ VALUE=$(env | grep $UV | sed -e 's/=/ /g' | awk '{print $2}')
+ fi
  echo $VALUE
  else
-	echo "Conf.egg referred to project $PRJ"
+	echo "Con
+#$1 projectf.egg referred to project $PRJ"
  fi
 }
 
@@ -134,24 +152,3 @@ return $RES
 
 
 
-#$1 projects
-#$2 title to echo...
-#$3 file to write 
-function prepare_script(){
-local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $(pwd)/functions.sh | sed -e 's/ /\n/g' | head -n 1)
-LINE=$((LINE-1))
-head $(pwd)/functions.sh -n $LINE >> $3
-echo "print_c $GREEN_LIGTH $2 $YELLOW $1" >> $3
-echo "" >> $3
-echo "" >> $3
-}
-
-
-#$1 projects
-#$2 title to echo...
-#$3 file to write 
-function end_script(){
-echo "print_c $GREEN_LIGTH $2 $YELLOW $1" >> $3
-echo "" >> $3
-echo "" >> $3
-}

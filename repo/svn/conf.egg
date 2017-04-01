@@ -10,7 +10,7 @@
 		</remote>
 		<patch id="0">
 			<method>file</method>
-			<url>/home/finsoft </url>
+			<url>$HOME </url>
 			<file>p1.patch</file>
 		</patch>
 		<build>

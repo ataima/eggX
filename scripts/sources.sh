@@ -344,8 +344,8 @@ fi
 # $3 filename 
 function file_packet(){
 print_c "$GREEN_LIGHT" "   - File copy source $3" "$YELLOW" $1
-local PNAME="$2/$3"
-rsync -ry "$PNAME" "$REPO/$1/$3"
+local PNAME=$2/$3
+rsync -ry $PNAME $REPO/$1/$3
 if [ $? -ne 0 ]; then
 	error_c "Cannot copy file $3" " project $1"
 fi
@@ -558,7 +558,7 @@ if [ $? -eq 1 ]; then
 					error_c "Missing  patch packet name " "project : $1"
 				fi	
 				MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
-				download_action "$1" "$MODE"  "$REMOTE" "$PACKET" 1
+				download_action "$1" "$MODE"  $REMOTE $PACKET 1
 				if [ $2 -eq 99 ]; then 
 				apply_patch "$1" "$PACKET"
 				fi	

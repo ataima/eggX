@@ -16,7 +16,8 @@ declare -A SORTREQ
 
 ALL_PACKETS=$(ls $OROOT/repo)
 
-
+CONF_MAIN=""
+CONF_BUILD=""
 # test if exist project <name> from packets list...
 # $1 packet name
 function check_project(){
@@ -34,6 +35,7 @@ local PRI=""
 local NAME=""
 local ARCH=""
 local CROSS=""
+local SILENT=""
 local INDEX=""
 local NUM=0
 check_project $1
@@ -52,6 +54,13 @@ if [ $? -eq 1 ]; then
 			equs "$NAME"  
 			if [ $? -eq 1 ]; then 
 				error_c "Missing  build name Phase $2" "project : $1"
+			fi 
+			if [ "$BUILD_NAME" == "" ]; then 
+				BUILD_NAME=$NAME
+			else
+				if [ "$BUILD_NAME" != "$NAME" ]; then
+					error_c "Misaligned project name " "  -project $1 : step $2"
+				fi
 			fi
 			ARCH=$(xml_value $1 "/egg/project/build/step[@id='$2']/arch")		
 			equs "$ARCH"  
@@ -63,7 +72,27 @@ if [ $? -eq 1 ]; then
 			if [ $? -eq 1 ]; then 
 				error_c "Missing  build cross platform Phase $2" "project : $1"
 			fi	
-			INDEX="$PRI%$NAME%$ARCH%$CROSS:$1"
+			SILENT=$(xml_value $1 "/egg/project/build/step[@id='$2']/silent")
+			#optional
+			if [ $SILENT ]; then
+				range_multi "$SILENT" "yes no"
+				if [ $? -eq 0 ]; then 
+					error_c "silent value error $SILENT-yes or no only! Phase $2" "project : $1"
+				fi
+			else
+			SILENT="yes"
+			fi
+			THREADS=$(xml_value $1 "/egg/project/build/step[@id='$2']/threads")
+			#optional
+			if [ $THREADS ]; then
+				range_multi "$THREADS" "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16"
+				if [ $? -eq 0 ]; then 
+					error_c "Threads value error $THREADS-0..16 only! Phase $2" "project : $1"
+				fi
+			else
+				THREADS=2
+			fi
+			INDEX="$PRI%$NAME%$ARCH%$CROSS:$1%$SILENT%$THREADS"
 			BSEQ[$INDEX]="$INDEX"	
 		fi
 	else
@@ -73,6 +102,11 @@ else
 	error_c "Missing project in $REPO " "project : $1"
 fi
 }
+
+
+
+
+
 
 #$1 projects
 #$2 source dir
@@ -85,6 +119,86 @@ if [ $? -ne 0 ]; then
 	error_c " Autoconf fail " "  - project $1"
 fi
 cd $PWD
+}
+
+
+
+#$1 projects
+#$2 Step
+#$3 title to echo...
+#$4 file to write 
+#$5 BUILD NAME
+#$6 ARCH
+#$7 CROSS
+function prepare_script_configure(){
+local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $(pwd)/functions.sh | sed -e 's/ /\n/g' | head -n 1)
+LINE=$((LINE-1))
+head $(pwd)/functions.sh -n $LINE >> $4
+local SRC=""
+if [ -e $SOURCES/$1/$1-*/configure ]; then
+	SRC=$(ls -d $SOURCES/$1/$1-*)
+else
+	if [ -e $SOURCES/$1/configure.ac ]; then
+		SRC=$SOURCES/$1
+	else
+		if [ -e $SOURCES/$1/$1-*/configure.ac ]; then
+			SRC=$(ls -d $SOURCES/$1/$1-*)
+		else
+			SRC=$SOURCES/$1
+		fi
+	fi
+fi
+echo "PROJECT=$1" >> $4
+echo "STEP=$2" >> $4
+echo "SOURCE=$SRC" >> $4
+echo "BUILD=$BUILD/$5/$1" >> $4
+echo "DEPLOY=$IMAGES/$5/$1" >> $4
+echo "export ARCH=$6">> $4
+echo "export CROSS=$7">> $4
+echo "#print_c \"\$GREEN_LIGHT\" \"$3\" \"\$YELLOW\" \"project : $1  -  step \$STEP\"" >> $4
+echo "" >> $4
+echo "" >>$4
+}
+
+#$1 string to print
+#$2 step
+#$3 file to write
+function prepare_script_main_configure(){
+local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $(pwd)/functions.sh | sed -e 's/ /\n/g' | head -n 1)
+LINE=$((LINE-1))
+head $(pwd)/functions.sh -n $LINE >> $3
+echo "PWD=\$(pwd)">> $3
+echo "print_c \"\$GREEN_LIGHT\" \"$1\" \"\$YELLOW\" \"-  step $2\"" >> $3
+echo "" >> $3
+echo "" >>$3
+}
+
+
+
+
+#$1 projects
+#$2 Step
+#$3 title to echo...
+#$4 file to write 
+function end_script_configure(){
+echo "#print_c \"\$GREEN_LIGHT\" \"$3\" \"\$YELLOW\" \"  project : $1  -  step \$STEP\"" >> $4
+echo "" >> $4
+echo "" >> $4
+}
+
+
+
+
+#$1 title to echo...
+#$2 Step
+
+function end_script_main_configure(){
+echo "print_c \"\$GREEN_LIGHT\" \"END MAIN CONFIGURE\" \"\$YELLOW\" \"-  step $2\"" >>  "$CONF_MAIN"
+echo "" >> "$CONF_MAIN"
+echo "" >> "$CONF_MAIN"
+echo "print_c \"\$GREEN_LIGHT\" \"END MAIN BUILD\" \"\$YELLOW\" \"-  step $2\"" >>  "$CONF_BUILD"
+echo "" >> "$CONF_BUILD"
+echo "" >> "$CONF_BUILD"
 }
 
 #$1 project
@@ -214,6 +328,7 @@ echo " "  >> $3
 #$1 project
 #$2 step id
 #$3 file out
+#$4 silent
 function add_extra_conf(){
 declare -i i=0
 local VALUE=""
@@ -239,7 +354,9 @@ if [ $? -eq 1 ]; then
 				done 
 			fi
 		fi
-		echo " > /dev/null" >>  $3
+		if  [ "$4" == "yes" ]; then 
+			echo " > /dev/null" >>  $3
+		fi
 	else
 		error_c "Missing conf.egg file " "project : $1"
 	fi
@@ -247,38 +364,92 @@ else
 	error_c "Missing project in $REPO " "project : $1"
 fi
 echo " "  >> $3
+echo "RES=\$?" >> $3
+echo "if [ \$RES -ne 0 ]; then" >> $3
+echo "    error_c \"Configure return error: \$RES \" \"  - project : \$PROJECT step \$STEP\"" >> $3
+echo "else" >> $3
+echo "    print_c \"\$GREEN_LIGHT\" \"Configure      \" \"\$YELLOW\" \"project : \$PROJECT  -  step \$STEP\" \"\$BLUE_LIGHT\" \" OK !\"">> $3
+echo "fi" >> $3 
 }
 
+#$1 build name
+#$2 step
+function start_main_script_configure(){
+mkdir -p $BUILD/$1
+CONF_MAIN="$BUILD/$1/main_configure.sh"
+CONF_BUILD="$BUILD/$1/main_build.sh"
+rm -f "$CONF_MAIN"
+touch "$CONF_MAIN"
+rm -f "$CONF_BUILD"
+touch "$CONF_BUILD"
+prepare_script_main_configure  "START MAIN CONFIGURE" "$2" "$CONF_MAIN" 
+chmod +x "$CONF_MAIN"
+prepare_script_main_configure  "START MAIN BUILD" "$2" "$CONF_BUILD" 
+chmod +x "$CONF_BUILD"
+}
 
+#$1 script to go
+#$2 path of script
+function add_entry_in_main_configure_script(){
+echo "cd $2" >>"$CONF_MAIN"
+echo "$1 " >> "$CONF_MAIN"
+echo "if [ \$? -ne 0 ]; then exit 1;fi"  >> "$CONF_MAIN"
+echo "cd \$PWD" >>"$CONF_MAIN"
+}
+
+#$1 project
+#$2 build path
+#$3 silent 
+#S4 threads
+function add_entry_in_main_build_script(){
+	echo "print_c \"\$GREEN_LIGHT\" \"make $1 :\" \"\$YELLOW\" \"\$1\"" >>"$CONF_BUILD"
+if [ "$3" == "yes" ]; then 
+	echo "make --silent -C $2 -j$4 \$1 > /dev/null" >> "$CONF_BUILD"
+else
+	echo "make -C $2  -j$4 \$1">> "$CONF_BUILD"
+fi
+echo "if [ \$? -ne 0 ]; then">> "$CONF_BUILD"
+echo "    error_c \"Error on build \" \"  - project \$1\"" >>"$CONF_BUILD"
+echo "fi"  >> "$CONF_BUILD"
+#install
+	echo "print_c \"\$GREEN_LIGHT\" \"install $1 :\" \"\$YELLOW\" \"\$1\"" >>"$CONF_BUILD"
+if [ "$3" == "yes" ]; then 
+	echo "make --silent -C $2   install > /dev/null" >> "$CONF_BUILD"
+else
+	echo "make -C $2  install">> "$CONF_BUILD"
+fi
+echo "if [ \$? -ne 0 ]; then">> "$CONF_BUILD"
+echo "    error_c \"Error on install \" \"  - project \$1\"" >>"$CONF_BUILD"
+echo "fi"  >> "$CONF_BUILD"
+}
 
 #$1 id 0,1,2,3
-#$2 composite name priority%name%arch%cross:project
-
+#$2 composite name priority%name%arch%cross:project%silent%threads
 function configure_packet(){
 #retrieve data...
 local PRIORITY=""
-local BUILD_NAME=""
 local BUILD_ARCH=""
 local BUILD_CROSS=""
 local BUILD_PROJECT=""
+local BUILD_SILENT=""
+local BUILD_THREADS=""
 local AA=$(echo $2 | sed -e 's/%/   /g' | sed -e 's/:/   /g' )
 PRIORITY=$(echo $AA | awk '{print $1}')
-BUILD_NAME=$(echo $AA | awk '{print $2}')
 BUILD_ARCH=$(echo $AA | awk '{print $3}')
 BUILD_CROSS=$(echo $AA | awk '{print $4}')
 BUILD_PROJECT=$(echo $AA | awk '{print $5}')
- 
-local CONF_RUN="$BUILD/$BUILD_PROJECT/$BUILD_NAME/$BUILD_NAME""_bootstrap.sh"
+BUILD_SILENT=$(echo $AA | awk '{print $6}')
+BUILD_THREADS=$(echo $AA | awk '{print $7}')
+local CONF_RUN="$BUILD/$BUILD_NAME/$BUILD_PROJECT/bootstrap.sh"
 local DEST="$IMAGES/$BUILD_NAME"
-mkdir -p $BUILD/$BUILD_PROJECT
-mkdir -p $BUILD/$BUILD_PROJECT/$BUILD_NAME
-rm -rf $BUILD/$BUILD_PROJECT/$BUILD_NAME/*
+mkdir -p $BUILD/$BUILD_NAME/$BUILD_PROJECT
+rm -rf $BUILD/$BUILD_NAME/$BUILD_PROJECT/*
 mkdir -p $DEST
 rm -rf $DEST/*
 touch $CONF_RUN
 chmod +x $CONF_RUN
-prepare_script $1 "START CONFIGURE" $CONF_RUN
-add_pre_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_PROJECT/$BUILD_NAME"  "$BUILD_NAME"
+prepare_script_configure "$BUILD_PROJECT"  "$1" "START CONFIGURE" "$CONF_RUN" "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS"
+add_pre_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 if [ -e $SOURCES/$BUILD_PROJECT/configure ]; then
 	echo -n "$SOURCES/$BUILD_PROJECT/configure --prefix=$DEST --target=$BUILD_CROSS ">> $CONF_RUN
 else
@@ -300,29 +471,51 @@ else
 		fi
 	fi
 fi	
-add_extra_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_PROJECT/$BUILD_NAME"  "$BUILD_NAME"
-add_post_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_PROJECT/$BUILD_NAME"  "$BUILD_NAME"
-end_script $1 "END CONFIGURE" $CONF_RUN
+add_extra_conf "$BUILD_PROJECT" "$1" "$CONF_RUN"  "$BUILD_SILENT"
+add_post_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
+end_script_configure  "$BUILD_PROJECT"  "$1" "END CONFIGURE" "$CONF_RUN"
+add_entry_in_main_configure_script "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"
+add_entry_in_main_build_script  "$BUILD_PROJECT" "$BUILD/$BUILD_NAME/$BUILD_PROJECT" "$BUILD_SILENT" "$BUILD_THREADS"
 }
 
 
-#$1 build id number
+
+
+
+
+
+
+#$1 force 0=0ff 99 0=on
+#$2.... 1=build id number 2 argv optional
 function configure_all_packet(){
-local i=""
-for i in $ALL_PACKETS; do
-	insert_packet $i $1 
+local V=""
+local ID=$2
+local PRJS=""
+if [ $1 -eq  0 ]; then
+	PRJS=$ALL_PACKETS
+else
+	shift 
+	shift
+	PRJS=$@
+fi
+
+for V in $PRJS; do
+	insert_packet $V $ID 
 done
+start_main_script_configure "$BUILD_NAME" "$ID"
 SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
-for i in $SORTREQ; do
-	configure_packet  $1 $i
+for V in $SORTREQ; do
+	configure_packet  $ID $V
 done
+end_script_main_configure  "$BUILD_NAME" "$ID"
 }
 
 
 
 function usage(){
-	print_c "$BLUE_LIGHT" "usage : ./configure.sh <opt> <phase> <args>"
+	print_c "$BLUE_LIGHT" "usage : ./configure.sh <opt> <phase=always> <args>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-F or --force : set debug mode"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "phase = 0,1,2..." 
 	print_c  "$PURPLE" "ARGS" "$GREEN" "args for options"
 	exit 1
@@ -330,6 +523,7 @@ function usage(){
 
 #$1 build id number
 function main(){
+local FORCE=0
 input_arg "$@"
 if [ "$OPT_ARGV" != "" ]; then
 	for i in $OPT_ARGV; do
@@ -339,7 +533,11 @@ if [ "$OPT_ARGV" != "" ]; then
 		export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 		set -x
 		dolog "Set Debug ON"
-		;;		
+		;;
+		-F|--force)
+		FORCE=99
+		dolog "Set Debug ON"
+		;;	
 		*)
 		usage
 		error_c "Command line" " unknow option $i"
@@ -352,7 +550,14 @@ if [ "$ARGV" != "" ]; then
 	for i in $ARGV; do
 	print_c "$GREEN_LIGHT" "argv " "$YELLOW"  "$i"
 	done
+else
+	usage
 fi
+
+if [ $FORCE -eq 0 ] && [ ${#ARGV[@]} -gt 1 ]; then
+	warning_c "Discarding extra args on command line :\n to force a specific project(s) have to set\n --force flag , ex: :/configure.sh -F 2 binutils"
+fi
+
 #set log to download
 LOGFILE="$LOGFILE""-configure.txt"
 touch "$LOGFILE"
@@ -364,7 +569,7 @@ rsync -ry $OREPO $REPO
 if [ $? -ne 0 ]; then
 	error_c "Cannot  sync work repository"
 fi
-configure_all_packet  "$ARGV"
+configure_all_packet  "$FORCE" $ARGV
 }
 
 
