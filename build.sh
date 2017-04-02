@@ -88,15 +88,15 @@ done
 local PWD=$(pwd)
 for V in $PRJ_NAMES; do
 	cd "$BUILD/$V"
-	"$BUILD/$V/main_configure.sh"
+	$BUILD/$V/main_configure.sh
 	if [ $? -ne 0 ] ; then
 		exit -1;
 	fi
-	"$BUILD/$V/main_build.sh all"
+	$BUILD/$V/main_build.sh all
 	if [ $? -ne 0 ] ; then
 		exit -1;
 	fi
-	"$BUILD/$V/main_build.sh install"
+	$BUILD/$V/main_build.sh install
 	if [ $? -ne 0 ] ; then
 		exit -1;
 	fi
@@ -105,22 +105,51 @@ done
 
 
 
+#$@ from argv build.sh
+function build_single(){
+#trovo nomi build per ogni progetto
+local PRJ_NAMES=""
+for V in $ALL_PACKETS; do
+	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
+done
+
+local PWD=$(pwd)
+for V in $PRJ_NAMES; do
+	set -x
+	for I in $@; do
+		cd "$BUILD/$V/$I"
+		$BUILD/$V/$I/bootstrap.sh
+		if [ $? -ne 0 ] ; then
+			exit -1;
+		fi
+		make all
+		if [ $? -ne 0 ] ; then
+			exit -1;
+		fi
+		make install
+		if [ $? -ne 0 ] ; then
+			exit -1;
+		fi
+	done 
+done
+}
 
 
-#$1 force 0=0ff 99 0=on
+
+#$ARGV
 function build_all_packet(){
 if [ "$1" == "" ]; then
 	build_all
 else
-	shift 
-	#build $@
+	build_single $@
 fi
 }
 
 function config_all_step(){
 declare -i NUM=0
 while [ $NUM -lt $MAX_STEP ]; do
-	bash $SCRIPT_DIR/configure.sh $NUM $@
+	print_c "$GREEN_LIGHT" "Step   :   " "$YELLOW" "$NUM" 
+	$SCRIPT_DIR/configure.sh $NUM $@
 	NUM=$((NUM+1))
 done
 }
@@ -139,6 +168,7 @@ function main(){
 local SOURCE=0
 local CONFIGURE=0
 local MAKE=0
+local DO=0
 input_arg "$@"
 if [ "$OPT_ARGV" != "" ]; then
 	for i in $OPT_ARGV; do
@@ -163,18 +193,23 @@ fi
 if [ "$ARGV" != "" ]; then
 	for i in $ARGV; do
 	print_c "$GREEN_LIGHT" "Check args " "$YELLOW"  "$i"
+	ARGV=$(echo $ARGV | sed -e "s/$i//g")
 	case $i in 
 		source)
 		SOURCE=1
-		shift
+		break
 		;;	
 		configure)
 		CONFIGURE=1
-		shift
+		break
+		;;	
+		compile)
+		MAKE=1
+		break
 		;;	
 		do)
-		MAKE=1
-		shift
+		DO=1		
+		break
 		;;	
 		*)
 		usage
@@ -198,17 +233,22 @@ rsync -ry $OREPO $REPO
 if [ $? -ne 0 ]; then
 	error_c "Cannot  sync work repository"
 fi
+
 get_max_step
 if [ $SOURCE -ne 0 ]; then	
-	bash $SCRIPT_DIR/sources.sh $@
+	$SCRIPT_DIR/sources.sh "$ARGV"
 else
 	if [ $CONFIGURE -ne 0 ]; then	
 		config_all_step
 	else
-		if [ $MAKE -ne 0 ]; then	
-			build_all_packet  $@
+		if [ $DO -ne 0 ]; then	
+			build_all_packet  "$ARGV"
 		else
-			usage
+			if [ $MAKE -ne 0 ]; then	
+				build_all_packet  "$ARGV"
+			else
+				usage
+			fi
 		fi
 	fi
 fi

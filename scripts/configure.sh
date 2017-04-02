@@ -840,11 +840,7 @@ if [ "$OPT_ARGV" != "" ]; then
 	done
 fi
 
-if [ "$ARGV" != "" ]; then
-	for i in $ARGV; do
-	print_c "$GREEN_LIGHT" "argv " "$YELLOW"  "$i"
-	done
-else
+if [ "$ARGV" == "" ]; then
 	usage
 fi
 
