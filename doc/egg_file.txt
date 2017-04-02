@@ -1,0 +1,55 @@
+
+<?xml version="1.0"?>    									
+<egg>													
+	<project>							#project define 
+		<name>binutils</name>			
+		<download>check</download>		# download see sources.sh
+		<remote>
+			<method>wget</method>
+			<url>ftp://ftp.gnu.org/gnu/binutils</url>
+			<file>binutils-2.28.tar.bz2</file>
+			<password>12345678 </password>    #optional svn / git password
+			#TODO  add fw nodes
+			# depend   id=xx                                     optinal  :before download this project you must download depend projects
+			# depend/action                                       link to source , copy source, etc
+			# ssh_user                                                optinal :for access via ssh with user certificate
+			# alternate						  optinal :alternate via to download source
+			# backup                                                  optinal :repository backup : if remote & alternate fail copy from here..
+			# alway_backup                                       optinal :alway after a update or check create a source backup
+		</remote>	
+		<build>								 # build step
+			<step id="0">					 # step nn :  < configure make install  packet >	,< configure make install  packet >....
+			<priority>0</priority>				 # into a step  0 first project compiled  , 1 second...nn
+			<name> prepare_gcc_native</name>
+			<arch>x86_64</arch>				 # arch =x86 , arm etc
+		        <cross>i686-elf</cross>			 # specific cross 
+			<silent>yes</silent>				 # optional silent compile : yes/no default yes
+			<threads>8</threads>			 # optional parameter to pass to make -jxx : optional value 1..16, default 2
+			<extra_conf id="0">--disable-werror</extra_conf>	# extra configure parameter to pass to configure
+			<extra_conf id="1">--disable-nls</extra_conf>	
+			<pre_conf id="0">				# before configure step can do this pre_conf  xx
+				<mode>script</mode>		# mode : script, source, code 
+				<value>test.sh </value>             # call test.sh
+			</pre_conf>
+			<pre_conf id="1">
+				<mode>code</mode>			# mode code 
+				<value> echo hello</value>      # execute echo hello
+			</pre_conf>
+			<post_conf id="0">				# after configure step can do this pre_conf  xx
+				<mode>code</mode>
+				<value></value>
+			</post_conf>
+			<post_conf id="1">
+				<mode>code</mode>
+				<value></value>
+			</post_conf>
+			</step>							#next step for this projects: same source code change configure and build path
+			<step id="1">
+			<priority>1</priority>
+			<name> prepare_gcc_cross</name>
+			<arch>native</arch>
+			<cross>arm_none_eabi</cross>			
+			</step>
+		</build>
+	</project>
+</egg>
