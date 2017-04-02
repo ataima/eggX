@@ -55,22 +55,25 @@ local NAME=""
 local TT=""
 local PRJ_NAME=$2
 declare -i IND=0
-set -x
-while [  $IND -lt $MAX_STEP ]; do
-	NAME=$(xml_value $1 "/egg/project/build/step[@id='$IND']/name")		
-	equs "$NAME"  
-	if [ $? -eq 1 ]; then 
-		error_c "Missing  build name Phase $2" "project : $1"
-	else
-		TT=$(echo $PRJ_NAME | grep $NAME)
-		if [ "$TT" == "" ]; then 
-			PRJ_NAME="$PRJ_NAME""  ""$NAME"
-		fi
-	fi 	
-	IND=$((IND+1))	
-done
+	xml_count $1 "/egg/project/build"
+	IND=$?
+	if [ $IND -eq 1 ]; then
+		IND=0
+		while [  $IND -lt $MAX_STEP ]; do
+		NAME=$(xml_value $1 "/egg/project/build/step[@id='$IND']/name")		
+		equs "$NAME"  
+		if [ $? -eq 1 ]; then 
+			error_c "Missing  build name Phase $2" "project : $1"
+		else
+			TT=$(echo $PRJ_NAME | grep $NAME)
+			if [ "$TT" == "" ]; then 
+				PRJ_NAME="$PRJ_NAME""  ""$NAME"
+			fi
+		fi 	
+		IND=$((IND+1))		
+		done
+	fi
 echo $PRJ_NAME
-set +x
 }
 
 
@@ -80,7 +83,6 @@ function build_all(){
 local PRJ_NAMES=""
 for V in $ALL_PACKETS; do
 	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
-	echo "---> $PRJ_NAME"
 done
 
 local PWD=$(pwd)

@@ -17,8 +17,30 @@
 		        <cross>i686-elf</cross>	
 			<silent>yes</silent>
 			<threads>8</threads>
-			<extra_conf id="0">--disable-werror</extra_conf>	
-			<extra_conf id="1">--disable-nls</extra_conf>	
+			<pre_conf id="0">
+				<mode>code</mode>
+				<value>GMP=$(ls -d $SOURCES/gmp/gmp-*) </value>
+			</pre_conf>
+			<pre_conf id="1">
+				<mode>code</mode>
+				<value>if [ ! -e $SOURCE/gmp ]; then ln -s $GMP $SOURCE/gmp; fi</value>
+			</pre_conf>
+			<pre_conf id="2">
+				<mode>code</mode>
+				<value>MPFR=$(ls -d $SOURCES/mpfr/mpfr-*)</value>
+			</pre_conf>
+			<pre_conf id="3">
+				<mode>code</mode>
+				<value>if [ ! -e $SOURCE/mpfr ]; then ln -s $MPFR $SOURCE/mpfr; fi</value>
+			</pre_conf>
+			<pre_conf id="4">
+				<mode>code</mode>
+				<value>MPC=$(ls -d $SOURCES/mpc/mpc-*)</value>
+			</pre_conf>
+			<pre_conf id="5">
+				<mode>code</mode>
+				<value>if [ ! -e $SOURCE/mpc ]; then ln -s $MPC $SOURCE/mpc;fi</value>
+			</pre_conf>
 			<!--
 			<pre_conf id="0">
 				<mode>code</mode>
@@ -42,7 +64,9 @@
 			<priority>1</priority>
 			<name> prepare_gcc_cross</name>
 			<arch>native</arch>
-			<cross>arm_none_eabi</cross>			
+			<cross>arm_none_eabi</cross>	
+			<silent>yes</silent>
+			<threads>8</threads>		
 			</step>
 		</build>	
 	</project>

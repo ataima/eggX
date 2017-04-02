@@ -54,28 +54,29 @@ return 0
 #$1 file
 #$2 remote file.sig
 #$3 project
+#$4 ext sig,asc,gpg
 function check_pgp(){
 local RES=0
 local KEYS=""
-if [ ! -f  $1.sig ]; then 
-	dolog "Download sign file : $1.sig"
-	wget  --show-progress -q "$2.sig" -O "$1.sig"
-	tmp=$( ls -al  "$1.sig"  |  awk  '{print $5}' )
+if [ ! -f  $1.$4 ]; then 
+	dolog "Download sign file : $1.$4"
+	wget  --show-progress -q "$2.$4" -O "$1.$4"
+	tmp=$( ls -al  "$1.$4"  |  awk  '{print $5}' )
 	if [  $tmp -ne 0  ]; then
 		KEYS=$(ls $RKEYS/*.gpg )
 		for i in $KEYS; do
-			gpg --verify --keyring "$i" "$1.sig"
+			gpg --verify --keyring "$i" "$1.$4"
 			RES=$?
 			if [ $RES -eq 2 ]; then 
 				continue
 			fi
 			if [ $RES -eq 1 ]; then 
-				dolog "Gpg sign  fail redo download : $1.sig"
+				dolog "Gpg sign  fail redo download : $1.$4"
 				RES=99
 				break
 			fi
 			if [ $RES -eq 0 ]; then 
-				dolog "Gpg sign  ok : $1.sig"
+				dolog "Gpg sign  ok : $1.$4"
 				RES=1
 				break
 			fi		
@@ -85,11 +86,11 @@ if [ ! -f  $1.sig ]; then
 			chmod 444 $1
 		else
 			print_c "$RED_LIGHT" "   - SIG check source FAIL" "$YELLOW" $3	
-			rm -f  "$1.sig"
+			rm -f  "$1.$4"
 			rm -f "$1"
 		fi
 	else
-		rm -f  "$1.sig"
+		rm -f  "$1.$4"
 	fi
 else
 print_c "$GREEN_LIGHT" "   - SIG check source OK" "$YELLOW" $3	
@@ -173,12 +174,12 @@ return $RES
 #$3 project
 function check_sign(){
 local RES=0
-local ASIGN="sig md5 sha1"
+local ASIGN="sig asc md5 sha1"
 local i=""
 for i in $ASIGN; do
  case $i in
-	"sig")
-	check_pgp $1 $2 $3
+	"sig"|"asc")
+	check_pgp $1 $2 $3 $i  
 	RES=$?	
 	;;
 	"md5")

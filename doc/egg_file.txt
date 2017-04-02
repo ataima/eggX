@@ -30,25 +30,40 @@
 			<pre_conf id="0">				# before configure step can do this pre_conf  xx
 				<mode>script</mode>		# mode : script, source, code 
 				<value>test.sh </value>             # call test.sh
+										# optinal value id="0"
+												value id="1" in the same node	
 			</pre_conf>
 			<pre_conf id="1">
 				<mode>code</mode>			# mode code 
-				<value> echo hello</value>      # execute echo hello
+				<value> echo hello</value>          # execute echo hello
 			</pre_conf>
 			<post_conf id="0">				# after configure step can do this pre_conf  xx
 				<mode>code</mode>
-				<value></value>
+				<value>echo end</value>
 			</post_conf>
 			<post_conf id="1">
-				<mode>code</mode>
-				<value></value>
+				<mode>script</mode>
+				<value>test.sh</value>
 			</post_conf>
+			<pre_build id="0">				# before make step can do this pre_build  xx
+				<mode>script</mode>		# mode : script, source, code 
+				<value>test.sh </value>        # call test.sh
+			</pre_build>
+			<post_build id="0">			# after make step can do this pre_build  xx
+				<mode>script</mode>		# mode : script, source, code 
+				<value>test.sh </value>        # call test.sh
+			</post_build>
+			<pre_install id="0">			# before make install step can do this pre_build  xx
+				<mode>script</mode>		# mode : script, source, code 
+				<value>test.sh </value>        # call test.sh
+			</pre_install>
+			<post_install id="0">			# after make install step can do this pre_build  xx
+				<mode>script</mode>		# mode : script, source, code 
+				<value>test.sh </value>        # call test.sh
+			</post_install>
 			</step>							#next step for this projects: same source code change configure and build path
-			<step id="1">
-			<priority>1</priority>
-			<name> prepare_gcc_cross</name>
-			<arch>native</arch>
-			<cross>arm_none_eabi</cross>			
+			<step id="nn">
+			......
 			</step>
 		</build>
 	</project>
