@@ -1,13 +1,19 @@
 #!/bin/sh 
 
-# include configuration
-source "$(pwd)/conf.sh"
-# include io functions
-source "$(pwd)/functions.sh"
+if [ "$OROOT" == "" ] ; then
+	OROOT="$HOME/eggX"
+fi
 
 SCRIPT_DIR=$OROOT/scripts
 OREPO=$OROOT/repo/.
 RKEYS=$OROOT/Keys
+
+# include configuration
+source "$SCRIPT_DIR/conf.sh"
+# include io functions
+source "$SCRIPT_DIR/functions.sh"
+
+
 
 
 

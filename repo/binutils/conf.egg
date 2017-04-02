@@ -41,7 +41,7 @@
 			-->
 			</step>
 			<step id="1">
-			<priority>1</priority>
+			<priority>0</priority>
 			<name> prepare_gcc_cross</name>
 			<arch>native</arch>
 			<cross>arm_none_eabi</cross>			

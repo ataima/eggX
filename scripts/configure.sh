@@ -1,13 +1,18 @@
 #!/bin/sh 
 
-# include configuration
-source "$(pwd)/conf.sh"
-# include io functions
-source "$(pwd)/functions.sh"
-
+if [ "$OROOT" == "" ] ; then
+	OROOT="$HOME/eggX"
+fi
 
 SCRIPT_DIR=$OROOT/scripts
 OREPO=$OROOT/repo/.
+
+# include configuration
+source "$SCRIPT_DIR/conf.sh"
+# include io functions
+source "$SCRIPT_DIR/functions.sh"
+
+
 
 declare -A MAP    
 
@@ -131,9 +136,9 @@ cd $PWD
 #$6 ARCH
 #$7 CROSS
 function prepare_script_configure(){
-local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $(pwd)/functions.sh | sed -e 's/ /\n/g' | head -n 1)
+local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
 LINE=$((LINE-1))
-head $(pwd)/functions.sh -n $LINE >> $4
+head $SCRIPT_DIR/functions.sh -n $LINE >> $4
 local SRC=""
 if [ -e $SOURCES/$1/$1-*/configure ]; then
 	SRC=$(ls -d $SOURCES/$1/$1-*)
@@ -164,9 +169,9 @@ echo "" >>$4
 #$2 step
 #$3 file to write
 function prepare_script_main_configure(){
-local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $(pwd)/functions.sh | sed -e 's/ /\n/g' | head -n 1)
+local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
 LINE=$((LINE-1))
-head $(pwd)/functions.sh -n $LINE >> $3
+head $SCRIPT_DIR/functions.sh -n $LINE >> $3
 echo "PWD=\$(pwd)">> $3
 echo "print_c \"\$GREEN_LIGHT\" \"$1\" \"\$YELLOW\" \"-  step $2\"" >> $3
 echo "" >> $3

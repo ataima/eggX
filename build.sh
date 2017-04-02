@@ -1,13 +1,18 @@
 #!/bin/sh 
 
-# include configuration
-source "$(pwd)/scripts/conf.sh"
-# include io functions
-source "$(pwd)/scripts/functions.sh"
-
+# where is the project eggX
+export OROOT="$HOME/eggX"
 
 SCRIPT_DIR=$OROOT/scripts
 OREPO=$OROOT/repo/.
+
+# include configuration
+source "$SCRIPT_DIR/conf.sh"
+# include io functions
+source "$SCRIPT_DIR/functions.sh"
+
+
+
 
 declare -A MAP    
 
@@ -34,7 +39,8 @@ function get_max_step(){
 declare -i NUM=0
 declare -i MAX=0
 for V in $ALL_PACKETS; do
-	NUM=xml_count $V "/egg/project/build/step"
+	xml_count $V "/egg/project/build/step"
+	NUM=$?
 	if [ $MAX  -lt $NUM ]; then 
 		MAX=$NUM
 	fi
@@ -49,8 +55,9 @@ local NAME=""
 local TT=""
 local PRJ_NAME=$2
 declare -i IND=0
+set -x
 while [  $IND -lt $MAX_STEP ]; do
-	NAME=$(xml_value $1 "/egg/project/build/step[@id='$2']/name")		
+	NAME=$(xml_value $1 "/egg/project/build/step[@id='$IND']/name")		
 	equs "$NAME"  
 	if [ $? -eq 1 ]; then 
 		error_c "Missing  build name Phase $2" "project : $1"
@@ -59,9 +66,11 @@ while [  $IND -lt $MAX_STEP ]; do
 		if [ "$TT" == "" ]; then 
 			PRJ_NAME="$PRJ_NAME""  ""$NAME"
 		fi
-	fi 			
+	fi 	
+	IND=$((IND+1))	
 done
 echo $PRJ_NAME
+set +x
 }
 
 
@@ -97,33 +106,29 @@ done
 
 
 #$1 force 0=0ff 99 0=on
-#$2.... 1=build id number 2 argv optional
 function build_all_packet(){
-local V=""
-declare -i STEP=0
-local ID=$2
-local PRJS=""
-if [ $1 -eq  0 ]; then
+if [ "$1" == "" ]; then
 	build_all
 else
 	shift 
-	build $@
+	#build $@
 fi
 }
 
 function config_all_step(){
 declare -i NUM=0
 while [ $NUM -lt $MAX_STEP ]; do
-	"$SCRIPT_DIR/configure.sh $NUM $@"
+	bash $SCRIPT_DIR/configure.sh $NUM $@
 	NUM=$((NUM+1))
 done
 }
 
 function usage(){
-	print_c "$BLUE_LIGHT" "usage : ./configure.sh <opt> command  <args>"
+	print_c "$BLUE_LIGHT" "usage : ./build.sh <-D> command  <args to pass subcommand>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
-	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-F or --force : set debug mode"
-	print_c  "$PURPLE" "ARGS" "$GREEN" "args for options"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : download all sources from repo projects"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure all repo projects"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : build and install  all repo projects"
 	exit 1
 }
 
@@ -178,7 +183,10 @@ if [ "$ARGV" != "" ]; then
 fi
 
 #set log to download
-LOGFILE="$LOGFILE""-buld.txt"
+if [ ! -d $ROOT ]; then 
+	mkdir -p $ROOT
+fi
+LOGFILE="$LOGFILE""-do.txt"
 touch "$LOGFILE"
 #sort project in repo to bin search
 for key in $ALL_PACKETS; do MAP[$key]="$key"; done  
@@ -190,7 +198,7 @@ if [ $? -ne 0 ]; then
 fi
 get_max_step
 if [ $SOURCE -ne 0 ]; then	
-	"$SCRIPT_DIR/sources.sh $@"
+	bash $SCRIPT_DIR/sources.sh $@
 else
 	if [ $CONFIGURE -ne 0 ]; then	
 		config_all_step
@@ -203,7 +211,6 @@ else
 	fi
 fi
 }
-
 
 
 main "$@"
