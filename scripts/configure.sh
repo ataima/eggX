@@ -139,7 +139,7 @@ cd $PWD
 #$5 BUILD NAME
 #$6 ARCH
 #$7 CROSS
-function prepare_script_configure(){
+function prepare_script_generic(){
 local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
 LINE=$((LINE-1))
 head $SCRIPT_DIR/functions.sh -n $LINE >> $4
@@ -191,7 +191,7 @@ echo "" >>$3
 #$2 Step
 #$3 title to echo...
 #$4 file to write 
-function end_script_configure(){
+function end_script_generic(){
 echo "#print_c \"\$GREEN_LIGHT\" \"$3\" \"\$YELLOW\" \"  project : $1  -  step \$STEP\"" >> $4
 echo "" >> $4
 echo "" >> $4
@@ -429,6 +429,81 @@ echo "$1 " >> "$CONF_MAIN"
 echo "if [ \$? -ne 0 ]; then exit 1;fi"  >> "$CONF_MAIN"
 }
 
+
+
+#$1 project
+#$2 step id
+#$3 path build
+#$4 build name
+#$5 arch
+#$6 cross
+function add_build_script(){
+local SH_CLEAN="$3/clean.sh"
+local SH_DISTCLEAN="$3/distclean.sh"
+local SH_BUILD="$3/build.sh"
+local SH_INSTALL="$3/install.sh"
+local SH_REBUILD="$3/rebuild.sh"
+rm -f "$SH_CLEAN " "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD" 
+touch "$SH_CLEAN " "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD"
+chmod +x "$SH_CLEAN " "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD"
+# clean 
+prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" "$5" "$6"
+echo " make -C $3 clean " >> "$SH_CLEAN"
+end_script_generic "$1" "$2" "done clean build " "$SH_CLEAN"
+#distclean 
+prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" "$5" "$6"
+echo " make -C $3 clean " >> "$SH_DISTCLEAN"
+end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
+#build
+prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" "$5" "$6"
+#$1 project
+#$2 step id
+#$3 file out
+#$4 path build
+#$5 build name
+add_pre_build "$1" "$2" "$SH_BUILD" "$3" "$4"
+#$1 project
+#$2 build path
+#$3 file out
+#$3 silent 
+#S4 threads
+add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" yes 4
+#$1 project
+#$2 step id
+#$3 file out
+#$4 path build
+#$5 build name
+add_post_build "$1" "$2" "$SH_BUILD" "$3" "$4"
+end_script_generic "$1" "$2" "done  build " "$SH_BUILD"
+#install
+prepare_script_generic "$1" "$2" "Start install " "$SH_INSTALL" "$4" "$5" "$6"
+#$1 project
+#$2 step id
+#$3 file out
+#$4 path build
+#$5 build name
+add_pre_install "$1" "$2" "$SH_INSTALL" "$3" "$4"
+#$1 project
+#$2 build path
+#$3 file out
+#$3 silent 
+add_entry_in_main_install_script "$1" "$3"  "$SH_INSTALL" yes 
+#$1 project
+#$2 step id
+#$3 file out
+#$4 path build
+#$5 build name
+add_post_install "$1" "$2" "$SH_INSTALL" "$3" "$4"
+end_script_generic "$1" "$2" "done  install " "$SH_INSTALL"
+#rebuild
+prepare_script_generic "$1" "$2" "Start Rebuild " "$SH_REBUILD" "$4" "$5" "$6"
+echo "$SH_CLEAN" >> "$SH_REBUILD"
+echo "$SH_DISTCLEAN" >> "$SH_REBUILD"
+echo "$3/bootstrap.sh" >> "$SH_REBUILD"
+echo "$SH_BUILD" >> "$SH_REBUILD"
+echo "$SH_INSTALL" >> "$SH_REBUILD"
+end_script_generic "$1" "$2" "done  rebuild " "$SH_REBUILD"
+}
 
 #$1 project
 #$2 step id
@@ -681,36 +756,38 @@ echo " "  >> $3
 
 #$1 project
 #$2 build path
+#$3 file out
 #$3 silent 
 #S4 threads
 function add_entry_in_main_build_script(){
-	echo "print_c \"\$GREEN_LIGHT\" \"make $1 :\" \"\$YELLOW\" \"\$1\"" >>"$CONF_BUILD"
-if [ "$3" == "yes" ]; then 
-	echo "make --silent -C $2 -j$4 \$1 > /dev/null" >> "$CONF_BUILD"
+	echo "print_c \"\$GREEN_LIGHT\" \"make $1 :\" \"\$YELLOW\" \"\$1\"" >>"$3"
+if [ "$4" == "yes" ]; then 
+	echo "make --silent -C $2 -j$5 \$1 > /dev/null" >> "$3"
 else
-	echo "make -C $2  -j$4 \$1">> "$CONF_BUILD"
+	echo "make -C $2  -j$5 \$1">> "$3"
 fi
-echo "if [ \$? -ne 0 ]; then">> "$CONF_BUILD"
-echo "    error_c \"Error on build \" \"  - project \$1\"" >>"$CONF_BUILD"
-echo "fi"  >> "$CONF_BUILD"
-
+echo "if [ \$? -ne 0 ]; then">> "$3"
+echo "    error_c \"Error on build \" \"  - project \$1\"" >>"$3"
+echo "fi"  >> "$3"
 }
 
 #$1 project
 #$2 build path
-#$3 silent 
+#$3 file out
+#$4 silent 
+
 function add_entry_in_main_install_script()
 {
 #install
-	echo "print_c \"\$GREEN_LIGHT\" \"install $1 :\" \"\$YELLOW\" \"\$1\"" >>"$CONF_BUILD"
-if [ "$3" == "yes" ]; then 
-	echo "make --silent -C $2   install > /dev/null" >> "$CONF_BUILD"
+	echo "print_c \"\$GREEN_LIGHT\" \"install $1 :\" \"\$YELLOW\" \"\$1\"" >>"$3"
+if [ "$4" == "yes" ]; then 
+	echo "make --silent -C $2   install > /dev/null" >> "$3"
 else
-	echo "make -C $2  install">> "$CONF_BUILD"
+	echo "make -C $2  install">> "$3"
 fi
-echo "if [ \$? -ne 0 ]; then">> "$CONF_BUILD"
-echo "    error_c \"Error on install \" \"  - project \$1\"" >>"$CONF_BUILD"
-echo "fi"  >> "$CONF_BUILD"
+echo "if [ \$? -ne 0 ]; then">> "$3"
+echo "    error_c \"Error on install \" \"  - project \$1\"" >>"$3"
+echo "fi"  >> "$3"
 }
 #$1 id 0,1,2,3
 #$2 composite name priority%name%arch%cross:project%silent%threads
@@ -737,7 +814,7 @@ mkdir -p $DEST
 rm -rf $DEST/*
 touch $CONF_RUN
 chmod +x $CONF_RUN
-prepare_script_configure "$BUILD_PROJECT"  "$1" "START CONFIGURE" "$CONF_RUN" "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS"
+prepare_script_generic "$BUILD_PROJECT"  "$1" "START CONFIGURE" "$CONF_RUN" "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS"
 add_pre_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 if [ -e $SOURCES/$BUILD_PROJECT/configure ]; then
 	echo -n "$SOURCES/$BUILD_PROJECT/configure --prefix=$DEST --target=$BUILD_CROSS ">> $CONF_RUN
@@ -762,13 +839,14 @@ else
 fi	
 add_extra_conf "$BUILD_PROJECT" "$1" "$CONF_RUN"  "$BUILD_SILENT"
 add_post_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
-end_script_configure  "$BUILD_PROJECT"  "$1" "END CONFIGURE" "$CONF_RUN"
+end_script_generic  "$BUILD_PROJECT"  "$1" "END CONFIGURE" "$CONF_RUN"
 add_entry_in_main_configure_script "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"
+add_build_script "$BUILD_PROJECT" "$1"  "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS"
 add_pre_build "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
-add_entry_in_main_build_script  "$BUILD_PROJECT" "$BUILD/$BUILD_NAME/$BUILD_PROJECT" "$BUILD_SILENT" "$BUILD_THREADS"
+add_entry_in_main_build_script  "$BUILD_PROJECT" "$BUILD/$BUILD_NAME/$BUILD_PROJECT" "$CONF_BUILD" "$BUILD_SILENT" "$BUILD_THREADS"
 add_post_build "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 add_pre_install "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
-add_entry_in_main_install_script "$BUILD_PROJECT" "$BUILD/$BUILD_NAME/$BUILD_PROJECT" "$BUILD_SILENT"
+add_entry_in_main_install_script "$BUILD_PROJECT" "$BUILD/$BUILD_NAME/$BUILD_PROJECT" "$CONF_BUILD""$BUILD_SILENT"
 add_post_install "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 }
 

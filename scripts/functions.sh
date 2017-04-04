@@ -109,7 +109,7 @@ ARGV=""
 ARGN=0
 local i=""
 for i in "$@" ; do
-	if [ ${i:0:1} == "-" ]; then
+	if [ "${i:0:1}" == "-" ]; then
 		OPT_ARGV+=" $i"
 	else
 		ARGV+=" $i"
