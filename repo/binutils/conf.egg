@@ -19,26 +19,63 @@
 		        <cross>i686-elf</cross>	
 			<silent>yes</silent>
 			<threads>8</threads>
-			<extra_conf id="0">--disable-werror</extra_conf>	
-			<extra_conf id="1">--disable-nls</extra_conf>	
-			<!--
+			<extra_conf id="0">--disable-nls</extra_conf>
+			<extra_conf id="1">--disable-multilib</extra_conf>		
 			<pre_conf id="0">
 				<mode>code</mode>
-				<value> </value>
+				<value> echo pippo</value>
 			</pre_conf>
 			<pre_conf id="1">
 				<mode>code</mode>
-				<value> </value>
+				<value>echo pluto </value>
 			</pre_conf>
 			<post_conf id="0">
 				<mode>code</mode>
-				<value></value>
+				<value>echo paperino</value>
 			</post_conf>
+			
 			<post_conf id="1">
 				<mode>code</mode>
-				<value></value>
+				<value>echo minnie</value>
 			</post_conf>
-			-->
+
+
+			<pre_build id="0">
+				<mode>code</mode>
+				<value> echo pippo</value>
+			</pre_build>
+			<pre_build id="1">
+				<mode>code</mode>
+				<value>echo pluto </value>
+			</pre_build>
+			
+			<post_build id="0">
+				<mode>code</mode>
+				<value>echo paperino</value>
+			</post_build>
+			<post_build id="1">
+				<mode>code</mode>
+				<value>echo minnie</value>
+			</post_build>
+
+			<pre_install id="0">
+				<mode>code</mode>
+				<value> echo pippo</value>
+			</pre_install>
+			<pre_install id="1">
+				<mode>code</mode>
+				<value>echo pluto </value>
+			</pre_install>
+			
+			<post_install id="0">
+				<mode>code</mode>
+				<value>echo paperino</value>
+			</post_install>
+			<post_install id="1">
+				<mode>code</mode>
+				<value>echo minnie</value>
+			</post_install>
+
 			</step>
 			<step id="1">
 			<priority>0</priority>

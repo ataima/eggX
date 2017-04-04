@@ -50,15 +50,15 @@ if [ $? -eq 1 ]; then
 		xml_count $1 "/egg/project/build"
 		NUM=$?
 		if [ $NUM -eq 1 ]; then
-			xml_count $1 "/egg/project/build/step[@id='$2']"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
-				PRI=$(xml_value $1 "/egg/project/build/step[@id='$2']/priority")		
+				PRI=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/priority")		
 				equs "$PRI"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  build priority Phase $2" "project : $1"
 				fi
-				NAME=$(xml_value $1 "/egg/project/build/step[@id='$2']/name")		
+				NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")		
 				equs "$NAME"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  build name Phase $2" "project : $1"
@@ -70,17 +70,17 @@ if [ $? -eq 1 ]; then
 						error_c "Misaligned project name " "  -project $1 : step $2"
 					fi
 				fi
-				ARCH=$(xml_value $1 "/egg/project/build/step[@id='$2']/arch")		
+				ARCH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/arch")		
 				equs "$ARCH"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  build architetture Phase $2" "project : $1"
 				fi		
-				CROSS=$(xml_value $1 "/egg/project/build/step[@id='$2']/cross")
+				CROSS=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/cross")
 				equs "$CROSS"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  build cross platform Phase $2" "project : $1"
 				fi	
-				SILENT=$(xml_value $1 "/egg/project/build/step[@id='$2']/silent")
+				SILENT=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/silent")
 				#optional
 				if [ $SILENT ]; then
 					range_multi "$SILENT" "yes no"
@@ -90,7 +90,7 @@ if [ $? -eq 1 ]; then
 				else
 				SILENT="yes"
 				fi
-				THREADS=$(xml_value $1 "/egg/project/build/step[@id='$2']/threads")
+				THREADS=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/threads")
 				#optional
 				if [ $THREADS ]; then
 					range_multi "$THREADS" "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16"
@@ -142,7 +142,7 @@ cd $PWD
 function prepare_script_generic(){
 local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
 LINE=$((LINE-1))
-head $SCRIPT_DIR/functions.sh -n $LINE >> $4
+head $SCRIPT_DIR/functions.sh -n $LINE >> "$4"
 local SRC=""
 if [ -e $SOURCES/$1/$1-*/configure ]; then
 	SRC=$(ls -d $SOURCES/$1/$1-*)
@@ -157,18 +157,18 @@ else
 		fi
 	fi
 fi
-echo "PROJECT=$1" >> $4
-echo "STEP=$2" >> $4
-echo "SOURCES=$SOURCES" >> $4
-echo "BUILDS=$BUILD/$5">> $4
-echo "SOURCE=$SRC" >> $4
-echo "BUILD=$BUILD/$5/$1" >> $4
-echo "DEPLOY=$IMAGES/$5" >> $4
-echo "export ARCH=$6">> $4
-echo "export CROSS=$7">> $4
+echo "PROJECT=$1" >> "$4"
+echo "STEP=$2" >> "$4"
+echo "SOURCES=$SOURCES" >> "$4"
+echo "BUILDS=$BUILD/$5">> "$4"
+echo "SOURCE=$SRC" >> "$4"
+echo "BUILD=$BUILD/$5/$1" >> "$4"
+echo "DEPLOY=$IMAGES/$5" >> "$4"
+echo "export ARCH=$6">> "$4"
+echo "export CROSS=$7">> "$4"
 echo "#print_c \"\$GREEN_LIGHT\" \"$3\" \"\$YELLOW\" \"project : $1  -  step \$STEP\"" >> $4
-echo "" >> $4
-echo "" >>$4
+echo "" >> "$4"
+echo "" >> "$4"
 }
 
 #$1 string to print
@@ -177,11 +177,11 @@ echo "" >>$4
 function prepare_script_main_configure(){
 local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
 LINE=$((LINE-1))
-head $SCRIPT_DIR/functions.sh -n $LINE >> $3
-echo "PWD=\$(pwd)">> $3
-echo "print_c \"\$GREEN_LIGHT\" \"$1\" \"\$YELLOW\" \"-  step $2\"" >> $3
-echo "" >> $3
-echo "" >>$3
+head $SCRIPT_DIR/functions.sh -n $LINE >> "$3"
+echo "PWD=\$(pwd)">> "$3"
+echo "print_c \"\$GREEN_LIGHT\" \"$1\" \"\$YELLOW\" \"-  step $2\"" >> "$3"
+echo "" >> "$3"
+echo "" >> "$3"
 }
 
 
@@ -226,19 +226,19 @@ check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
 		dolog "Read conf.egg from project $1 : action pre_conf"	
-		xml_count $1 "/egg/project/build/step[@id='$2']"
+		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id='$2']/pre_conf"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/pre_conf"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id='$2']/pre_conf[@id='$i']/value")	
+				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/pre_conf[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre conf id=$i value Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id='$2']/pre_conf[@id='$i']/mode")	
+				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/pre_conf[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre conf id=$i mode Phase $2" "project : $1"
@@ -288,19 +288,19 @@ check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
 		dolog "Read conf.egg from project $1 : action post_conf"	
-		xml_count $1 "/egg/project/build/step[@id='$2']"
+		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id='$2']/post_conf"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/post_conf"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id='$2']/post_conf[@id='$i']/value")	
+				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/post_conf[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post conf id=$i Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id='$2']/pre_conf[@id='$i']/mode")	
+				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/pre_conf[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post conf id=$i mode Phase $2" "project : $1"
@@ -348,14 +348,14 @@ check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
 		dolog "Read conf.egg from project $1 : action extra_conf"	
-		xml_count $1 "/egg/project/build/step[@id='$2']"
+		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id='$2']/extra_conf"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/extra_conf"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id='$2']/extra_conf[@id='$i']")	
+				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/extra_conf[@id=\"$i\"]")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  extra conf id=$i Phase $2" "project : $1"
@@ -387,7 +387,7 @@ echo "fi" >> $3
 #$1 build name
 #$2 step
 function start_main_script_configure(){
-mkdir -p $BUILD/$1
+mkdir -p "$BUILD/$1"
 CONF_MAIN="$BUILD/$1/main_configure.sh"
 CONF_BUILD="$BUILD/$1/main_build.sh"
 rm -f "$CONF_MAIN"
@@ -443,16 +443,24 @@ local SH_DISTCLEAN="$3/distclean.sh"
 local SH_BUILD="$3/build.sh"
 local SH_INSTALL="$3/install.sh"
 local SH_REBUILD="$3/rebuild.sh"
-rm -f "$SH_CLEAN " "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD" 
-touch "$SH_CLEAN " "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD"
-chmod +x "$SH_CLEAN " "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD"
+rm -f "$SH_CLEAN" "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD" 
+touch "$SH_CLEAN" "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD"
+chmod +rwx "$SH_CLEAN" "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD"
 # clean 
 prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" "$5" "$6"
+echo "if [ -f Makefile ]; then " >> "$SH_CLEAN"
 echo " make -C $3 clean " >> "$SH_CLEAN"
+echo "fi" >> "$SH_CLEAN"
+echo "" >> "$SH_CLEAN"
+echo "" >> "$SH_CLEAN"
 end_script_generic "$1" "$2" "done clean build " "$SH_CLEAN"
 #distclean 
 prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" "$5" "$6"
+echo "if [ -f Makefile ]; then " >> "$SH_DISTCLEAN"
 echo " make -C $3 clean " >> "$SH_DISTCLEAN"
+echo "fi" >> "$SH_DISTCLEAN"
+echo "" >> "$SH_DISTCLEAN"
+echo "" >> "$SH_DISTCLEAN"
 end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
 #build
 prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" "$5" "$6"
@@ -467,7 +475,7 @@ add_pre_build "$1" "$2" "$SH_BUILD" "$3" "$4"
 #$3 file out
 #$3 silent 
 #S4 threads
-add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" yes 4
+add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "yes" 4
 #$1 project
 #$2 step id
 #$3 file out
@@ -487,7 +495,7 @@ add_pre_install "$1" "$2" "$SH_INSTALL" "$3" "$4"
 #$2 build path
 #$3 file out
 #$3 silent 
-add_entry_in_main_install_script "$1" "$3"  "$SH_INSTALL" yes 
+add_entry_in_main_install_script "$1" "$3"  "$SH_INSTALL" "yes" 
 #$1 project
 #$2 step id
 #$3 file out
@@ -518,19 +526,19 @@ check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
 		dolog "Read conf.egg from project $1 : action pre_build"	
-		xml_count $1 "/egg/project/build/step[@id='$2']"
+		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id='$2']/pre_build"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/pre_build"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id='$2']/pre_build[@id='$i']/value")	
+				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/pre_build[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre conf id=$i value Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id='$2']/pre_build[@id='$i']/mode")	
+				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/pre_build[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre conf id=$i mode Phase $2" "project : $1"
@@ -539,14 +547,14 @@ if [ $? -eq 1 ]; then
 				case $MODE in 
 					SCRIPTS)
 						rsync -sy "$REPO/$1/$VALUE" "$4/$VALUE"				
-						echo "$4/$VALUE  $1 $2 $5 $4 $REPO/$1 $SOURCES/$1 $IMAGES/$5"  >> $3
+						echo "$4/$VALUE  $1 $2 $5 $4 $REPO/$1 $SOURCES/$1 $IMAGES/$5"  >> "$3"
 					;;		
 					SOURCE)
 						rsync -sy "$REPO/$1/$VALUE" "$4/$VALUE"				
-						echo "source $4/$VALUE  $1 $2 $5 $4 $REPO/$1 $SOURCES/$1 $IMAGES/$5"  >> $3
+						echo "source $4/$VALUE  $1 $2 $5 $4 $REPO/$1 $SOURCES/$1 $IMAGES/$5"  >> "$3"
 					;;		
 					CODE)
-						echo "$VALUE"  >> $3
+						echo "$VALUE"  >> "$3"
 					;;		
 					*)
 					error_c "Unknow  pre build id=$i mode Phase $2" "project : $1"
@@ -555,7 +563,7 @@ if [ $? -eq 1 ]; then
 				i=$((i+1))
 				done 
 			else
-				echo "# no pre build script available for prject : $1" >> $3
+				echo "# no pre build script available for prject : $1" >> "$3"
 			fi
 		fi
 	else
@@ -581,19 +589,19 @@ check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
 		dolog "Read conf.egg from project $1 : action pre_install"	
-		xml_count $1 "/egg/project/build/step[@id='$2']"
+		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id='$2']/pre_install"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/pre_install"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id='$2']/pre_install[@id='$i']/value")	
+				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/pre_install[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre install id=$i value Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id='$2']/pre_install[@id='$i']/mode")	
+				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/pre_install[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre install id=$i mode Phase $2" "project : $1"
@@ -643,19 +651,19 @@ check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
 		dolog "Read conf.egg from project $1 : action post_build"	
-		xml_count $1 "/egg/project/build/step[@id='$2']"
+		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id='$2']/post_build"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/post_build"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id='$2']/post_build[@id='$i']/value")	
+				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/post_build[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post build id=$i Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id='$2']/post_build[@id='$i']/mode")	
+				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/post_build[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post build id=$i mode Phase $2" "project : $1"
@@ -704,19 +712,19 @@ check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
 		dolog "Read conf.egg from project $1 : action post_install"	
-		xml_count $1 "/egg/project/build/step[@id='$2']"
+		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id='$2']/post_install"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/post_install"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id='$2']/post_install[@id='$i']/value")	
+				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/post_install[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post install id=$i Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id='$2']/post_install[@id='$i']/mode")	
+				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/post_install[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post install id=$i mode Phase $2" "project : $1"
@@ -741,7 +749,7 @@ if [ $? -eq 1 ]; then
 				i=$((i+1))
 				done 
 			else
-				echo "# no post insall script available for prject : $1" >> $3
+				echo "# no post install script available for prject : $1" >> $3
 			fi
 		fi
 	else
@@ -817,20 +825,20 @@ chmod +x $CONF_RUN
 prepare_script_generic "$BUILD_PROJECT"  "$1" "START CONFIGURE" "$CONF_RUN" "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS"
 add_pre_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 if [ -e $SOURCES/$BUILD_PROJECT/configure ]; then
-	echo -n "$SOURCES/$BUILD_PROJECT/configure --prefix=$DEST --target=$BUILD_CROSS ">> $CONF_RUN
+	echo -n "$SOURCES/$BUILD_PROJECT/configure  --prefix=$DEST --target=$BUILD_CROSS ">> $CONF_RUN
 else
 	if [ -e $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*/configure ]; then
 		AA=$(ls $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*/configure)
-		echo -n "$AA --prefix=$DEST --target=$BUILD_CROSS ">> $CONF_RUN
+		echo -n "$AA  --prefix=$DEST --target=$BUILD_CROSS ">> $CONF_RUN
 	else
 		if [ -e $SOURCES/$BUILD_PROJECT/configure.ac ]; then
 			call_autoconf $BUILD_PROJECT $SOURCES/$BUILD_PROJECT
-			echo -n "$SOURCES/$BUILD_PROJECT/configure --prefix=$DEST --target=$BUILD_CROSS ">> $CONF_RUN
+			echo -n "$SOURCES/$BUILD_PROJECT/configure  --prefix=$DEST --target=$BUILD_CROSS ">> $CONF_RUN
 		else
 			if [ -e $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*/configure.ac ]; then
 				call_autoconf $BUILD_PROJECT $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*
 				AA=$(ls $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*/configure)
-				echo -n "$AA --prefix=$DEST --target=$BUILD_CROSS">> $CONF_RUN
+				echo -n "$AA  --prefix=$DEST --target=$BUILD_CROSS">> $CONF_RUN
 			else
 			error_c "Cannot locate configure script" "  - project $BUILD_PROJECT"
 			fi
@@ -846,8 +854,9 @@ add_pre_build "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PRO
 add_entry_in_main_build_script  "$BUILD_PROJECT" "$BUILD/$BUILD_NAME/$BUILD_PROJECT" "$CONF_BUILD" "$BUILD_SILENT" "$BUILD_THREADS"
 add_post_build "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 add_pre_install "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
-add_entry_in_main_install_script "$BUILD_PROJECT" "$BUILD/$BUILD_NAME/$BUILD_PROJECT" "$CONF_BUILD""$BUILD_SILENT"
+add_entry_in_main_install_script "$BUILD_PROJECT" "$BUILD/$BUILD_NAME/$BUILD_PROJECT" "$CONF_BUILD"  "$BUILD_SILENT"
 add_post_install "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
+sync
 }
 
 
