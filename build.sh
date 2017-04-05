@@ -103,13 +103,47 @@ for V in $PRJ_NAMES; do
 done
 }
 
+#none
+function compile_all(){
+#trovo nomi build per ogni progetto
+local PRJ_NAMES=""
+for V in $ALL_PACKETS; do
+	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
+done
 
+local PWD=$(pwd)
+for V in $PRJ_NAMES; do
+	cd "$BUILD/$V"
+	$BUILD/$V/main_build.sh all
+	if [ $? -ne 0 ] ; then
+		exit -1;
+	fi
+done
+}
+
+#none
+function install_all(){
+#trovo nomi build per ogni progetto
+local PRJ_NAMES=""
+for V in $ALL_PACKETS; do
+	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
+done
+
+local PWD=$(pwd)
+for V in $PRJ_NAMES; do
+	cd "$BUILD/$V"
+	$BUILD/$V/main_build.sh install
+	if [ $? -ne 0 ] ; then
+		exit -1;
+	fi
+done
+}
 
 #$@ from argv build.sh
 function build_single(){
 #trovo nomi build per ogni progetto
 local PRJ_NAMES=""
-for V in $ALL_PACKETS; do
+for V in $@; do
 	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
 done
 
@@ -122,11 +156,11 @@ for V in $PRJ_NAMES; do
 		if [ $? -ne 0 ] ; then
 			exit -1;
 		fi
-		make all
+		$BUILD/$V/$I/build.sh
 		if [ $? -ne 0 ] ; then
 			exit -1;
 		fi
-		make install
+		$BUILD/$V/$I/install.sh
 		if [ $? -ne 0 ] ; then
 			exit -1;
 		fi
@@ -134,7 +168,41 @@ for V in $PRJ_NAMES; do
 done
 }
 
+#$@ from argv build.sh
+function compile_single(){
+#trovo nomi build per ogni progetto
+local PRJ_NAMES=""
+for V in $@; do
+	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
+done
 
+local PWD=$(pwd)
+for V in $PRJ_NAMES; do
+	set -x
+	for I in $@; do
+		cd "$BUILD/$V/$I"
+		$BUILD/$V/$I/build.sh
+	done 
+done
+}
+
+#$@ from argv build.sh
+function install_single(){
+#trovo nomi build per ogni progetto
+local PRJ_NAMES=""
+for V in $@; do
+	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
+done
+
+local PWD=$(pwd)
+for V in $PRJ_NAMES; do
+	set -x
+	for I in $@; do
+		cd "$BUILD/$V/$I"
+		$BUILD/$V/$I/install.sh
+	done 
+done
+}
 
 #$ARGV
 function build_all_packet(){
@@ -145,6 +213,25 @@ else
 fi
 }
 
+#$ARGV
+function compile_all_packet(){
+if [ "$1" == "" ]; then
+	compile_all
+else
+	compile_single $@
+fi
+}
+
+#$ARGV
+function install_all_packet(){
+if [ "$1" == "" ]; then
+	install_all
+else
+	isntall_single $@
+fi
+}
+
+#$ARGV TODO
 function config_all_step(){
 declare -i NUM=0
 while [ $NUM -lt $MAX_STEP ]; do
@@ -158,8 +245,11 @@ function usage(){
 	print_c "$BLUE_LIGHT" "usage : ./build.sh <-D> command  <args to pass subcommand>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : download all sources from repo projects"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure all repo projects"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : build and install  all repo projects"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure all repo projects or specified projects in argv"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure+build+install    all repo projects or specified projects in argv"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "build :   build all repo projects or specified projects in argv"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "install : install   all repo projects or specified projects in argv"
+	
 	exit 1
 }
 
@@ -169,55 +259,50 @@ local SOURCE=0
 local CONFIGURE=0
 local MAKE=0
 local DO=0
-input_arg "$@"
-if [ "$OPT_ARGV" != "" ]; then
-	for i in $OPT_ARGV; do
-	print_c "$GREEN_LIGHT" "Check option " "$YELLOW"  "$i"
+local INSTALL=0
+
+for i in $@; do
+print_c "$GREEN_LIGHT" "Check args " "$YELLOW"  "$i"
+ARGV=$(echo $ARGV | sed -e "s/$i//g")
+case $i in 
 	case $i in 
-		-D|--debug)
-		export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-		set -x
-		dolog "Set Debug ON"
-		shift
-		;;		
-		*)
-		usage
-		error_c "Command line" " unknow option $i"
-		;;
-	esac
-	done
-fi
-
-
-
-if [ "$ARGV" != "" ]; then
-	for i in $ARGV; do
-	print_c "$GREEN_LIGHT" "Check args " "$YELLOW"  "$i"
-	ARGV=$(echo $ARGV | sed -e "s/$i//g")
-	case $i in 
-		source)
-		SOURCE=1
-		break
-		;;	
-		configure)
-		CONFIGURE=1
-		break
-		;;	
-		compile)
-		MAKE=1
-		break
-		;;	
-		do)
-		DO=1		
-		break
-		;;	
-		*)
-		usage
-		error_c "Command line" " unknow option $i"
-		;;
-	esac
-	done
-fi
+	-D|--debug)
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	set -x
+	dolog "Set Debug ON"
+	shift
+	;;	
+	source)
+	SOURCE=1
+	shift
+	break
+	;;	
+	configure)
+	CONFIGURE=1
+	shift
+	break
+	;;	
+	build)
+	MAKE=1
+	shift
+	break
+	;;	
+	do)
+	DO=1		
+	shift
+	break
+	;;	
+	install)
+	INSTALL=1		
+	shift
+	break
+	;;	
+	*)
+	usage
+	error_c "Command line" " unknow option $i"
+	;;
+esac
+done
 
 #set log to download
 if [ ! -d $ROOT ]; then 
@@ -236,18 +321,22 @@ fi
 
 get_max_step
 if [ $SOURCE -ne 0 ]; then	
-	$SCRIPT_DIR/sources.sh "$ARGV"
+	$SCRIPT_DIR/sources.sh "$@"
 else
 	if [ $CONFIGURE -ne 0 ]; then	
-		config_all_step
+		config_all_step "$@"
 	else
 		if [ $DO -ne 0 ]; then	
-			build_all_packet  "$ARGV"
+			build_all_packet  "$@"
 		else
 			if [ $MAKE -ne 0 ]; then	
-				build_all_packet  "$ARGV"
+				build_all_packet  "$@"
 			else
-				usage
+				if [ $INSTALL -ne 0 ]; then	
+					install_all_packet  "$@"
+				else
+					usage
+				fi
 			fi
 		fi
 	fi
