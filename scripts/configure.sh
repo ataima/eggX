@@ -824,21 +824,27 @@ touch $CONF_RUN
 chmod +x $CONF_RUN
 prepare_script_generic "$BUILD_PROJECT"  "$1" "START CONFIGURE" "$CONF_RUN" "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS"
 add_pre_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
+BTARGET=$(echo $BUILD_CROSS  | tr '[:lower:]' '[:upper:]')
+if [ "$BTARGET" == "NATIVE" ]; then
+	BTARGET=""
+else
+	BTARGET="--target=$BUILD_CROSS"
+fi
 if [ -e $SOURCES/$BUILD_PROJECT/configure ]; then
-	echo -n "$SOURCES/$BUILD_PROJECT/configure  --prefix=$DEST --target=$BUILD_CROSS ">> $CONF_RUN
+	echo -n "$SOURCES/$BUILD_PROJECT/configure  --prefix=$DEST $BTARGET ">> $CONF_RUN
 else
 	if [ -e $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*/configure ]; then
 		AA=$(ls $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*/configure)
-		echo -n "$AA  --prefix=$DEST --target=$BUILD_CROSS ">> $CONF_RUN
+		echo -n "$AA  --prefix=$DEST $BTARGET ">> $CONF_RUN
 	else
 		if [ -e $SOURCES/$BUILD_PROJECT/configure.ac ]; then
 			call_autoconf $BUILD_PROJECT $SOURCES/$BUILD_PROJECT
-			echo -n "$SOURCES/$BUILD_PROJECT/configure  --prefix=$DEST --target=$BUILD_CROSS ">> $CONF_RUN
+			echo -n "$SOURCES/$BUILD_PROJECT/configure  --prefix=$DEST $BTARGET ">> $CONF_RUN
 		else
 			if [ -e $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*/configure.ac ]; then
 				call_autoconf $BUILD_PROJECT $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*
 				AA=$(ls $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*/configure)
-				echo -n "$AA  --prefix=$DEST --target=$BUILD_CROSS">> $CONF_RUN
+				echo -n "$AA  --prefix=$DEST $BTARGET">> $CONF_RUN
 			else
 			error_c "Cannot locate configure script" "  - project $BUILD_PROJECT"
 			fi

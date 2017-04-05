@@ -41,24 +41,15 @@
 				<mode>code</mode>
 				<value>if [ ! -e $SOURCE/mpc ]; then ln -s $MPC $SOURCE/mpc;fi</value>
 			</pre_conf>
-			<!--
-			<pre_conf id="0">
-				<mode>code</mode>
-				<value> </value>
-			</pre_conf>
-			<pre_conf id="1">
-				<mode>code</mode>
-				<value> </value>
-			</pre_conf>
-			<post_conf id="0">
-				<mode>code</mode>
-				<value></value>
-			</post_conf>
-			<post_conf id="1">
-				<mode>code</mode>
-				<value></value>
-			</post_conf>
-			-->
+				<pre_conf id="6">
+					<mode>code</mode>
+					<value>cp -a $SOURCE/* $BUILD/.</value>
+				</pre_conf>
+			<extra_conf id="0">--enable-languages=c,c++</extra_conf>
+			<extra_conf id="1">--without-headers</extra_conf>
+			<extra_conf id="2">--disable-nls</extra_conf>
+
+
 			</step>
 			<step id="1">
 			<priority>1</priority>

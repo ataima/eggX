@@ -265,7 +265,6 @@ for i in $@; do
 print_c "$GREEN_LIGHT" "Check args " "$YELLOW"  "$i"
 ARGV=$(echo $ARGV | sed -e "s/$i//g")
 case $i in 
-	case $i in 
 	-D|--debug)
 	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 	set -x
