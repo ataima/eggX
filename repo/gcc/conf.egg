@@ -11,7 +11,7 @@
 		</remote>	
 		<build>
 			<step id="0">
-			<priority>1</priority>
+			<priority>2</priority>
 			<name> prepare_gcc_native</name>
 			<arch>x86_64</arch>
 		        <cross>i686-elf</cross>	

@@ -13,21 +13,25 @@
 		</remote>	
 		<build>
 			<step id="0">
-			<priority>0</priority>
+			<priority>1</priority>
 			<name> prepare_gcc_native</name>
 			<arch>x86_64</arch>
 		        <cross>i686-elf</cross>	
-			<silent>yes</silent>
-			<threads>8</threads>
+			<silent>no</silent>
+			<threads>1</threads>
 			<extra_conf id="0">--disable-nls</extra_conf>
 			<extra_conf id="1">--disable-multilib</extra_conf>		
 			<pre_conf id="0">
 				<mode>code</mode>
-				<value> echo pippo</value>
+				<value> cd $SOURCE</value>
 			</pre_conf>
 			<pre_conf id="1">
 				<mode>code</mode>
-				<value>echo pluto </value>
+				<value>autoconf </value>
+			</pre_conf>
+			<pre_conf id="2">
+				<mode>code</mode>
+				<value>cd $PWD </value>
 			</pre_conf>
 			<post_conf id="0">
 				<mode>code</mode>
@@ -75,7 +79,10 @@
 				<mode>code</mode>
 				<value>echo minnie</value>
 			</post_install>
-
+						<!--
+			<path_remove></path_remove>
+			<path_add id></path_add>
+					-->
 			</step>
 			<step id="1">
 			<priority>0</priority>

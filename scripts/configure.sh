@@ -12,7 +12,9 @@ source "$SCRIPT_DIR/conf.sh"
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
 
-
+#initial value PATH
+RESPATH="/usr/bin:/sbin:/bin"
+MYPATH=""
 
 declare -A MAP    
 
@@ -21,8 +23,6 @@ declare -A SORTREQ
 
 ALL_PACKETS=$(ls $OROOT/repo)
 
-CONF_MAIN=""
-CONF_BUILD=""
 # test if exist project <name> from packets list...
 # $1 packet name
 function check_project(){
@@ -32,6 +32,35 @@ if [[ -n "${MAP[$1]}" ]]; then
 fi
 return 0
 }
+
+
+#$1 build name
+#$2 dir
+function remove_path(){
+local V=$(echo $MYPATH | sed -e 's/:/  /g')
+local OLD=$IMAGES/$1/$2
+MYPATH=""
+for I in $V; do
+	if [ "$I" != "$OLD" ]; then
+		MYPATH="$MYPATH:$I" 
+	fi
+done
+}
+
+
+#$1 build name
+#$2 dir
+function add_path(){
+local NEW=$IMAGES/$1/$2
+local V=$(echo $MYPATH | sed -e 's/:/  /g')
+for I in $V; do
+	if [ "$I" == "$NEW" ]; then
+		return 
+	fi
+done
+MYPATH="$NEW:"$MYPATH
+}
+
 
 #$1 project
 #$2 build phase number 0,1,2.....
@@ -43,6 +72,7 @@ local CROSS=""
 local SILENT=""
 local INDEX=""
 local NUM=0
+local TPATH=""
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
@@ -114,7 +144,61 @@ fi
 
 
 
-
+#$1 project
+#$2 build phase number 0,1,2.....
+function manage_path(){
+local TPATH=""
+local NUM=0
+local ID=0
+local NAME=""
+check_project $1
+if [ $? -eq 1 ]; then
+	if [ -f $REPO/$1/conf.egg ]; then
+		dolog "Read conf.egg from project $1 : action PATH manage"	
+		xml_count $1 "/egg/project/build"
+		NUM=$?
+		if [ $NUM -eq 1 ]; then
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
+			NUM=$?
+			if [ $NUM -ne 0 ]; then	
+				NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")		
+				equs "$NAME"  
+				if [ $? -eq 1 ]; then 
+					error_c "Missing  build name Phase $2" "project : $1"
+				fi 			
+				$(xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path_remove")
+				NUM=$?
+				if [ $NUM -ne 0 ]; then 	
+					while [ $ID -lt $NUM ]; do
+					TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path_remove[@id=\"$ID\"]")
+					if [ $TPATH != "" ]; then
+						remove_path $NAME $TPATH
+					fi
+					ID=$((ID+1))
+					done 
+				fi
+				$(xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path_add")
+				NUM=$?
+				if [ $NUM -ne 0 ]; then 	
+				if [ $NUM -ne 0 ]; then 	
+					while [ $ID -lt $NUM ]; do
+					TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path_add[@id=\"$ID\"]")
+					if [ $TPATH != "" ]; then
+						add_path  $NAME $TPATH
+					fi
+					ID=$((ID+1))
+					done 
+				fi
+				fi
+			fi	
+		fi
+	else
+		error_c "Missing conf.egg file " "project : $1"
+	fi
+else
+	error_c "Missing project in $REPO " "project : $1"
+fi
+}
 
 
 #$1 projects
@@ -131,6 +215,14 @@ cd $PWD
 }
 
 
+
+#$1 project
+#$2 step id
+#$3 fileout
+function generate_setenv(){
+	echo "#!/bin/sh" > $3
+	echo "export PATH=$MYPATH" >> $3
+}
 
 #$1 projects
 #$2 Step
@@ -198,20 +290,6 @@ echo "" >> $4
 }
 
 
-
-
-#$1 title to echo...
-#$2 Step
-
-function end_script_main_configure(){
-echo "cd \$PWD" >>"$CONF_MAIN"
-echo "print_c \"\$GREEN_LIGHT\" \"END MAIN CONFIGURE\" \"\$YELLOW\" \"-  step $2\"" >>  "$CONF_MAIN"
-echo "" >> "$CONF_MAIN"
-echo "" >> "$CONF_MAIN"
-echo "print_c \"\$GREEN_LIGHT\" \"END MAIN BUILD\" \"\$YELLOW\" \"-  step $2\"" >>  "$CONF_BUILD"
-echo "" >> "$CONF_BUILD"
-echo "" >> "$CONF_BUILD"
-}
 
 #$1 project
 #$2 step id
@@ -384,50 +462,6 @@ echo "    print_c \"\$GREEN_LIGHT\" \"Configure      \" \"\$YELLOW\" \"project :
 echo "fi" >> $3 
 }
 
-#$1 build name
-#$2 step
-function start_main_script_configure(){
-mkdir -p "$BUILD/$1"
-CONF_MAIN="$BUILD/$1/main_configure.sh"
-CONF_BUILD="$BUILD/$1/main_build.sh"
-rm -f "$CONF_MAIN"
-touch "$CONF_MAIN"
-rm -f "$CONF_BUILD"
-touch "$CONF_BUILD"
-prepare_script_main_configure  "START MAIN CONFIGURE" "$2" "$CONF_MAIN" 
-chmod +x "$CONF_MAIN"
-prepare_script_main_configure  "START MAIN BUILD" "$2" "$CONF_BUILD" 
-chmod +x "$CONF_BUILD"
-local SRC=""
-if [ -e $SOURCES/$1/$1-*/configure ]; then
-	SRC=$(ls -d $SOURCES/$1/$1-*)
-else
-	if [ -e $SOURCES/$1/configure.ac ]; then
-		SRC=$SOURCES/$1
-	else
-		if [ -e $SOURCES/$1/$1-*/configure.ac ]; then
-			SRC=$(ls -d $SOURCES/$1/$1-*)
-		else
-			SRC=$SOURCES/$1
-		fi
-	fi
-fi
-echo "SOURCES=$SOURCES" >> "$CONF_BUILD"
-echo "BUILDS=$BUILD/$1">>"$CONF_BUILD"
-echo "SOURCE=$SRC" >>"$CONF_BUILD"
-echo "BUILD=$BUILD/$1" >> "$CONF_BUILD"
-echo "DEPLOY=$IMAGES/$1" >> "$CONF_BUILD"
-echo "" >>  "$CONF_BUILD"
-echo "" >> "$CONF_BUILD"
-}
-
-#$1 script to go
-#$2 path of script
-function add_entry_in_main_configure_script(){
-echo "cd $2" >>"$CONF_MAIN"
-echo "$1 " >> "$CONF_MAIN"
-echo "if [ \$? -ne 0 ]; then exit 1;fi"  >> "$CONF_MAIN"
-}
 
 
 
@@ -438,6 +472,7 @@ echo "if [ \$? -ne 0 ]; then exit 1;fi"  >> "$CONF_MAIN"
 #$5 arch
 #$6 cross
 function add_build_script(){
+generate_setenv "$1" "$2" "$3/setenv.sh"
 local SH_CLEAN="$3/clean.sh"
 local SH_DISTCLEAN="$3/distclean.sh"
 local SH_BUILD="$3/build.sh"
@@ -821,7 +856,8 @@ rm -rf $BUILD/$BUILD_NAME/$BUILD_PROJECT/*
 mkdir -p $DEST
 rm -rf $DEST/*
 touch $CONF_RUN
-chmod +x $CONF_RUN
+chmod +x $CONF_RUN 
+manage_path  $BUILD_PROJECT  $1
 prepare_script_generic "$BUILD_PROJECT"  "$1" "START CONFIGURE" "$CONF_RUN" "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS"
 add_pre_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 if [ -e $SOURCES/$BUILD_PROJECT/configure ]; then
@@ -848,14 +884,7 @@ fi
 add_extra_conf "$BUILD_PROJECT" "$1" "$CONF_RUN"  "$BUILD_SILENT"
 add_post_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 end_script_generic  "$BUILD_PROJECT"  "$1" "END CONFIGURE" "$CONF_RUN"
-add_entry_in_main_configure_script "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"
 add_build_script "$BUILD_PROJECT" "$1"  "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS"
-add_pre_build "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
-add_entry_in_main_build_script  "$BUILD_PROJECT" "$BUILD/$BUILD_NAME/$BUILD_PROJECT" "$CONF_BUILD" "$BUILD_SILENT" "$BUILD_THREADS"
-add_post_build "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
-add_pre_install "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
-add_entry_in_main_install_script "$BUILD_PROJECT" "$BUILD/$BUILD_NAME/$BUILD_PROJECT" "$CONF_BUILD"  "$BUILD_SILENT"
-add_post_install "$BUILD_PROJECT" "$1" "$CONF_BUILD" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 sync
 }
 
@@ -883,12 +912,11 @@ fi
 for V in $PRJS; do
 	insert_packet $V $ID 
 done
-start_main_script_configure "$BUILD_NAME" "$ID"
 SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
+MYPATH=$RESPATH
 for V in $SORTREQ; do
 	configure_packet  $ID $V
 done
-end_script_main_configure  "$BUILD_NAME" "$ID"
 }
 
 

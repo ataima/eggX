@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>autoconf</name>
+		<download>check</download>		
+		<remote>
+			<method>wget</method>
+			<url>ftp://ftp.gnu.org/gnu/autoconf</url>
+			<file>autoconf-2.64.tar.bz2</file>
+		</remote>	
+		<build>
+			<step id="0">
+				<priority>0</priority>
+				<name> prepare_gcc_native</name>
+				<arch>x86_64</arch>
+				 <cross>i686-elf</cross>	
+				<silent>yes</silent>
+				<threads>1</threads>			
+				<path_add id="0">bin</path_add>
+				<path_add id="1">sbin</path_add>
+			</step>
+			<step id="1">
+			<priority>0</priority>
+			<name> prepare_gcc_cross</name>
+			<arch>native</arch>
+			<cross>arm_none_eabi</cross>			
+			</step>
+		</build>
+	</project>
+</egg>
