@@ -5,7 +5,7 @@ source "$(pwd)/functions.sh"
 
 
 function main(){
-local ALL_PACKET="rsync wget svn git apt apt-get xmlstarlet make gcc libtool autoconf glibc-static glibc-devel glibc-static libstdc++ libstdc++-devel"
+local ALL_PACKET="rsync wget svn git apt apt-get xmlstarlet make gcc libtool autoconf glibc-static glibc-devel glibc-static libstdc++ libstdc++-devel autogen"
 
 for i in $ALL_PACKET
 do

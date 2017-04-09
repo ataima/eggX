@@ -16,11 +16,35 @@
 				<arch>x86_64</arch>
 				<cross>native</cross>	
 				<silent>yes</silent>
-				<threads>8</threads>								
+				<threads>8</threads>	
+				<pre_conf id="0">
+					<mode>code</mode>		
+					<value>export CC=$DEPLOY/bin/gcc</value>
+				</pre_conf>
+				<pre_conf id="1">
+					<mode>code</mode>		
+					<value>export CXX=$DEPLOY/bin/g++</value>
+				</pre_conf>
+				<pre_conf id="2">
+					<mode>code</mode>		
+					<value>export LDFLAGS=$DEPLOY/lib</value>
+				</pre_conf>
+				<pre_build id="0">
+					<mode>code</mode>		
+					<value>export CC=$DEPLOY/bin/gcc</value>
+				</pre_build>
+				<pre_build id="1">
+					<mode>code</mode>		
+					<value>export CXX=$DEPLOY/bin/g++</value>
+				</pre_build>
+				<pre_build id="2">
+					<mode>code</mode>		
+					<value>export LDFLAGS=$DEPLOY/lib</value>
+				</pre_build>
 				<extra_conf id="0">--enable-kernel=2.6.32</extra_conf>
 				<extra_conf id="1">libc_cv_forced_unwind=yes</extra_conf>	
 				<extra_conf id="2">libc_cv_c_cleanup=yes</extra_conf>
-				<extra_conf id="3">--with-sysroot=$DEPLOY</extra_conf>				
+				<extra_conf id="3">--with-sysroot=$DEPLOYS</extra_conf>				
 			</step>
 		</build>	
 	</project>

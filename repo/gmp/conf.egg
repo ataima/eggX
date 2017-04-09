@@ -20,7 +20,7 @@
 				<extra_conf id="0">--disable-shared</extra_conf>
 				<extra_conf id="1">--enable-static</extra_conf>
 				<extra_conf id="2">--enable-cxx</extra_conf>
-				<extra_conf id="3">--with-sysroot=$DEPLOY</extra_conf>
+				<extra_conf id="3">--with-sysroot=$DEPLOYS</extra_conf>
 			</step>
 		</build>	
 	</project>

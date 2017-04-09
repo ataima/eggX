@@ -19,7 +19,7 @@ declare -A MAP
 declare -A BSEQ    
 declare -A SORTREQ
 
-ALL_PACKETS=$(ls $OROOT/repo)
+ALL_PACKETS=$(ls $OROOT/repo  | sed 's/conf.egg//g')
 
 declare -i MAX_STEP=0
 
@@ -352,6 +352,9 @@ declare -i NUM=0
 while [ $NUM -lt $MAX_STEP ]; do
 	print_c "$GREEN_LIGHT" "Step   :   " "$YELLOW" "$NUM" 
 	$SCRIPT_DIR/configure.sh $NUM $@
+	if [ $? -ne 0 ]; then 
+		exit 1
+	fi
 	NUM=$((NUM+1))
 done
 }
@@ -443,6 +446,9 @@ if [ $REDOALL -ne 0 ]; then
 	rm -rf $IMAGES
 	rm -rf $BUILD	
 	$SCRIPT_DIR/sources.sh
+	if [ $? -ne 0 ]; then 
+		exit 1
+	fi
 	config_all_step
 	build_all_packet
 else

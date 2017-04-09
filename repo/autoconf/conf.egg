@@ -18,8 +18,8 @@
 				<silent>yes</silent>
 				<threads>1</threads>	
 				<path_post>
-					<add id="0" >bin</add >
-					<add id="1" >sbin</add >
+					<add id="0" >/usr/bin</add >
+					<add id="1" >/usr/sbin</add >
 				</path_post> 	
 			</step>
 		</build>

@@ -17,10 +17,6 @@
 				<cross>native</cross>	
 				<silent>yes</silent>
 				<threads>8</threads>	
-				<pre_build id="0">
-					<mode>code</mode>		
-					<value>if [  -e /usr/include/stdc-predef.h ]; then cp /usr/include/stdc-predef.h $DEPLOY/include/.; else touch $DEPLOY/include/stdc-predef.h; fi</value>
-				</pre_build>
 				<extra_conf id="0">--enable-languages=c,c++</extra_conf>
 				<extra_conf id="1">--without-headers</extra_conf>
 				<extra_conf id="2">--disable-nls</extra_conf>							
@@ -28,10 +24,10 @@
 				<extra_conf id="4">--with-gmp=$DEPLOY</extra_conf>	
 				<extra_conf id="5">--with-mpc=$DEPLOY</extra_conf>	
 				<extra_conf id="6">--with-mpfr=$DEPLOY</extra_conf>	
-				<extra_conf id="7">--with-sysroot=$DEPLOY</extra_conf>				
+				<extra_conf id="7">--with-sysroot=$DEPLOYS</extra_conf>				
 				<extra_conf id="8">--with-newlib</extra_conf>	
 				<extra_conf id="9">--with-local-prefix=$DEPLOY</extra_conf>
-				<extra_conf id="10">--with-native-system-header-dir=$DEPLOY/include</extra_conf>	
+				<extra_conf id="10">--disable-warnings</extra_conf>
 				<extra_conf id="11">--disable-shared</extra_conf>
 				<extra_conf id="12">--disable-multilib</extra_conf>
 				<extra_conf id="13">--disable-bootstrap</extra_conf>	
@@ -47,10 +43,20 @@
 				<extra_conf id="23">--disable-libssp</extra_conf>
 				<extra_conf id="24">--disable-libvtv</extra_conf>
 				<extra_conf id="25">--disable-libstdcxx</extra_conf>
+				
 				<post_build id="0">
 					<mode>code</mode>		
 					<value>make -C $BUILD check test </value>
 				</post_build>
+				<post_build id="1">
+					<mode>code</mode>		
+					<value>echo $PATH; which gcc</value>
+				</post_build>
+				<post_build id="2">
+					<mode>code</mode>		
+					<value>gcc -fsyntax-only -xc -v -H </value>
+				</post_build>
+				
 			</step>
 		</build>	
 	</project>

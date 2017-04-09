@@ -19,7 +19,7 @@ source "$SCRIPT_DIR/functions.sh"
 
 declare -A MAP    
 
-ALL_PACKETS=$(ls $OROOT/repo )
+ALL_PACKETS=$(ls $OROOT/repo  | sed 's/conf.egg//g')
 
 # if repo non exist create
 function check_repository(){

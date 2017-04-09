@@ -19,9 +19,9 @@
 			<threads>8</threads>
 			<extra_conf id="0">--disable-nls</extra_conf>
 			<extra_conf id="1">--disable-multilib</extra_conf>	
-			<extra_conf id="2">--with-sysroot=$DEPLOY</extra_conf>			
+			<extra_conf id="2">--with-sysroot=$DEPLOYS</extra_conf>			
 			<path_post>
-					<add id="0" >x86_64-pc-linux-gnu</add >
+				<add id="0" >usr/x86_64-pc-linux-gnu</add >
 			</path_post>
 			</step>
 		</build>

@@ -21,7 +21,7 @@ declare -A MAP
 declare -A BSEQ    
 declare -A SORTREQ
 
-ALL_PACKETS=$(ls $OROOT/repo)
+ALL_PACKETS=$(ls $OROOT/repo  | sed 's/conf.egg//g')
 
 # test if exist project <name> from packets list...
 # $1 packet name
@@ -285,12 +285,20 @@ function generate_setenv(){
 		fi
 	fi
 	echo "#!/bin/sh" > "$3"
+	echo "#unset all ..." >> "$3"
+	ENV=$(env | sed 's/=.*//' | tr '\n' ' ')
+	echo "ENV=\"$ENV\"" >> "$3"		
+	echo "for i in \$ENV ; do ">> "$3"
+	echo " unset \$i" >> "$3"
+	echo "done" >> "$3"
+	echo "#done unset all" >> "$3"
 	echo "export PATH=$MYPATH" >> "$3"
 	echo "export PROJECT=$1" >> "$3"
 	echo "export SOURCES=$SOURCES" >> "$3"
 	echo "export BUILDS=$BUILD/$4">> "$3"
 	echo "export SOURCE=$SRC" >> "$3"
 	echo "export BUILD=$BUILD/$4/$1/build" >> "$3"
+	echo "export DEPLOYS=$IMAGES/$4" >> "$3"
 	echo "export DEPLOY=$7" >> "$3"
 	echo "export ARCH=$5">> "$3"
 	echo "export CROSS=$6">> "$3"
