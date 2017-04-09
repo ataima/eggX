@@ -364,7 +364,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure+build+install    all repo projects or specified projects in argv"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "build :   build all repo projects or specified projects in argv"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "install : install   all repo projects or specified projects in argv"
-	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : clear all build and deploy aout and redo source + configure+do"
 	exit 1
 }
 
@@ -375,7 +375,7 @@ local CONFIGURE=0
 local MAKE=0
 local DO=0
 local INSTALL=0
-
+local REDOALL=0
 for i in $@; do
 case $i in 
 	-D|--debug)
@@ -409,6 +409,11 @@ case $i in
 	shift
 	break
 	;;	
+	redoall)
+	REDOALL=1		
+	shift
+	break
+	;;	
 	*)
 	usage
 	error_c "Command line" " unknow option $i"
@@ -434,22 +439,30 @@ fi
 
 get_max_step
 
-if [ $SOURCE -ne 0 ]; then	
-	$SCRIPT_DIR/sources.sh "$@"
+if [ $REDOALL -ne 0 ]; then 
+	rm -rf $IMAGES
+	rm -rf $BUILD	
+	$SCRIPT_DIR/sources.sh
+	config_all_step
+	build_all_packet
 else
-	if [ $CONFIGURE -ne 0 ]; then	
-		config_all_step "$@"
+	if [ $SOURCE -ne 0 ]; then	
+		$SCRIPT_DIR/sources.sh "$@"
 	else
-		if [ $DO -ne 0 ]; then	
-			build_all_packet  "$@"
+		if [ $CONFIGURE -ne 0 ]; then	
+			config_all_step "$@"
 		else
-			if [ $MAKE -ne 0 ]; then	
-				compile_all_packet  "$@"
+			if [ $DO -ne 0 ]; then	
+				build_all_packet  "$@"
 			else
-				if [ $INSTALL -ne 0 ]; then	
-					install_all_packet  "$@"
+				if [ $MAKE -ne 0 ]; then	
+					compile_all_packet  "$@"
 				else
-					usage
+					if [ $INSTALL -ne 0 ]; then	
+						install_all_packet  "$@"
+					else
+						usage
+					fi
 				fi
 			fi
 		fi

@@ -118,6 +118,7 @@ if [ $? -eq 1 ]; then
 						error_c "silent value error $SILENT-yes or no only! Phase $2" "project : $1"
 					fi
 				else
+				#default
 				SILENT="yes"
 				fi
 				THREADS=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/threads")
@@ -128,9 +129,12 @@ if [ $? -eq 1 ]; then
 						error_c "Threads value error $THREADS-0..16 only! Phase $2" "project : $1"
 					fi
 				else
-					THREADS=2
+					#default
+					THREADS=1
 				fi
-				INDEX="$PRI%$NAME%$ARCH%$CROSS:$1%$SILENT%$THREADS"
+				PREFIX=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/prefix")
+				#optional				
+				INDEX="$PRI%$NAME%$ARCH%$CROSS:$1%$SILENT%$THREADS%$PREFIX"
 				BSEQ[$INDEX]="$INDEX"	
 			fi	
 		fi
@@ -264,7 +268,7 @@ fi
 #$4 build name
 #$5 arch
 #$6 cross
-
+#$7 prefix
 function generate_setenv(){
 	local SRC=""
 	if [ -e $SOURCES/$1/$1-*/configure ]; then
@@ -287,7 +291,7 @@ function generate_setenv(){
 	echo "export BUILDS=$BUILD/$4">> "$3"
 	echo "export SOURCE=$SRC" >> "$3"
 	echo "export BUILD=$BUILD/$4/$1/build" >> "$3"
-	echo "export DEPLOY=$IMAGES/$4" >> "$3"
+	echo "export DEPLOY=$7" >> "$3"
 	echo "export ARCH=$5">> "$3"
 	echo "export CROSS=$6">> "$3"
 }
@@ -508,9 +512,9 @@ echo "fi" >> $3
 #$6 cross
 #$7 silent
 #$8 thread
-
+#$9 prefix
 function add_build_script(){
-generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6"
+generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6" "$9"
 local SH_CLEAN="$3/clean.sh"
 local SH_DISTCLEAN="$3/distclean.sh"
 local SH_BUILD="$3/build.sh"
@@ -883,6 +887,7 @@ BUILD_CROSS=$(echo $AA | awk '{print $4}')
 BUILD_PROJECT=$(echo $AA | awk '{print $5}')
 BUILD_SILENT=$(echo $AA | awk '{print $6}')
 BUILD_THREADS=$(echo $AA | awk '{print $7}')
+BUILD_PREFIX=$(echo $AA | awk '{print $8}')
 local CONF_RUN="$BUILD/$BUILD_NAME/$BUILD_PROJECT/bootstrap.sh"
 local DEST="$IMAGES/$BUILD_NAME"
 mkdir -p $BUILD/$BUILD_NAME/$BUILD_PROJECT
@@ -892,6 +897,10 @@ mkdir -p $DEST
 rm -rf $DEST/*
 touch $CONF_RUN
 chmod +x $CONF_RUN 
+if [ $BUILD_PREFIX ]; then
+	DEST="$DEST/$BUILD_PREFIX"
+	mkdir -p $DEST
+fi
 manage_path_pre  $BUILD_PROJECT  $1
 prepare_script_generic "$BUILD_PROJECT"  "$1" "START CONFIGURE" "$CONF_RUN" "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS"
 add_pre_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
@@ -932,7 +941,7 @@ if [ "$EXTSI" != "YES" ]; then
 fi
 add_post_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 end_script_generic  "$BUILD_PROJECT"  "$1" "END CONFIGURE" "$CONF_RUN"
-add_build_script "$BUILD_PROJECT" "$1"  "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS" "$BUILD_SILENT" "$BUILD_THREADS"
+add_build_script "$BUILD_PROJECT" "$1"  "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS" "$BUILD_SILENT" "$BUILD_THREADS" "$DEST"
 manage_path_post $BUILD_PROJECT  $1
 sync
 }

@@ -12,10 +12,15 @@
 			<step id="0">
 				<priority>10</priority>
 				<name> prepare_gcc_native</name>
+				<prefix>usr</prefix>
 				<arch>x86_64</arch>
 				<cross>native</cross>	
-				<silent>no</silent>
-				<threads>1</threads>	
+				<silent>yes</silent>
+				<threads>8</threads>	
+				<pre_build id="0">
+					<mode>code</mode>		
+					<value>if [  -e /usr/include/stdc-predef.h ]; then cp /usr/include/stdc-predef.h $DEPLOY/include/.; else touch $DEPLOY/include/stdc-predef.h; fi</value>
+				</pre_build>
 				<extra_conf id="0">--enable-languages=c,c++</extra_conf>
 				<extra_conf id="1">--without-headers</extra_conf>
 				<extra_conf id="2">--disable-nls</extra_conf>							
@@ -33,7 +38,15 @@
 				<extra_conf id="14">--enable-libgomp</extra_conf>			
 				<extra_conf id="15">--enable-lto	</extra_conf>			
 				<extra_conf id="16">--enable-threads=posix</extra_conf>			
-				<extra_conf id="17">--enable-tls</extra_conf>					
+				<extra_conf id="17">--enable-tls</extra_conf>	
+				<extra_conf id="18">--disable-threads</extra_conf>
+				<extra_conf id="19">--disable-libatomic</extra_conf>
+				<extra_conf id="20">--disable-libgomp</extra_conf>
+				<extra_conf id="21">--disable-libmpx</extra_conf>
+				<extra_conf id="22">--disable-libquadmath</extra_conf>
+				<extra_conf id="23">--disable-libssp</extra_conf>
+				<extra_conf id="24">--disable-libvtv</extra_conf>
+				<extra_conf id="25">--disable-libstdcxx</extra_conf>
 				<post_build id="0">
 					<mode>code</mode>		
 					<value>make -C $BUILD check test </value>

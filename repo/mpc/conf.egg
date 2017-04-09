@@ -12,6 +12,7 @@
 		<step id="0">
 			<priority>4</priority>
 			<name> prepare_gcc_native</name>
+			<prefix>usr</prefix>
 			<arch>x86_64</arch>
 			<cross>native</cross>	
 			<silent>yes</silent>
