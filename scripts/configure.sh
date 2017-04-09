@@ -146,9 +146,67 @@ fi
 
 #$1 project
 #$2 build phase number 0,1,2.....
-function manage_path(){
+function manage_path_pre(){
 local TPATH=""
 local NUM=0
+local MAX=0
+local ID=0
+local NAME=""
+check_project $1
+if [ $? -eq 1 ]; then
+	if [ -f $REPO/$1/conf.egg ]; then
+		dolog "Read conf.egg from project $1 : action PATH manage"	
+		xml_count $1 "/egg/project/build"
+		NUM=$?
+		if [ $NUM -eq 1 ]; then
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
+			NUM=$?
+			if [ $NUM -ne 0 ]; then	
+				NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")	
+				equs "$NAME"  
+				if [ $? -eq 1 ]; then 
+					error_c "Missing  build name Phase $2 manage path pre" "project : $1"
+				fi 			
+				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path_pre"
+				NUM=$?
+				if [ $NUM -ne 0 ]; then 	
+					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path_pre/remove"
+					NUM=$?
+					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path_pre/add"
+					MAX=$?
+					if [ $NUM -gt $MAX ]; then
+						MAX=$NUM
+					fi					
+					ID=0
+					while [ $ID -lt $MAX ]; do
+						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path_pre/remove[@id=\"$ID\"]")
+						if [ "$TPATH" != "" ]; then
+							remove_path $NAME $TPATH
+						fi
+						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path_pre/add[@id=\"$ID\"]")
+						if [ "$TPATH" != "" ]; then
+							add_path $NAME $TPATH
+						fi
+						ID=$((ID+1))
+					done 
+				fi				
+			fi	
+		fi
+	else
+		error_c "Missing conf.egg file " "project : $1"
+	fi
+else
+	error_c "Missing project in $REPO " "project : $1"
+fi
+}
+
+
+#$1 project
+#$2 build phase number 0,1,2.....
+function manage_path_post(){
+local TPATH=""
+local NUM=0
+local MAX=0
 local ID=0
 local NAME=""
 check_project $1
@@ -164,32 +222,31 @@ if [ $? -eq 1 ]; then
 				NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")		
 				equs "$NAME"  
 				if [ $? -eq 1 ]; then 
-					error_c "Missing  build name Phase $2" "project : $1"
-				fi 			
-				$(xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path_remove")
+					error_c "Missing  build name Phase $2 manage path post" "project : $1"
+				fi 						
+				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path_post"
 				NUM=$?
 				if [ $NUM -ne 0 ]; then 	
-					while [ $ID -lt $NUM ]; do
-					TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path_remove[@id=\"$ID\"]")
-					if [ $TPATH != "" ]; then
-						remove_path $NAME $TPATH
-					fi
-					ID=$((ID+1))
+					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path_post/remove"
+					NUM=$?
+					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path_post/add"
+					MAX=$?
+					if [ $NUM -gt $MAX ]; then
+						MAX=$NUM
+					fi					
+					ID=0
+					while [ $ID -lt $MAX ]; do
+						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path_post/remove[@id=\"$ID\"]")
+						if [  "$TPATH"  !=  ""  ]; then
+							remove_path $NAME $TPATH
+						fi
+						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path_post/add[@id=\"$ID\"]")
+						if [  "$TPATH"  !=  ""  ]; then
+							add_path $NAME $TPATH
+						fi
+						ID=$((ID+1))
 					done 
-				fi
-				$(xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path_add")
-				NUM=$?
-				if [ $NUM -ne 0 ]; then 	
-				if [ $NUM -ne 0 ]; then 	
-					while [ $ID -lt $NUM ]; do
-					TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path_add[@id=\"$ID\"]")
-					if [ $TPATH != "" ]; then
-						add_path  $NAME $TPATH
-					fi
-					ID=$((ID+1))
-					done 
-				fi
-				fi
+				fi					
 			fi	
 		fi
 	else
@@ -201,27 +258,38 @@ fi
 }
 
 
-#$1 projects
-#$2 source dir
-function call_autoconf(){
-local PWD=$(pwd)
-cd $2
-dolog "action call autoconf :  - project $1"
-autoconf
-if [ $? -ne 0 ]; then
-	error_c " Autoconf fail " "  - project $1"
-fi
-cd $PWD
-}
-
-
-
 #$1 project
 #$2 step id
 #$3 fileout
+#$4 build name
+#$5 arch
+#$6 cross
+
 function generate_setenv(){
-	echo "#!/bin/sh" > $3
-	echo "export PATH=$MYPATH" >> $3
+	local SRC=""
+	if [ -e $SOURCES/$1/$1-*/configure ]; then
+		SRC=$(ls -d $SOURCES/$1/$1-*)
+	else
+		if [ -e $SOURCES/$1/configure.ac ]; then
+			SRC=$SOURCES/$1
+		else
+			if [ -e $SOURCES/$1/$1-*/configure.ac ]; then
+				SRC=$(ls -d $SOURCES/$1/$1-*)
+			else
+				SRC=$SOURCES/$1
+			fi
+		fi
+	fi
+	echo "#!/bin/sh" > "$3"
+	echo "export PATH=$MYPATH" >> "$3"
+	echo "export PROJECT=$1" >> "$3"
+	echo "export SOURCES=$SOURCES" >> "$3"
+	echo "export BUILDS=$BUILD/$4">> "$3"
+	echo "export SOURCE=$SRC" >> "$3"
+	echo "export BUILD=$BUILD/$4/$1/build" >> "$3"
+	echo "export DEPLOY=$IMAGES/$4" >> "$3"
+	echo "export ARCH=$5">> "$3"
+	echo "export CROSS=$6">> "$3"
 }
 
 #$1 projects
@@ -235,46 +303,13 @@ function prepare_script_generic(){
 local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
 LINE=$((LINE-1))
 head $SCRIPT_DIR/functions.sh -n $LINE >> "$4"
-local SRC=""
-if [ -e $SOURCES/$1/$1-*/configure ]; then
-	SRC=$(ls -d $SOURCES/$1/$1-*)
-else
-	if [ -e $SOURCES/$1/configure.ac ]; then
-		SRC=$SOURCES/$1
-	else
-		if [ -e $SOURCES/$1/$1-*/configure.ac ]; then
-			SRC=$(ls -d $SOURCES/$1/$1-*)
-		else
-			SRC=$SOURCES/$1
-		fi
-	fi
-fi
-echo "PROJECT=$1" >> "$4"
-echo "STEP=$2" >> "$4"
-echo "SOURCES=$SOURCES" >> "$4"
-echo "BUILDS=$BUILD/$5">> "$4"
-echo "SOURCE=$SRC" >> "$4"
-echo "BUILD=$BUILD/$5/$1" >> "$4"
-echo "DEPLOY=$IMAGES/$5" >> "$4"
-echo "export ARCH=$6">> "$4"
-echo "export CROSS=$7">> "$4"
-echo "#print_c \"\$GREEN_LIGHT\" \"$3\" \"\$YELLOW\" \"project : $1  -  step \$STEP\"" >> $4
+echo "source $BUILD/$5/$1/setenv.sh">> "$4"
+echo "PWD=\$(pwd)">> "$4"
+echo "cd \$BUILD" >> "$4"
 echo "" >> "$4"
 echo "" >> "$4"
 }
 
-#$1 string to print
-#$2 step
-#$3 file to write
-function prepare_script_main_configure(){
-local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
-LINE=$((LINE-1))
-head $SCRIPT_DIR/functions.sh -n $LINE >> "$3"
-echo "PWD=\$(pwd)">> "$3"
-echo "print_c \"\$GREEN_LIGHT\" \"$1\" \"\$YELLOW\" \"-  step $2\"" >> "$3"
-echo "" >> "$3"
-echo "" >> "$3"
-}
 
 
 
@@ -284,7 +319,9 @@ echo "" >> "$3"
 #$3 title to echo...
 #$4 file to write 
 function end_script_generic(){
-echo "#print_c \"\$GREEN_LIGHT\" \"$3\" \"\$YELLOW\" \"  project : $1  -  step \$STEP\"" >> $4
+echo "" >> $4
+echo "" >> $4
+echo "cd \$PWD" >> "$4"
 echo "" >> $4
 echo "" >> $4
 }
@@ -335,7 +372,7 @@ if [ $? -eq 1 ]; then
 						echo "$VALUE"  >> $3
 					;;		
 					*)
-					error_c "Unknow  pre conf id=$i mode Phase $2" "project : $1"
+					error_c "Unknow  pre build id=$i mode Phase $2" "project : $1"
 					;;
 				esac				
 				i=$((i+1))
@@ -457,8 +494,6 @@ echo " "  >> $3
 echo "RES=\$?" >> $3
 echo "if [ \$RES -ne 0 ]; then" >> $3
 echo "    error_c \"Configure return error: \$RES \" \"  - project : \$PROJECT step \$STEP\"" >> $3
-echo "else" >> $3
-echo "    print_c \"\$GREEN_LIGHT\" \"Configure      \" \"\$YELLOW\" \"project : \$PROJECT  -  step \$STEP\" \"\$BLUE_LIGHT\" \" OK !\"">> $3
 echo "fi" >> $3 
 }
 
@@ -471,8 +506,11 @@ echo "fi" >> $3
 #$4 build name
 #$5 arch
 #$6 cross
+#$7 silent
+#$8 thread
+
 function add_build_script(){
-generate_setenv "$1" "$2" "$3/setenv.sh"
+generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6"
 local SH_CLEAN="$3/clean.sh"
 local SH_DISTCLEAN="$3/distclean.sh"
 local SH_BUILD="$3/build.sh"
@@ -484,16 +522,15 @@ chmod +rwx "$SH_CLEAN" "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD"
 # clean 
 prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" "$5" "$6"
 echo "if [ -f Makefile ]; then " >> "$SH_CLEAN"
-echo " make -C $3 clean " >> "$SH_CLEAN"
+echo " make -C \$BUILD clean " >> "$SH_CLEAN"
 echo "fi" >> "$SH_CLEAN"
 echo "" >> "$SH_CLEAN"
 echo "" >> "$SH_CLEAN"
 end_script_generic "$1" "$2" "done clean build " "$SH_CLEAN"
 #distclean 
 prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" "$5" "$6"
-echo "if [ -f Makefile ]; then " >> "$SH_DISTCLEAN"
-echo " make -C $3 clean " >> "$SH_DISTCLEAN"
-echo "fi" >> "$SH_DISTCLEAN"
+echo "cd \$PWD " >> "$SH_DISTCLEAN"
+echo "rm -rf \$BUILD " >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
 end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
@@ -510,7 +547,7 @@ add_pre_build "$1" "$2" "$SH_BUILD" "$3" "$4"
 #$3 file out
 #$3 silent 
 #S4 threads
-add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "yes" 4
+add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "$7" "$8"
 #$1 project
 #$2 step id
 #$3 file out
@@ -530,7 +567,7 @@ add_pre_install "$1" "$2" "$SH_INSTALL" "$3" "$4"
 #$2 build path
 #$3 file out
 #$3 silent 
-add_entry_in_main_install_script "$1" "$3"  "$SH_INSTALL" "yes" 
+add_entry_in_main_install_script "$1" "$3"  "$SH_INSTALL" "$7" 
 #$1 project
 #$2 step id
 #$3 file out
@@ -571,12 +608,12 @@ if [ $? -eq 1 ]; then
 				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/pre_build[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
-					error_c "Missing  pre conf id=$i value Phase $2" "project : $1"
+					error_c "Missing  pre build id=$i value Phase $2" "project : $1"
 				fi
 				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/pre_build[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
-					error_c "Missing  pre conf id=$i mode Phase $2" "project : $1"
+					error_c "Missing  pre build id=$i mode Phase $2" "project : $1"
 				fi
 				MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
 				case $MODE in 
@@ -800,14 +837,13 @@ echo " "  >> $3
 #$1 project
 #$2 build path
 #$3 file out
-#$3 silent 
-#S4 threads
+#$4 silent 
+#S5 threads
 function add_entry_in_main_build_script(){
-	echo "print_c \"\$GREEN_LIGHT\" \"make $1 :\" \"\$YELLOW\" \"\$1\"" >>"$3"
 if [ "$4" == "yes" ]; then 
-	echo "make --silent -C $2 -j$5 \$1 > /dev/null" >> "$3"
+	echo "make --silent -C \$BUILD -j$5 \$1 > /dev/null" >> "$3"
 else
-	echo "make -C $2  -j$5 \$1">> "$3"
+	echo "make -C \$BUILD  -j$5 \$1">> "$3"
 fi
 echo "if [ \$? -ne 0 ]; then">> "$3"
 echo "    error_c \"Error on build \" \"  - project \$1\"" >>"$3"
@@ -818,15 +854,13 @@ echo "fi"  >> "$3"
 #$2 build path
 #$3 file out
 #$4 silent 
-
 function add_entry_in_main_install_script()
 {
 #install
-	echo "print_c \"\$GREEN_LIGHT\" \"install $1 :\" \"\$YELLOW\" \"\$1\"" >>"$3"
 if [ "$4" == "yes" ]; then 
-	echo "make --silent -C $2   install > /dev/null" >> "$3"
+	echo "make --silent -C \$BUILD   install > /dev/null" >> "$3"
 else
-	echo "make -C $2  install">> "$3"
+	echo "make -C \$BUILD  install">> "$3"
 fi
 echo "if [ \$? -ne 0 ]; then">> "$3"
 echo "    error_c \"Error on install \" \"  - project \$1\"" >>"$3"
@@ -853,11 +887,12 @@ local CONF_RUN="$BUILD/$BUILD_NAME/$BUILD_PROJECT/bootstrap.sh"
 local DEST="$IMAGES/$BUILD_NAME"
 mkdir -p $BUILD/$BUILD_NAME/$BUILD_PROJECT
 rm -rf $BUILD/$BUILD_NAME/$BUILD_PROJECT/*
+mkdir -p $BUILD/$BUILD_NAME/$BUILD_PROJECT/build
 mkdir -p $DEST
 rm -rf $DEST/*
 touch $CONF_RUN
 chmod +x $CONF_RUN 
-manage_path  $BUILD_PROJECT  $1
+manage_path_pre  $BUILD_PROJECT  $1
 prepare_script_generic "$BUILD_PROJECT"  "$1" "START CONFIGURE" "$CONF_RUN" "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS"
 add_pre_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 BTARGET=$(echo $BUILD_CROSS  | tr '[:lower:]' '[:upper:]')
@@ -865,6 +900,10 @@ if [ "$BTARGET" == "NATIVE" ]; then
 	BTARGET=""
 else
 	BTARGET="--target=$BUILD_CROSS"
+fi
+EXTSI=$(echo $BUILD_SILENT  | tr '[:lower:]' '[:upper:]')
+if [ "$EXTSI" != "YES" ]; then
+	echo "set -x ">> $CONF_RUN
 fi
 if [ -e $SOURCES/$BUILD_PROJECT/configure ]; then
 	echo -n "$SOURCES/$BUILD_PROJECT/configure  --prefix=$DEST $BTARGET ">> $CONF_RUN
@@ -874,11 +913,9 @@ else
 		echo -n "$AA  --prefix=$DEST $BTARGET ">> $CONF_RUN
 	else
 		if [ -e $SOURCES/$BUILD_PROJECT/configure.ac ]; then
-			call_autoconf $BUILD_PROJECT $SOURCES/$BUILD_PROJECT
 			echo -n "$SOURCES/$BUILD_PROJECT/configure  --prefix=$DEST $BTARGET ">> $CONF_RUN
 		else
 			if [ -e $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*/configure.ac ]; then
-				call_autoconf $BUILD_PROJECT $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*
 				AA=$(ls $SOURCES/$BUILD_PROJECT/$BUILD_PROJECT-*/configure)
 				echo -n "$AA  --prefix=$DEST $BTARGET">> $CONF_RUN
 			else
@@ -888,9 +925,15 @@ else
 	fi
 fi	
 add_extra_conf "$BUILD_PROJECT" "$1" "$CONF_RUN"  "$BUILD_SILENT"
+BTARGET=$(echo $BUILD_SILENT  | tr '[:lower:]' '[:upper:]')
+iEXTSI=$(echo $BUILD_SILENT  | tr '[:lower:]' '[:upper:]')
+if [ "$EXTSI" != "YES" ]; then
+	echo "set +x ">> $CONF_RUN
+fi
 add_post_conf "$BUILD_PROJECT" "$1" "$CONF_RUN" "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME"
 end_script_generic  "$BUILD_PROJECT"  "$1" "END CONFIGURE" "$CONF_RUN"
-add_build_script "$BUILD_PROJECT" "$1"  "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS"
+add_build_script "$BUILD_PROJECT" "$1"  "$BUILD/$BUILD_NAME/$BUILD_PROJECT"  "$BUILD_NAME" "$BUILD_ARCH" "$BUILD_CROSS" "$BUILD_SILENT" "$BUILD_THREADS"
+manage_path_post $BUILD_PROJECT  $1
 sync
 }
 

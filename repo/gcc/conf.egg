@@ -6,60 +6,38 @@
 		<remote>
 			<method>wget</method>
 			<url>ftp://ftp.gnu.org/gnu/gcc/gcc-6.3.0</url>
-			<file>gcc-6.3.0.tar.gz</file>
-			<password>pippo</password>			
+			<file>gcc-6.3.0.tar.gz</file>			
 		</remote>	
 		<build>
 			<step id="0">
-			<priority>2</priority>
-			<name> prepare_gcc_native</name>
-			<arch>x86_64</arch>
-		        <cross>i686-elf</cross>	
-			<silent>yes</silent>
-			<threads>8</threads>
-			<pre_conf id="0">
-				<mode>code</mode>
-				<value>GMP=$(ls -d $SOURCES/gmp/gmp-*) </value>
-			</pre_conf>
-			<pre_conf id="1">
-				<mode>code</mode>
-				<value>if [ ! -e $SOURCE/gmp ]; then ln -s $GMP $SOURCE/gmp; fi</value>
-			</pre_conf>
-			<pre_conf id="2">
-				<mode>code</mode>
-				<value>MPFR=$(ls -d $SOURCES/mpfr/mpfr-*)</value>
-			</pre_conf>
-			<pre_conf id="3">
-				<mode>code</mode>
-				<value>if [ ! -e $SOURCE/mpfr ]; then ln -s $MPFR $SOURCE/mpfr; fi</value>
-			</pre_conf>
-			<pre_conf id="4">
-				<mode>code</mode>
-				<value>MPC=$(ls -d $SOURCES/mpc/mpc-*)</value>
-			</pre_conf>
-			<pre_conf id="5">
-				<mode>code</mode>
-				<value>if [ ! -e $SOURCE/mpc ]; then ln -s $MPC $SOURCE/mpc;fi</value>
-			</pre_conf>
-				<pre_conf id="6">
-					<mode>code</mode>
-					<value>cp -a $SOURCE/* $BUILD/.</value>
-				</pre_conf>
-			<extra_conf id="0">--enable-languages=c,c++</extra_conf>
-			<extra_conf id="1">--without-headers</extra_conf>
-			<extra_conf id="2">--disable-nls</extra_conf>
-				<pre_build id="0">
-					<mode>code</mode>
-					<value>export PATH=$IMAGES/bin:$PATH</value>
-				</pre_build>
-			</step>
-			<step id="1">
-			<priority>1</priority>
-			<name> prepare_gcc_cross</name>
-			<arch>native</arch>
-			<cross>arm_none_eabi</cross>	
-			<silent>yes</silent>
-			<threads>8</threads>		
+				<priority>10</priority>
+				<name> prepare_gcc_native</name>
+				<arch>x86_64</arch>
+				<cross>native</cross>	
+				<silent>no</silent>
+				<threads>1</threads>	
+				<extra_conf id="0">--enable-languages=c,c++</extra_conf>
+				<extra_conf id="1">--without-headers</extra_conf>
+				<extra_conf id="2">--disable-nls</extra_conf>							
+				<extra_conf id="3">--disable-libstdcxx-pch</extra_conf>	
+				<extra_conf id="4">--with-gmp=$DEPLOY</extra_conf>	
+				<extra_conf id="5">--with-mpc=$DEPLOY</extra_conf>	
+				<extra_conf id="6">--with-mpfr=$DEPLOY</extra_conf>	
+				<extra_conf id="7">--with-sysroot=$DEPLOY</extra_conf>				
+				<extra_conf id="8">--with-newlib</extra_conf>	
+				<extra_conf id="9">--with-local-prefix=$DEPLOY</extra_conf>
+				<extra_conf id="10">--with-native-system-header-dir=$DEPLOY/include</extra_conf>	
+				<extra_conf id="11">--disable-shared</extra_conf>
+				<extra_conf id="12">--disable-multilib</extra_conf>
+				<extra_conf id="13">--disable-bootstrap</extra_conf>	
+				<extra_conf id="14">--enable-libgomp</extra_conf>			
+				<extra_conf id="15">--enable-lto	</extra_conf>			
+				<extra_conf id="16">--enable-threads=posix</extra_conf>			
+				<extra_conf id="17">--enable-tls</extra_conf>					
+				<post_build id="0">
+					<mode>code</mode>		
+					<value>make -C $BUILD check test </value>
+				</post_build>
 			</step>
 		</build>	
 	</project>

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>glibc</name>
+		<download>check</download>		
+		<remote>
+			<method>wget</method>
+			<url>http://ftp.gnu.org/gnu/glibc</url>
+			<file>glibc-2.25.tar.gz</file>
+		</remote>	
+		<build>
+			<step id="0">
+				<priority>20</priority>
+				<name> prepare_gcc_native</name>
+				<arch>x86_64</arch>
+				<cross>native</cross>	
+				<silent>yes</silent>
+				<threads>8</threads>								
+				<extra_conf id="0">--enable-kernel=2.6.32</extra_conf>
+				<extra_conf id="1">libc_cv_forced_unwind=yes</extra_conf>	
+				<extra_conf id="2">libc_cv_c_cleanup=yes</extra_conf>
+				<extra_conf id="3">--with-sysroot=$DEPLOY</extra_conf>				
+			</step>
+		</build>	
+	</project>
+</egg>

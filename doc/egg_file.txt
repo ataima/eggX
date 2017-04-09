@@ -8,6 +8,10 @@
 			<method>wget</method>
 			<url>ftp://ftp.gnu.org/gnu/binutils</url>
 			<file>binutils-2.28.tar.bz2</file>
+			<key>
+				<url>ftp://ftp.gnu.org/gnu/binutils</url>
+				<file>binutils-2.28.tar.bz2.sig</file>
+			<key>
 			<password>12345678 </password>    #optional svn / git password
 			#TODO  add fw nodes
 			# depend   id=xx                                     optinal  :before download this project you must download depend projects

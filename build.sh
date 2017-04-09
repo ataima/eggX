@@ -141,8 +141,8 @@ while [ $ID -lt $MAX_STEP ] ; do
 		PRI=$(echo $V | awk '{print $1}')
 		NAME=$(echo $V | awk '{print $2}')
 		PRJ=$(echo $V | awk '{print $3}')
-		print_c "$RED_LIGHT" "$PRI" "$GREEN_LIGHT" "$NAME" "$YELLOW" "$PRJ"
 		print_c "$WHITE" "-------------------------------------------------------"
+		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
 		cd "$BUILD/$PRJ/$NAME"
 		$BUILD/$PRJ/$NAME/bootstrap.sh
 		if [ $? -ne 0 ] ; then
@@ -156,6 +156,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 		if [ $? -ne 0 ] ; then
 			exit -1;
 		fi
+		sync
 		print_c "$WHITE" "-------------------------------------------------------"
 	done
 done
@@ -163,33 +164,58 @@ done
 
 #none
 function compile_all(){
+local ID=0 
 local V=""
-for V in $SORTREQ; do
-V=$(echo $V  | sed -e 's/_//g')
-PRI=$(echo $V | awk '{print $1}')
-NAME=$(echo $V | awk '{print $2}')
-PRJ=$(echo $V | awk '{print $3}')
-print_c "$RED_LIGHT""$PRI""$GREEN_LIGHT""$NAME""$YELLOW""$PRJ"
-	compile_single "$NAME"
+while [ $ID -lt $MAX_STEP ] ; do
+	prepare_seq_priority $ID
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		PRI=$(echo $V | awk '{print $1}')
+		NAME=$(echo $V | awk '{print $2}')
+		PRJ=$(echo $V | awk '{print $3}')
+		print_c "$WHITE" "-------------------------------------------------------"
+		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
+		cd "$BUILD/$PRJ/$NAME"
+		$BUILD/$PRJ/$NAME/build.sh
+		if [ $? -ne 0 ] ; then
+			exit -1;
+		fi
+		sync
+		print_c "$WHITE" "-------------------------------------------------------"
+	done
 done
 }
 
 #none
 function install_all(){
+local ID=0 
 local V=""
-for V in $SORTREQ; do
-V=$(echo $V  | sed -e 's/_//g')
-PRI=$(echo $V | awk '{print $1}')
-NAME=$(echo $V | awk '{print $2}')
-PRJ=$(echo $V | awk '{print $3}')
-print_c "$RED_LIGHT""$PRI""$GREEN_LIGHT""$NAME""$YELLOW""$PRJ"
-	install_single "$NAME"
+while [ $ID -lt $MAX_STEP ] ; do
+	prepare_seq_priority $ID
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		PRI=$(echo $V | awk '{print $1}')
+		NAME=$(echo $V | awk '{print $2}')
+		PRJ=$(echo $V | awk '{print $3}')
+		print_c "$WHITE" "-------------------------------------------------------"
+		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
+		cd "$BUILD/$PRJ/$NAME"
+		$BUILD/$PRJ/$NAME/install.sh
+		if [ $? -ne 0 ] ; then
+			exit -1;
+		fi
+		sync
+		print_c "$WHITE" "-------------------------------------------------------"
+	done
 done
 }
 
 #$@ from argv build.sh
 function build_single(){
 #trovo nomi build per ogni progetto
+local V=""
+local T=""
+local SEQ=""
 local PRJ_NAMES=""
 for V in $@; do
 	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
@@ -198,6 +224,18 @@ done
 local PWD=$(pwd)
 for V in $PRJ_NAMES; do
 	for I in $@; do
+		for T in $SORTREQ; do
+			SEQ=$(echo $T | grep $V | grep $I )
+			if [ "$SEQ" != "" ]; then 
+				break;
+			fi
+		done
+		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
+		PRI=$(echo $SEQ | awk '{print $1}')
+		NAME=$(echo $SEQ | awk '{print $2}')
+		PRJ=$(echo $SEQ | awk '{print $3}')
+		print_c "$WHITE" "-------------------------------------------------------"
+		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
 		cd "$BUILD/$V/$I"
 		$BUILD/$V/$I/bootstrap.sh
 		if [ $? -ne 0 ] ; then
@@ -211,6 +249,8 @@ for V in $PRJ_NAMES; do
 		if [ $? -ne 0 ] ; then
 			exit -1;
 		fi
+		sync
+		print_c "$WHITE" "-------------------------------------------------------"
 	done 
 done
 }
@@ -227,8 +267,22 @@ local PWD=$(pwd)
 for V in $PRJ_NAMES; do
 	set -x
 	for I in $@; do
+		for T in $SORTREQ; do
+			SEQ=$(echo $T | grep $V | grep $I )
+			if [ "$SEQ" != "" ]; then 
+				break;
+			fi
+		done
+		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
+		PRI=$(echo $SEQ | awk '{print $1}')
+		NAME=$(echo $SEQ | awk '{print $2}')
+		PRJ=$(echo $SEQ | awk '{print $3}')
+		print_c "$WHITE" "-------------------------------------------------------"
+		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
 		cd "$BUILD/$V/$I"
 		$BUILD/$V/$I/build.sh
+		sync
+		print_c "$WHITE" "-------------------------------------------------------"
 	done 
 done
 }
@@ -245,8 +299,22 @@ local PWD=$(pwd)
 for V in $PRJ_NAMES; do
 	set -x
 	for I in $@; do
+		for T in $SORTREQ; do
+			SEQ=$(echo $T | grep $V | grep $I )
+			if [ "$SEQ" != "" ]; then 
+				break;
+			fi
+		done
+		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
+		PRI=$(echo $SEQ | awk '{print $1}')
+		NAME=$(echo $SEQ | awk '{print $2}')
+		PRJ=$(echo $SEQ | awk '{print $3}')
+		print_c "$WHITE" "-------------------------------------------------------"
+		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
 		cd "$BUILD/$V/$I"
 		$BUILD/$V/$I/install.sh
+		sync
+		print_c "$WHITE" "-------------------------------------------------------"
 	done 
 done
 }

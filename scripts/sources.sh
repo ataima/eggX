@@ -63,7 +63,7 @@ if [ ! -f  $1.$4 ]; then
 	wget  --show-progress -q "$2.$4" -O "$1.$4"
 	tmp=$( ls -al  "$1.$4"  |  awk  '{print $5}' )
 	if [  $tmp -ne 0  ]; then
-		KEYS=$(ls $RKEYS/*.gpg )
+		KEYS=$(ls $RKEYS/* )
 		for i in $KEYS; do
 			gpg --verify --keyring "$i" "$1.$4"
 			RES=$?
@@ -87,7 +87,7 @@ if [ ! -f  $1.$4 ]; then
 		else
 			print_c "$RED_LIGHT" "   - SIG check source FAIL" "$YELLOW" $3	
 			rm -f  "$1.$4"
-			rm -f "$1"
+#			rm -f "$1"
 		fi
 	else
 		rm -f  "$1.$4"
@@ -174,11 +174,11 @@ return $RES
 #$3 project
 function check_sign(){
 local RES=0
-local ASIGN="sig asc md5 sha1"
+local ASIGN="sig sign asc md5 sha1"
 local i=""
 for i in $ASIGN; do
  case $i in
-	"sig"|"asc")
+	"sig"|"sign"|"asc")
 	check_pgp $1 $2 $3 $i  
 	RES=$?	
 	;;
@@ -206,6 +206,8 @@ return $RES
 # $1 project name
 # $2 link
 # $3 filename 
+# $4 sign key furl
+# $5  sign key file
 function wget_packet(){
 local RES=0
 print_c "$GREEN_LIGHT" "   - Download source" "$YELLOW" $i
@@ -219,7 +221,11 @@ rm -f $REPO/$1/logs/$LOG/*
 dolog "Created download log file : $REPO/$1/logs/$LOG"
 wget  --show-progress -q -o "$REPO/$1/logs/$LOG" "$PNAME" -O "$REPO/$1/$3"
 if [ -f  "$REPO/$1/$3" ]; then
-	check_sign "$REPO/$1/$3" "$PNAME" "$1"
+	if [ "$4" != "" ]; then
+		check_sign "$REPO/$1/$3" "$4/$5" "$1"
+	else
+		check_sign "$REPO/$1/$3" "$PNAME" "$1"
+	fi
 	RES=$?
 	if [ $RES -eq 99 ]; then 
 		wget_packet $1 $2 $3
@@ -242,10 +248,16 @@ fi
 # $1 project name
 # $2 link
 # $3 filename 
+#$4 sig key url
+# $5 sign key file
 function wget_update_packet(){
 local PNAME="$2/$3"
 if [ -f  "$REPO/$1/$3" ]; then
-	check_sign "$REPO/$1/$3" "$PNAME" "$1"
+	if [ "$4" != "" ]; then
+		check_sign "$REPO/$1/$3" "$4/$5" "$1"
+	else
+		check_sign "$REPO/$1/$3" "$PNAME" "$1"
+	fi
 	RES=$?
 	if [ $RES -eq 99 ]; then 
 		wget_packet $1 $2 $3
@@ -386,24 +398,54 @@ cd $PWD
 rm -rf /tmp/$3
 }
 
+
+
+# if present key PASSWORD (svn.. to do ) xx return xx 
+#$1 project
+#S2 Mode
+function get_password(){
+local TPWD="";
+check_project $1
+if [ $? -eq 1 ]; then
+	if [ -f $REPO/$1/conf.egg ]; then		
+		dolog "Read conf.egg from project $1 : action GET PASSWORD"
+		TPWD=$(xml_value $1 '/egg/project/remote/password')
+		equs "$TPWD"  
+		if [ $? -eq 1 ]; then 
+			error_c "Set PASSWORD to null!" "project : $1"
+		fi
+	else
+		error_c "Missing conf.egg file " "project : $1"
+	fi
+else
+	error_c "Missing project in $REPO " "project : $1"
+fi
+echo "$TPWD"
+}
+
+
 #$1 projects
 #$2 mode : wget svn git etc
 #$3 remote link to download the packet
 #$4 packet name 
-#$5 password ssh
+#$5 sign key url
+#$6 sign key file
 function download_packet(){
+local PW=""
 case  $2 in
 	"WGET")
 	dolog "Method to get source is : wget for project $1"
-	wget_packet $1 $3 $4
+	wget_packet $1 $3 $4 $5 $6
 	;;
 	"GIT")
 	dolog "Method to get source is : git for project $1"
-	git_packet $1 $3 $4 $5
+	PW=$(get_password "$1"  "$2")
+	git_packet $1 $3 $4 $PW
 	;;
 	"SVN")
 	dolog "Method to get source is : svn for project $1"
-	svn_packet $1 $3 $4 $5 
+	PW=$(get_password "$1"  "$2")
+	svn_packet $1 $3 $4 $PW 
 	;;
 	"FILE")
 	dolog "Method to get source is : rsync for project $1"
@@ -424,18 +466,22 @@ esac
 #$1 projects
 #$2 mode : wget svn git etc
 #$3 remote link to download the packet
-#$4 packet name 
-#$5 password ssh
+#$4 packet name
+#$5 sign key url
+#$6 sign key file
 function is_updated(){
+local PW=""
 case  $2 in
 	"WGET")
-	wget_update_packet $1 $3 $4
+	wget_update_packet $1 $3 $4  $5 $6
 	;;
 	"GIT")
-	git_update_packet $1 $3 $4 $5
+	PW=$(get_password "$1"  "$2")
+	git_update_packet $1 $3 $4 $PW
 	;;
 	"SVN")
-	svn_update_packet $1 $3 $4 $5 
+	PW=$(get_password "$1"  "$2")
+	svn_update_packet $1 $3 $4 $PW 
 	;;
 	"FILE")
 	file_packet $1 $3 $4
@@ -450,26 +496,6 @@ esac
 
 
 
-# if present key PASSWORD (svn.. to do ) xx return xx 
-function get_password(){
-local TPWD="";
-check_project $1
-if [ $? -eq 1 ]; then
-	if [ -f $REPO/$1/conf.egg ]; then		
-		dolog "Read conf.egg from project $1 : action GET PASSWORD"
-		TPWD=$(xml_value $1 '/egg/project/remote/password')
-		equs "$TPWD"  
-		if [ $? -eq 1 ]; then 
-			error_c "Set SSH PASSWORD to null!" "project : $1"
-		fi
-	else
-		error_c "Missing conf.egg file " "project : $1"
-	fi
-else
-	error_c "Missing project in $REPO " "project : $1"
-fi
-echo "$TPWD"
-}
 
 
 #$1 projects
@@ -477,6 +503,8 @@ echo "$TPWD"
 #$3 remote link to download the packet
 #$4 packet name 
 #$5 action 99=force 1=normal 2=update
+#$6 sign key url  optional
+#$7 sign key file optional
 function download_action(){
 local PWD_SVN=""
 
@@ -492,26 +520,22 @@ if [ "$5" == 99 ]; then
 	
 fi
 
-# if mode == SVN , GIT test if needed password
-if [ "$2" == "SVN" ]; then	 
-	PWD_SVN=$(get_password "$1" )
-fi
 
 if [ "$2" == "WGET" ]; then 
 	if [ -f "$REPO/$1/$4" ] ; then 
 		dolog "File $REPO/$1/$4 exist : check sign"
-		is_updated $1 $2 $3 $4 
+		is_updated $1 $2 $3 $4 $6 $7
 	else
 		dolog "Download $REPO/$1/$4 "
-		download_packet $1 $2 $3 $4 
+		download_packet $1 $2 $3 $4 $6 $7
 	fi
 else
 	if [ -d "$SOURCES/$1" ] ; then 
 		dolog "File $SOURCES/$1 exist : check sign"
-		is_updated $1 $2 $3 $4  $PWD_SVN
+		is_updated $1 $2 $3 $4  $6 $7
 	else
 		dolog "Download $SOURCES/$1 "
-		download_packet $1 $2 $3 $4  $PWD_SVN
+		download_packet $1 $2 $3 $4  $6 $7
 	fi
 fi
 }
@@ -564,8 +588,22 @@ if [ $? -eq 1 ]; then
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  patch packet name " "project : $1"
 				fi	
+				xml_count $1 "/egg/project/patch[@id='$i']/key"
+				NUM=$?
+				if [ $NUM -ne 0 ]; then 
+					KEY_URL=$(xml_value $1 "/egg/project/patch[@id='$i']/key/url")
+					equs "$KEY_URL" 
+					if [ $? -eq 1 ]; then 
+						error_c "Missing  key url " "project : $1"
+					fi
+					KEY_FILE=$(xml_value $1 "/egg/project/patch[@id='$i']/key/file")
+					equs "$KEY_FILE" 
+					if [ $? -eq 1 ]; then 
+						error_c "Missing  key file " "project : $1"
+					fi
+				fi
 				MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
-				download_action "$1" "$MODE"  $REMOTE $PACKET 1
+				download_action "$1" "$MODE"  "$REMOTE" "$PACKET" "$2" "$KEY_URL" "$KEY_FILE" 
 				if [ $2 -eq 99 ]; then 
 				apply_patch "$1" "$PACKET"
 				fi	
@@ -640,6 +678,9 @@ local tmp=""
 local REMOTE=""
 local MODE=""
 local PACKET=""
+local NUM=0
+local KEY_URL=""
+local KEY_FILE=""
 check_project $1
 if [ $? -eq 1 ]; then
 #exist project name <name> in repo 
@@ -661,9 +702,23 @@ if [ $? -eq 1 ]; then
 		equs "$PACKET" 
 		if [ $? -eq 1 ]; then 
 			error_c "Missing  packet name " "project : $1"
-		fi		
+		fi	
+		xml_count $1 "/egg/project/remote/key"
+		NUM=$?
+		if [ $NUM -ne 0 ]; then 
+			KEY_URL=$(xml_value $1 "/egg/project/remote/key/url")
+			equs "$KEY_URL" 
+			if [ $? -eq 1 ]; then 
+				error_c "Missing  key url " "project : $1"
+			fi
+			KEY_FILE=$(xml_value $1 "/egg/project/remote/key/file")
+			equs "$KEY_FILE" 
+			if [ $? -eq 1 ]; then 
+				error_c "Missing  key file " "project : $1"
+			fi
+		fi
 		MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
-		download_action "$1" "$MODE"  "$REMOTE" "$PACKET" "$2"
+		download_action "$1" "$MODE"  "$REMOTE" "$PACKET" "$2" "$KEY_URL" "$KEY_FILE"
 		RES=1	
 		if [ $RES -ne 1 ]; then
 			error_c "Missing REMOTE key in conf.egg " "project : $1"
@@ -697,7 +752,7 @@ done
 
 # $1 requested
 function download_sign_key(){
-local KEYS="ftp://ftp.gnu.org/gnu/gnu-keyring.gpg "
+local KEYS="ftp://ftp.gnu.org/gnu/gnu-keyring.gpg http://www.cs.unipr.it/~bagnara/pgp_public_key"
 
 if [ ! -d $RKEYS ]; then 
 	dolog "Create dir for gpg keys"

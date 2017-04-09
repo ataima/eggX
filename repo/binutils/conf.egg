@@ -6,89 +6,22 @@
 		<remote>
 			<method>wget</method>
 			<url>ftp://ftp.gnu.org/gnu/binutils</url>
-			<file>binutils-2.28.tar.bz2</file>
-			<!--
-			<password> </password>		
-			-->			
+			<file>binutils-2.28.tar.bz2</file>		
 		</remote>	
 		<build>
 			<step id="0">
 			<priority>1</priority>
 			<name> prepare_gcc_native</name>
 			<arch>x86_64</arch>
-		        <cross>i686-elf</cross>	
-			<silent>no</silent>
-			<threads>1</threads>
+		        <cross>native</cross>	
+			<silent>yes</silent>
+			<threads>8</threads>
 			<extra_conf id="0">--disable-nls</extra_conf>
-			<extra_conf id="1">--disable-multilib</extra_conf>		
-			<pre_conf id="0">
-				<mode>code</mode>
-				<value> cd $SOURCE</value>
-			</pre_conf>
-			<pre_conf id="1">
-				<mode>code</mode>
-				<value>autoconf </value>
-			</pre_conf>
-			<pre_conf id="2">
-				<mode>code</mode>
-				<value>cd $PWD </value>
-			</pre_conf>
-			<post_conf id="0">
-				<mode>code</mode>
-				<value>echo paperino</value>
-			</post_conf>
-			
-			<post_conf id="1">
-				<mode>code</mode>
-				<value>echo minnie</value>
-			</post_conf>
-
-
-			<pre_build id="0">
-				<mode>code</mode>
-				<value> echo pippo</value>
-			</pre_build>
-			<pre_build id="1">
-				<mode>code</mode>
-				<value>echo pluto </value>
-			</pre_build>
-			
-			<post_build id="0">
-				<mode>code</mode>
-				<value>echo paperino</value>
-			</post_build>
-			<post_build id="1">
-				<mode>code</mode>
-				<value>echo minnie</value>
-			</post_build>
-
-			<pre_install id="0">
-				<mode>code</mode>
-				<value> echo pippo</value>
-			</pre_install>
-			<pre_install id="1">
-				<mode>code</mode>
-				<value>echo pluto </value>
-			</pre_install>
-			
-			<post_install id="0">
-				<mode>code</mode>
-				<value>echo paperino</value>
-			</post_install>
-			<post_install id="1">
-				<mode>code</mode>
-				<value>echo minnie</value>
-			</post_install>
-						<!--
-			<path_remove></path_remove>
-			<path_add id></path_add>
-					-->
-			</step>
-			<step id="1">
-			<priority>0</priority>
-			<name> prepare_gcc_cross</name>
-			<arch>native</arch>
-			<cross>arm_none_eabi</cross>			
+			<extra_conf id="1">--disable-multilib</extra_conf>	
+			<extra_conf id="2">--with-sysroot=$DEPLOY</extra_conf>			
+			<path_post>
+					<add id="0" >x86_64-pc-linux-gnu</add >
+			</path_post>
 			</step>
 		</build>
 	</project>

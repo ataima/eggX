@@ -8,5 +8,18 @@
 			<url>http://mpfr.loria.fr/mpfr-current</url>
 			<file>mpfr-3.1.5.tar.xz</file>
 		</remote>	
+		<build>
+			<step id="0">
+				<priority>3</priority>
+				<name> prepare_gcc_native</name>
+				<arch>x86_64</arch>
+				<cross>native</cross>	
+				<silent>yes</silent>
+				<threads>8</threads>				
+				<extra_conf id="0">--disable-shared</extra_conf>
+				<extra_conf id="1">--enable-static</extra_conf>
+				<extra_conf id="2">--with-gmp=$DEPLOY</extra_conf>
+			</step>
+		</build>	
 	</project>
 </egg>
