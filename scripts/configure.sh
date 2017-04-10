@@ -228,7 +228,8 @@ fi
 #$4 build name
 #$5 arch
 #$6 cross
-#$7 prefix
+#$7 deploy
+#$8 prefix
 function generate_setenv(){
 	local SRC=""
 	if [ -e $SOURCES/$1/$1-*/configure ]; then
@@ -259,7 +260,7 @@ function generate_setenv(){
 	echo "export SOURCE=$SRC" >> "$3"
 	echo "export BUILD=$BUILD/$4/$1/build" >> "$3"
 	echo "export DEPLOYS=$IMAGES/$4" >> "$3"
-	echo "export DEPLOY=$7" >> "$3"
+	echo "export DEPLOY=$7/$8" >> "$3"
 	echo "export ARCH=$5">> "$3"
 	echo "export CROSS=$6">> "$3"
 }
@@ -480,9 +481,11 @@ echo "fi" >> $3
 #$6 cross
 #$7 silent
 #$8 thread
-#$9 prefix
+#$9 deploy
+#$10 prefix
 function add_build_script(){
-generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6" "$9"
+echo "-->$@"
+generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6" "$9" "$10"
 local SH_CLEAN="$3/clean.sh"
 local SH_DISTCLEAN="$3/distclean.sh"
 local SH_BUILD="$3/build.sh"
@@ -975,7 +978,7 @@ fi
 add_post_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 #build
-add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$ARCH" "$CROSS" "$SILENT" "$THREADS" "$DEST"
+add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$ARCH" "$CROSS" "$SILENT" "$THREADS" "$DEST" "$PREFIX"
 print_c "$GREEN_LIGHT" "STEP:$2" "$WHITE" "$1" "$RED_LIGHT" "configured done !"
 }
 

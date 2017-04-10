@@ -21,6 +21,20 @@
 				<cross>native</cross>	
 				<silent>yes</silent>
 				<threads>1</threads>			
+				<make>
+					<pre id="0">
+						<mode>code</mode>
+						<value>make mbproper</value>
+					</pre>
+					<pre id="1">
+						<mode>code</mode>
+						<value>make INSTALL_HDR_PATH=$BUILD headers_install</value>
+					</pre>
+					<pre id="2">
+						<mode>code</mode>
+						<value>cp -rv $BUILD/include/* $DEPLOY/include</value>
+					</pre>
+				</make>
 			</step>
 		</build>
 	</project>
