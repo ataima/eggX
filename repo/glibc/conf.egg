@@ -30,18 +30,12 @@
 						<mode>code</mode>		
 						<value>export LDFLAGS=$DEPLOY/lib</value>
 					</pre>
-					<extra id="0">--enable-kernel=2.6.32</extra_conf>
-					<extra id="1">libc_cv_forced_unwind=yes</extra_conf>	
-					<extra id="2">libc_cv_c_cleanup=yes</extra_conf>
-					<extra id="3">--with-sysroot=$DEPLOYS</extra_conf>
-					<post id="2">
-						<mode>code</mode>		
-						<value>export LDFLAGS=$DEPLOY/lib</value>
-					</post>
+					<extra id="0">--enable-kernel=2.6.32</extra>
+					<extra id="1">libc_cv_forced_unwind=yes</extra>	
+					<extra id="2">libc_cv_c_cleanup=yes</extra>
+					<extra id="3">--with-sysroot=$DEPLOYS</extra>
 				</configure>				
 				<make>
-					<rules id="0">
-						<name> all</name>
 						<pre id="0">
 							<mode>code</mode>		
 							<value>export CC=$DEPLOY/bin/gcc</value>
@@ -50,33 +44,7 @@
 							<mode>code</mode>		
 							<value>export CXX=$DEPLOY/bin/g++</value>
 						</pre>
-						<post id="0">
-							<mode>code</mode>		
-							<value>export LDFLAGS=$DEPLOY/lib</value>
-						</post>
-					</rules>
-					<rules id="1">
-						<name> test</name>
-						<pre id="0">
-							<mode>code</mode>		
-							<value>export CC=$DEPLOY/bin/gcc</value>
-						</pre>
-						<post id="0">
-							<mode>code</mode>		
-							<value>export LDFLAGS=$DEPLOY/lib</value>
-						</post>
-					</rules>
 				</make>		
-				<install>
-					<pre id="1">
-						<mode>code</mode>		
-						<value>export CXX=$DEPLOY/bin/g++</value>
-					</pre>
-					<post id="0">
-						<mode>code</mode>		
-						<value>export LDFLAGS=$DEPLOY/lib</value>
-					</post>
-				</install>
 			</step>
 		</build>	
 	</project>

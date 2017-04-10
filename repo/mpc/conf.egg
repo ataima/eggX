@@ -16,11 +16,13 @@
 			<arch>x86_64</arch>
 			<cross>native</cross>	
 			<silent>yes</silent>
-			<threads>8</threads>				
-			<extra_conf id="0">--disable-shared</extra_conf>
-			<extra_conf id="1">--enable-static</extra_conf>
-			<extra_conf id="2">--with-gmp=$DEPLOY</extra_conf>
-			<extra_conf id="3">--with-mpfr=$DEPLOY</extra_conf>
+			<threads>8</threads>		
+			<configure>
+				<extra   id="0">--disable-shared</extra>
+				<extra   id="1">--enable-static</extra>
+				<extra   id="2">--with-gmp=$DEPLOY</extra>
+				<extra   id="3">--with-mpfr=$DEPLOY</extra>
+			</configure>
 		</step>
 	</build>	
 	</project>

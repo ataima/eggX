@@ -18,8 +18,10 @@
 		        <cross>native</cross>	
 			<silent>yes</silent>
 			<threads>8</threads>
-			<extra_conf id="0">--disable-werror</extra_conf>	
-			<extra_conf id="1">--disable-nls</extra_conf>	
+			<configure>
+				<extra   id="0">--disable-werror</extra>	
+				<extra   id="1">--disable-nls</extra>	
+			</configure>
 			</step>
 		</build>
 	</project>

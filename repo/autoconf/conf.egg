@@ -17,10 +17,12 @@
 				 <cross>native</cross>	
 				<silent>yes</silent>
 				<threads>1</threads>	
-				<path_post>
-					<add id="0" >usr/bin</add >
-					<add id="1" >usr/sbin</add >
-				</path_post> 	
+				<path>
+					<post>
+						<add id="0" >usr/bin</add >
+						<add id="1" >usr/sbin</add >
+					</post> 	
+				</path>
 			</step>
 		</build>
 	</project>

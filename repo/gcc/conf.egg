@@ -17,46 +17,48 @@
 				<cross>native</cross>	
 				<silent>yes</silent>
 				<threads>8</threads>	
-				<extra_conf id="0">--enable-languages=c,c++</extra_conf>
-				<extra_conf id="1">--without-headers</extra_conf>
-				<extra_conf id="2">--disable-nls</extra_conf>							
-				<extra_conf id="3">--disable-libstdcxx-pch</extra_conf>	
-				<extra_conf id="4">--with-gmp=$DEPLOY</extra_conf>	
-				<extra_conf id="5">--with-mpc=$DEPLOY</extra_conf>	
-				<extra_conf id="6">--with-mpfr=$DEPLOY</extra_conf>	
-				<extra_conf id="7">--with-sysroot=$DEPLOYS</extra_conf>				
-				<extra_conf id="8">--with-newlib</extra_conf>	
-				<extra_conf id="9">--with-local-prefix=$DEPLOY</extra_conf>
-				<extra_conf id="10">--disable-warnings</extra_conf>
-				<extra_conf id="11">--disable-shared</extra_conf>
-				<extra_conf id="12">--disable-multilib</extra_conf>
-				<extra_conf id="13">--disable-bootstrap</extra_conf>	
-				<extra_conf id="14">--enable-libgomp</extra_conf>			
-				<extra_conf id="15">--enable-lto	</extra_conf>			
-				<extra_conf id="16">--enable-threads=posix</extra_conf>			
-				<extra_conf id="17">--enable-tls</extra_conf>	
-				<extra_conf id="18">--disable-threads</extra_conf>
-				<extra_conf id="19">--disable-libatomic</extra_conf>
-				<extra_conf id="20">--disable-libgomp</extra_conf>
-				<extra_conf id="21">--disable-libmpx</extra_conf>
-				<extra_conf id="22">--disable-libquadmath</extra_conf>
-				<extra_conf id="23">--disable-libssp</extra_conf>
-				<extra_conf id="24">--disable-libvtv</extra_conf>
-				<extra_conf id="25">--disable-libstdcxx</extra_conf>
-				
-				<post_build id="0">
-					<mode>code</mode>		
-					<value>make -C $BUILD check test </value>
-				</post_build>
-				<post_build id="1">
-					<mode>code</mode>		
-					<value>echo $PATH; which gcc</value>
-				</post_build>
-				<post_build id="2">
-					<mode>code</mode>		
-					<value>gcc -fsyntax-only -xc -v -H </value>
-				</post_build>
-				
+				<configure>
+					<extra id="0">--enable-languages=c,c++</extra>
+					<extra id="1">--without-headers</extra>
+					<extra id="2">--disable-nls</extra>							
+					<extra id="3">--disable-libstdcxx-pch</extra>	
+					<extra id="4">--with-gmp=$DEPLOY</extra>	
+					<extra id="5">--with-mpc=$DEPLOY</extra>	
+					<extra id="6">--with-mpfr=$DEPLOY</extra>	
+					<extra id="7">--with-sysroot=$DEPLOYS</extra>				
+					<extra id="8">--with-newlib</extra>	
+					<extra id="9">--with-local-prefix=$DEPLOY</extra>
+					<extra id="10">--disable-warnings</extra>
+					<extra id="11">--disable-shared</extra>
+					<extra id="12">--disable-multilib</extra>
+					<extra id="13">--disable-bootstrap</extra>	
+					<extra id="14">--enable-libgomp</extra>			
+					<extra id="15">--enable-lto	</extra>			
+					<extra id="16">--enable-threads=posix</extra>			
+					<extra id="17">--enable-tls</extra>	
+					<extra id="18">--disable-threads</extra>
+					<extra id="19">--disable-libatomic</extra>
+					<extra id="20">--disable-libgomp</extra>
+					<extra id="21">--disable-libmpx</extra>
+					<extra id="22">--disable-libquadmath</extra>
+					<extra id="23">--disable-libssp</extra>
+					<extra id="24">--disable-libvtv</extra>
+					<extra id="25">--disable-libstdcxx</extra>
+				</configure>
+				<make>
+					<post  id="0">
+						<mode>code</mode>		
+						<value>make -C $BUILD check test </value>
+					</post >
+					<post  id="1">
+						<mode>code</mode>		
+						<value>echo $PATH; which gcc</value>
+					</post >
+					<post  id="2">
+						<mode>code</mode>		
+						<value>gcc -fsyntax-only -xc -v -H </value>
+					</post >
+				</make>
 			</step>
 		</build>	
 	</project>

@@ -10,19 +10,21 @@
 		</remote>	
 		<build>
 			<step id="0">
-			<priority>1</priority>
-			<name> prepare_gcc_native</name>
-			<prefix>usr</prefix>
-			<arch>x86_64</arch>
-		        <cross>native</cross>	
-			<silent>yes</silent>
-			<threads>8</threads>
-			<extra_conf id="0">--disable-nls</extra_conf>
-			<extra_conf id="1">--disable-multilib</extra_conf>	
-			<extra_conf id="2">--with-sysroot=$DEPLOYS</extra_conf>			
-			<path_post>
-				<add id="0" >usr/x86_64-pc-linux-gnu</add >
-			</path_post>
+				<priority>1</priority>
+				<name> prepare_gcc_native</name>
+				<prefix>usr</prefix>
+				<arch>x86_64</arch>
+				<cross>native</cross>	
+				<silent>yes</silent>
+				<threads>8</threads>
+				<path>
+					<add id="0" >usr/x86_64-pc-linux-gnu</add >
+				</path>
+				<configure>
+					<extra id="0">--disable-nls</extra>
+					<extra id="1">--disable-multilib</extra>	
+					<extra id="2">--with-sysroot=$DEPLOYS</extra>			
+				</configure>
 			</step>
 		</build>
 	</project>

@@ -349,8 +349,7 @@ fi
 #$ARGV TODO
 function config_all_step(){
 declare -i NUM=0
-while [ $NUM -lt $MAX_STEP ]; do
-	print_c "$GREEN_LIGHT" "Step   :   " "$YELLOW" "$NUM" 
+while [ $NUM -lt $MAX_STEP ]; do 
 	$SCRIPT_DIR/configure.sh $NUM $@
 	if [ $? -ne 0 ]; then 
 		exit 1
