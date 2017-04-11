@@ -408,6 +408,9 @@ if [ $? -eq 1 ]; then
 					;;		
 					CODE)
 						echo "$VALUE"  >> $3
+						echo "if [ $? -ne 0 ]; then">> $3
+						echo " error_c \"Custom command  Fail!\" \"$VALUE\"" >> $3
+						echo "fi" >> $3
 					;;		
 					*)
 					error_c "Unknow  post conf id=$i mode Phase $2" "project : $1"
@@ -600,42 +603,6 @@ echo "" >> "$SH_DISTCLEAN"
 end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
 }
 
-#$1 project
-#$2 step id
-#$3 path build
-#$4 build name
-#$5 arch
-#$6 cross
-#$7 silent
-#$8 thread
-#$9 deploy
-
-function generate_install_rule(){
-local SH_INSTALL="$3/install.sh"
-rm -f "$SH_INSTALL" 
-touch "$SH_INSTALL"
-chmod +rwx "$SH_INSTALL"
-#install
-prepare_script_generic "$1" "$2" "Start install " "$SH_INSTALL" "$4" "$5" "$6"
-#$1 project
-#$2 step id
-#$3 file out
-#$4 path build
-#$5 build name
-add_pre_install "$1" "$2" "$SH_INSTALL" "$3" "$4"
-#$1 project
-#$2 build path
-#$3 file out
-#$3 silent 
-add_entry_in_main_install_script "$1" "$3"  "$SH_INSTALL" "$7" 
-#$1 project
-#$2 step id
-#$3 file out
-#$4 path build
-#$5 build name
-add_post_install "$1" "$2" "$SH_INSTALL" "$3" "$4"
-end_script_generic "$1" "$2" "done  install " "$SH_INSTALL"
-}
 
 
 #$1 project
@@ -659,7 +626,6 @@ echo "$SH_CLEAN" >> "$SH_REBUILD"
 echo "$SH_DISTCLEAN" >> "$SH_REBUILD"
 echo "$3/bootstrap.sh" >> "$SH_REBUILD"
 echo "$SH_BUILD" >> "$SH_REBUILD"
-echo "$SH_INSTALL" >> "$SH_REBUILD"
 end_script_generic "$1" "$2" "done  rebuild " "$SH_REBUILD"
 }
 #$1 project
@@ -677,7 +643,6 @@ generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6" "$9" "$PREFIX"
 generate_clean_rule $@
 generate_distclean_rule $@ 
 generate_build_rules $@
-generate_install_rule $@
 generate_rebuild_rule $@
 }
 
@@ -724,6 +689,9 @@ if [ $? -eq 1 ]; then
 					;;		
 					CODE)
 						echo "$VALUE"  >> "$3"
+						echo "if [ $? -ne 0 ]; then">> $3
+						echo " error_c \"Custom command  Fail!\" \"$VALUE\"" >> $3
+						echo "fi" >> $3						
 					;;		
 					*)
 					error_c "Unknow  pre build id=$i mode Phase $2" "project : $1"
@@ -744,68 +712,6 @@ fi
 echo " "  >> $3
 }
 
-
-#$1 project
-#$2 step id
-#$3 file out
-#$4 path build
-#$5 build name
-function add_pre_install(){
-declare -i i=0
-local VALUE=""
-local MODE=""
-check_project $1
-if [ $? -eq 1 ]; then
-	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action pre_install"	
-		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
-		NUM=$?
-		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/install/pre"
-			NUM=$?
-			if [ $NUM -ne 0 ]; then
-				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/install/pre[@id=\"$i\"]/value")	
-				equs "$VALUE"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  pre install id=$i value Phase $2" "project : $1"
-				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/install/pre[@id=\"$i\"]/mode")	
-				equs "$MODE"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  pre install id=$i mode Phase $2" "project : $1"
-				fi
-				MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
-				case $MODE in 
-					SCRIPTS)
-						rsync -sy "$REPO/$1/$VALUE" "$4/$VALUE"				
-						echo "$4/$VALUE  $1 $2 $5 $4 $REPO/$1 $SOURCES/$1 $IMAGES/$5"  >> $3
-					;;		
-					SOURCE)
-						rsync -sy "$REPO/$1/$VALUE" "$4/$VALUE"				
-						echo "source $4/$VALUE  $1 $2 $5 $4 $REPO/$1 $SOURCES/$1 $IMAGES/$5"  >> $3
-					;;		
-					CODE)
-						echo "$VALUE"  >> $3
-					;;		
-					*)
-					error_c "Unknow  pre install id=$i mode Phase $2" "project : $1"
-					;;
-				esac				
-				i=$((i+1))
-				done 
-			else
-				echo "# no pre build script available for prject : $1" >> $3
-			fi
-		fi
-	else
-		error_c "Missing conf.egg file " "project : $1"
-	fi
-else
-	error_c "Missing project in $REPO " "project : $1"
-fi
-echo " "  >> $3
-}
 
 
 #$1 project
@@ -850,6 +756,9 @@ if [ $? -eq 1 ]; then
 					;;		
 					CODE)
 						echo "$VALUE"  >> $3
+						echo "if [ $? -ne 0 ]; then">> $3
+						echo " error_c \"Custom command  Fail!\" \"$VALUE\"" >> $3
+						echo "fi" >> $3
 					;;		
 					*)
 					error_c "Unknow  post build id=$i mode Phase $2" "project : $1"
@@ -870,66 +779,7 @@ fi
 echo " "  >> $3
 }
 
-#$1 project
-#$2 step id
-#$3 file out
-#$4 path build
-#$5 build name
-function add_post_install(){
-declare -i i=0
-local VALUE=""
-check_project $1
-if [ $? -eq 1 ]; then
-	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action post_install"	
-		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
-		NUM=$?
-		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/install/post"
-			NUM=$?
-			if [ $NUM -ne 0 ]; then
-				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/install/post[@id=\"$i\"]/value")	
-				equs "$VALUE"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  post install id=$i Phase $2" "project : $1"
-				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/install/post[@id=\"$i\"]/mode")	
-				equs "$MODE"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  post install id=$i mode Phase $2" "project : $1"
-				fi
-				MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
-				case $MODE in 
-					SCRIPTS)
-						rsync -sy "$REPO/$1/$VALUE" "$4/$VALUE"				
-						echo "$4/$VALUE  $1 $2 $5 $4 $REPO/$1 $SOURCES/$1 $IMAGES/$5"  >> $3
-					;;		
-					SOURCE)
-						rsync -sy "$REPO/$1/$VALUE" "$4/$VALUE"				
-						echo "source $4/$VALUE  $1 $2 $5 $4 $REPO/$1 $SOURCES/$1 $IMAGES/$5"  >> $3
-					;;		
-					CODE)
-						echo "$VALUE"  >> $3
-					;;		
-					*)
-					error_c "Unknow  post install id=$i mode Phase $2" "project : $1"
-					;;
-				esac				
-				i=$((i+1))
-				done 
-			else
-				echo "# no post install script available for prject : $1" >> $3
-			fi
-		fi
-	else
-		error_c "Missing conf.egg file " "project : $1"
-	fi
-else
-	error_c "Missing project in $REPO " "project : $1"
-fi
-echo " "  >> $3
-}
+
 
 
 #$1 project
@@ -954,27 +804,6 @@ echo "total_time=\$((stop_time-start_time))">> "$3"
 echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$3" 
 }
 
-#$1 project
-#$2 build path
-#$3 file out
-#$4 silent 
-function add_entry_in_main_install_script()
-{
-#install
-echo "start_time=\$(date +%s)">> "$3"
-echo " print_s_ita \"       Make \"  \"install\"  \"start\"" >> "$3"
-if [ "$4" == "yes" ]; then 
-	echo "make --silent -C \$BUILD   install > /dev/null 2>&1 " >> "$3"
-else
-	echo "make -C \$BUILD  install">> "$3"
-fi
-echo "if [ \$? -ne 0 ]; then">> "$3"
-echo "    error_c \"Error on install \" \"  - project \$1\"" >>"$3"
-echo "fi"  >> "$3"
-echo "stop_time=\$(date +%s)">> "$3" 
-echo "total_time=\$((stop_time-start_time))">> "$3" 
-echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$3"
-}
 
 #$1 project
 #$2 build phase number 0,1,2.....
@@ -1103,7 +932,7 @@ else
 						echo  "#no configure is needed .... ">> $C_FILE
 					else
 						#to add Makefile check
-						error_c "Cannot locate configure script" "  - project $1"
+						error_c "Configure script or Makefile missing" "  - project $1"
 					fi
 				fi
 			fi

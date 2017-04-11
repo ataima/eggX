@@ -47,6 +47,9 @@
 							<value>export CXX=$DEPLOY/bin/g++</value>
 						</pre>
 					</rule>
+					<rule id="1">
+						<name>install</name> 
+					</rule>					
 				</make>		
 			</step>
 		</build>	

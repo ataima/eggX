@@ -168,10 +168,6 @@ while [ $ID -lt $MAX_STEP ] ; do
 		if [ $? -ne 0 ] ; then
 			exit -1;
 		fi
-		$BUILD/$PRJ/$NAME/install.sh
-		if [ $? -ne 0 ] ; then
-			exit -1;
-		fi
 		sync
 	done
 done
@@ -199,27 +195,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 done
 }
 
-#none
-function install_all(){
-local ID=0 
-local V=""
-while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority $ID
-	for V in $SORTREQ; do
-		V=$(echo $V  | sed -e 's/%/   /g')
-		PRI=$(echo $V | awk '{print $1}')
-		NAME=$(echo $V | awk '{print $2}')
-		PRJ=$(echo $V | awk '{print $3}')
-		print_build_msg "$PRI" "$NAME" "$PRJ"
-		cd "$BUILD/$PRJ/$NAME"
-		$BUILD/$PRJ/$NAME/install.sh
-		if [ $? -ne 0 ] ; then
-			exit -1;
-		fi
-		sync
-	done
-done
-}
+
 
 #$@ from argv build.sh
 function build_single(){
@@ -252,10 +228,6 @@ for V in $PRJ_NAMES; do
 			exit -1;
 		fi
 		$BUILD/$V/$I/build.sh
-		if [ $? -ne 0 ] ; then
-			exit -1;
-		fi
-		$BUILD/$V/$I/install.sh
 		if [ $? -ne 0 ] ; then
 			exit -1;
 		fi
@@ -296,36 +268,7 @@ for V in $PRJ_NAMES; do
 done
 }
 
-#$@ from argv build.sh
-function install_single(){
-#trovo nomi build per ogni progetto
-local PRJ_NAMES=""
-for V in $@; do
-	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
-done
 
-local PWD=$(pwd)
-for V in $PRJ_NAMES; do
-	set -x
-	for I in $@; do
-		for T in $SORTREQ; do
-			SEQ=$(echo $T | grep $V | grep $I )
-			if [ "$SEQ" != "" ]; then 
-				break;
-			fi
-		done
-		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
-		PRI=$(echo $SEQ | awk '{print $1}')
-		NAME=$(echo $SEQ | awk '{print $2}')
-		PRJ=$(echo $SEQ | awk '{print $3}')
-		print_build_msg "$PRI" "$NAME" "$PRJ"
-		cd "$BUILD/$V/$I"
-		$BUILD/$V/$I/install.sh
-		sync
-		print_c "$WHITE" "-------------------------------------------------------"
-	done 
-done
-}
 
 #$@
 function build_all_packet(){
@@ -345,14 +288,6 @@ else
 fi
 }
 
-#$ARGV
-function install_all_packet(){
-if [ "$1" == "" ]; then
-	install_all
-else
-	isntall_single $@
-fi
-}
 
 #$ARGV TODO
 function config_all_step(){
@@ -404,9 +339,8 @@ function usage(){
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : download all sources from repo projects"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure all repo projects or specified projects in argv"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure+build+install    all repo projects or specified projects in argv"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure+build    all repo projects or specified projects in argv"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "build :   build all repo projects or specified projects in argv"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "install : install   all repo projects or specified projects in argv"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : clear all build and deploy aout and redo source + configure+do"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "try <step xx> <project nn>: open a bash with setenv for step xx of project nn"	
 	exit 1
@@ -418,7 +352,6 @@ local SOURCE=0
 local CONFIGURE=0
 local MAKE=0
 local DO=0
-local INSTALL=0
 local REDOALL=0
 local TRY=0
 for i in $@; do
@@ -453,12 +386,7 @@ case $i in
 	DO=1		
 	shift
 	break
-	;;	
-	install)
-	INSTALL=1		
-	shift
-	break
-	;;	
+	;;		
 	redoall)
 	REDOALL=1		
 	shift
@@ -511,14 +439,10 @@ else
 				if [ $MAKE -ne 0 ]; then	
 					compile_all_packet  "$@"
 				else
-					if [ $INSTALL -ne 0 ]; then	
-						install_all_packet  "$@"
+					if [ $TRY -ne 0 ]; then	
+						try_packet  "$@"
 					else
-						if [ $TRY -ne 0 ]; then	
-							try_packet  "$@"
-						else
-							usage
-						fi
+						usage
 					fi
 				fi
 			fi

@@ -29,6 +29,9 @@
 					<rule id="0">
 						<name>all</name> 
 					</rule>
+					<rule id="1">
+						<name>install</name> 
+					</rule>
 				</make>
 			</step>
 		</build>

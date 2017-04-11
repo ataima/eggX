@@ -60,7 +60,7 @@ local RES=0
 local KEYS=""
 if [ ! -f  $1.$4 ]; then 
 	dolog "Download sign file : $1.$4"
-	wget  --show-progress -q "$2.$4" -O "$1.$4"
+	wget  --show-progress -q "$2" -O "$1.$4"
 	tmp=$( ls -al  "$1.$4"  |  awk  '{print $5}' )
 	if [  $tmp -ne 0  ]; then
 		KEYS=$(ls $RKEYS/* )
@@ -86,7 +86,7 @@ if [ ! -f  $1.$4 ]; then
 			chmod 444 $1
 		else
 			print_c "$RED_LIGHT" "   - SIG check source FAIL" "$YELLOW" $3	
-			rm -f  "$1.$4"
+#			rm -f  "$1.$4"
 #			rm -f "$1"
 		fi
 	else
@@ -202,6 +202,35 @@ return $RES
 }
 
 
+#$1 filename 
+#$2 remote repository
+#$3 project
+function check_sign_fix(){
+local RES=0
+local i=$(echo $2 | sed 's/^.*//')
+case $i in
+	"sig"|"sign"|"asc")
+	check_pgp $1 $2 $3 $i  
+	RES=$?	
+	;;
+	"md5")
+	check_md5sum $1 $2 $3
+	RES=$?
+	;;
+	"sha1")
+	check_sha1sum $1 $2 $3
+	RES=$?
+	;;
+	*)
+	error_c "Unknow sign " "$i - project : $3"
+	;;
+esac 
+if [ $RES -eq 1 ] || [ $RES -eq 99 ]; then 
+	break
+fi
+return $RES
+}
+
 # get a packet from internet
 # $1 project name
 # $2 link
@@ -221,20 +250,25 @@ rm -f $REPO/$1/logs/$LOG/*
 dolog "Created download log file : $REPO/$1/logs/$LOG"
 wget  --show-progress -q -o "$REPO/$1/logs/$LOG" "$PNAME" -O "$REPO/$1/$3"
 if [ -f  "$REPO/$1/$3" ]; then
-	if [ "$4" != "" ]; then
-		check_sign "$REPO/$1/$3" "$4/$5" "$1"
+	if [ "$4/$5" != "" ] ; then
+		#check_sign_fix "$REPO/$1/$3" "$4/$5" "$1"
+		echo "TODO"
 	else
 		check_sign "$REPO/$1/$3" "$PNAME" "$1"
 	fi
 	RES=$?
 	if [ $RES -eq 99 ]; then 
-		wget_packet $1 $2 $3
+		wget_packet $1 $2 $3 $4 $5
 	fi
 	if [ $RES -eq 1 ]; then 
 		if [ ! -d "$SOURCES/$1" ]; then 
 			mkdir -p "$SOURCES/$1"
 		fi
 		dolog "Untar file $REPO/$1/$3 "
+		if [ ! -e "$SOURCES/$1" ] ; then
+			mkdir -p "$SOURCES/$1"
+		fi
+		#echo "-->tar -xf $REPO/$1/$3 -C  $SOURCES/$1"
 		tar -xf "$REPO/$1/$3" -C  "$SOURCES/$1"
 		if [ $? -ne 0 ]; then
 			error_c "Unable to untar file " "$REPO/$1/$3 project $1"
@@ -253,14 +287,15 @@ fi
 function wget_update_packet(){
 local PNAME="$2/$3"
 if [ -f  "$REPO/$1/$3" ]; then
-	if [ "$4" != "" ]; then
-		check_sign "$REPO/$1/$3" "$4/$5" "$1"
+	if [ "$4/$5" != "" ] ; then
+		#check_sign_fix "$REPO/$1/$3" "$4/$5" "$1"
+		echo "TODO"
 	else
 		check_sign "$REPO/$1/$3" "$PNAME" "$1"
 	fi
 	RES=$?
 	if [ $RES -eq 99 ]; then 
-		wget_packet $1 $2 $3
+		wget_packet $1 $2 $3 $4 $5
 	fi
 fi
 }

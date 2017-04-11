@@ -11,22 +11,25 @@
 		</remote>		
 		<build>
 			<step id="0">
-			<priority>1000</priority>
-			<name> prepare_gcc_native</name>
-			<prefix>usr</prefix>
-			<arch>x86_64</arch>
-		        <cross>native</cross>	
-			<silent>yes</silent>
-			<threads>8</threads>
-			<configure>
-				<extra   id="0">--disable-werror</extra>	
-				<extra   id="1">--disable-nls</extra>	
-			</configure>
-			<make>
-				<rule id="0">
-					<name>all</name> 
-				</rule>
-			</make>			
+				<priority>1000</priority>
+				<name> prepare_gcc_native</name>
+				<prefix>usr</prefix>
+				<arch>x86_64</arch>
+				<cross>native</cross>	
+				<silent>yes</silent>
+				<threads>8</threads>
+				<configure>
+					<extra   id="0">--disable-werror</extra>	
+					<extra   id="1">--disable-nls</extra>	
+				</configure>
+				<make>
+					<rule id="0">
+						<name>all</name> 
+					</rule>
+					<rule id="1">
+						<name>install</name> 
+					</rule>				
+				</make>			
 			</step>
 		</build>
 	</project>

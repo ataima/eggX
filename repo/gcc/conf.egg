@@ -65,6 +65,9 @@
 							<value>gcc -fsyntax-only -xc -v -H </value>
 						</post >
 					</rule>
+					<rule id="3">
+						<name>install</name> 
+					</rule>
 				</make>
 			</step>
 		</build>	

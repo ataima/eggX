@@ -23,23 +23,19 @@
 				<threads>8</threads>			
 				<make>
 					<rule id="0">
-						<name>oldconfig</name>
-						<thread> 1 </thread>
-					</rule>
-					<rule id="1">
 						<pre id="0">
 							<mode>code</mode>
 							<value>mkdir -p $BUILDS/$PROJECT/temp</value>
-						</pre>
-						<pre id="1">
-							<mode>code</mode>
-							<value>export  INSTALL_HDR_PATH=$BUILDS/$PROJECT/temp</value>
 						</pre>
 						<name> V=1 INSTALL_HDR_PATH=$BUILDS/$PROJECT/temp headers_install</name>
 						<thread> 1 </thread>
 						<post id="0">
 							<mode>code</mode>
-							<value>cp -rv $BUILDS/$PROJECT/temp/include/* $DEPLOY/include && rm -rf  $BUILDS/$PROJECT/temp</value>
+							<value>cp -rv $BUILDS/$PROJECT/temp/include/* $DEPLOY/include </value>
+						</post>						
+						<post id="1">
+							<mode>code</mode>
+							<value>rm -rf  $BUILDS/$PROJECT/temp </value>
 						</post>						
 					</rule>
 				</make>
