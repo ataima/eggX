@@ -260,7 +260,7 @@ function generate_setenv(){
 	echo "export SOURCE=$SRC" >> "$3"
 	echo "export BUILD=$BUILD/$4/$1/build" >> "$3"
 	echo "export DEPLOYS=$IMAGES/$4" >> "$3"
-	echo "export DEPLOY=$7/$8" >> "$3"
+	echo "export DEPLOY=$7" >> "$3"
 	echo "export ARCH=$5">> "$3"
 	echo "export CROSS=$6">> "$3"
 }
@@ -343,6 +343,9 @@ if [ $? -eq 1 ]; then
 					;;		
 					CODE)
 						echo "$VALUE"  >> $3
+						echo "if [ $? -ne 0 ]; then">> $3
+						echo " error_c \"Custom command  Fail!\" \"$VALUE\"" >> $3
+						echo "fi" >> $3
 					;;		
 					*)
 					error_c "Unknow  pre build id=$i mode Phase $2" "project : $1"
@@ -500,6 +503,9 @@ rm -f "$SH_BUILD"
 touch "$SH_BUILD"
 chmod +rwx "$SH_BUILD"
 prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" "$5" "$6"
+echo "declare -i start_time">> "$SH_BUILD"
+echo "declare -i stop_time">> "$SH_BUILD"
+echo "declare -i total_time">> "$SH_BUILD"
 #------------------------------------------------------------------------------------------------------------------
 check_project $1
 if [ $? -eq 1 ]; then
@@ -554,7 +560,7 @@ end_script_generic "$1" "$2" "done  build " "$SH_BUILD"
 #$7 silent
 #$8 thread
 #$9 deploy
-#$10 prefix
+
 function generate_clean_rule(){
 local SH_CLEAN="$3/clean.sh"
 rm -f "$SH_CLEAN" 
@@ -579,7 +585,7 @@ end_script_generic "$1" "$2" "done clean build " "$SH_CLEAN"
 #$7 silent
 #$8 thread
 #$9 deploy
-#$10 prefix
+
 function generate_distclean_rule(){
 local SH_DISTCLEAN="$3/distclean.sh"
 rm -f "$SH_DISTCLEAN"  
@@ -603,7 +609,7 @@ end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
 #$7 silent
 #$8 thread
 #$9 deploy
-#$10 prefix
+
 function generate_install_rule(){
 local SH_INSTALL="$3/install.sh"
 rm -f "$SH_INSTALL" 
@@ -641,7 +647,6 @@ end_script_generic "$1" "$2" "done  install " "$SH_INSTALL"
 #$7 silent
 #$8 thread
 #$9 deploy
-#$10 prefix
 function generate_rebuild_rule(){
 local SH_REBUILD="$3/rebuild.sh"
 rm -f  "$SH_REBUILD" 
@@ -666,9 +671,9 @@ end_script_generic "$1" "$2" "done  rebuild " "$SH_REBUILD"
 #$7 silent
 #$8 thread
 #$9 deploy
-#$10 prefix
 function add_build_script(){
-generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6" "$9" "$10"
+local PREFIX=$(basename "$9")
+generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6" "$9" "$PREFIX"
 generate_clean_rule $@
 generate_distclean_rule $@ 
 generate_build_rules $@
@@ -934,14 +939,19 @@ echo " "  >> $3
 #$5 threads
 #$6 make rule name
 function add_entry_in_main_build_script(){
+echo "start_time=\$(date +%s)">> "$3"
+echo " print_s_ita \"       Make \"  \"$6:$5\"  \"start\"" >> "$3"
 if [ "$4" == "yes" ]; then 
-	echo "make --silent -C \$BUILD -j$5 $6 > /dev/null" >> "$3"
+	echo "make --silent -C \$BUILD -j$5 $6 > /dev/null 2>&1 " >> "$3"
 else
 	echo "make -C \$BUILD  -j$5 $6 ">> "$3"
 fi
 echo "if [ \$? -ne 0 ]; then">> "$3"
 echo "    error_c \"Error on build \" \"  - project \$1\"" >>"$3"
 echo "fi"  >> "$3"
+echo "stop_time=\$(date +%s)">> "$3" 
+echo "total_time=\$((stop_time-start_time))">> "$3" 
+echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$3" 
 }
 
 #$1 project
@@ -951,14 +961,19 @@ echo "fi"  >> "$3"
 function add_entry_in_main_install_script()
 {
 #install
+echo "start_time=\$(date +%s)">> "$3"
+echo " print_s_ita \"       Make \"  \"install\"  \"start\"" >> "$3"
 if [ "$4" == "yes" ]; then 
-	echo "make --silent -C \$BUILD   install > /dev/null" >> "$3"
+	echo "make --silent -C \$BUILD   install > /dev/null 2>&1 " >> "$3"
 else
 	echo "make -C \$BUILD  install">> "$3"
 fi
 echo "if [ \$? -ne 0 ]; then">> "$3"
 echo "    error_c \"Error on install \" \"  - project \$1\"" >>"$3"
 echo "fi"  >> "$3"
+echo "stop_time=\$(date +%s)">> "$3" 
+echo "total_time=\$((stop_time-start_time))">> "$3" 
+echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$3"
 }
 
 #$1 project
@@ -970,6 +985,7 @@ local ARCH=""
 local CROSS=""
 local SILENT=""
 local INDEX=""
+local PREFIX=""
 local NUM=0
 check_project $1
 if [ $? -eq 1 ]; then
@@ -1035,7 +1051,7 @@ else
 fi
 local C_BUILD="$BUILD/$NAME/$1"
 local C_FILE="$C_BUILD/bootstrap.sh"
-local DEST="$IMAGES/$NAME"
+local DEST="$IMAGES/$NAME/$PREFIX"
 mkdir -p "$C_BUILD"
 rm -rf "$C_BUILD/*"
 mkdir -p "$DEST"
@@ -1049,7 +1065,7 @@ BTARGET=$(echo $CROSS  | tr '[:lower:]' '[:upper:]')
 if [ "$BTARGET" == "NATIVE" ]; then
 	BTARGET=""
 else
-	BTARGET="--target=$BUILD_CROSS"
+	BTARGET="--target=$C_BUILD"
 fi
 EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
@@ -1087,7 +1103,7 @@ else
 						echo  "#no configure is needed .... ">> $C_FILE
 					else
 						#to add Makefile check
-						error_c "Cannot locate configure script" "  - project $BUILD_PROJECT"
+						error_c "Cannot locate configure script" "  - project $1"
 					fi
 				fi
 			fi
@@ -1096,13 +1112,13 @@ else
 fi	
 EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
-	echo "set +x ">> $CONF_RUN
+	echo "set +x ">> $C_FILE
 fi
 add_post_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 #build
 add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$ARCH" "$CROSS" "$SILENT" "$THREADS" "$DEST" "$PREFIX"
-print_ita "STEP:$2" "$1"  "configured done !"
+print_ita "STEP : $2" "$1"  "configured done !"
 }
 
 

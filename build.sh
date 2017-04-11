@@ -82,11 +82,13 @@ fi
 
 #$1 ID BUILD STEP
 function prepare_seq_priority(){
+local V=""
 SORTREQ=""
 BSEQ=""
+declare -i ID=$1
 while [ $ID -lt $MAX_STEP ] ; do
 	for V in $ALL_PACKETS; do
-		insert_packet $V $1 
+		insert_packet $V $ID 
 	done	
 	ID=$((ID+1))
 done
@@ -141,7 +143,7 @@ echo $PRJ_NAME
 #$2 name
 #$3 project
 function print_build_msg(){
-print_ita  "PRI : $1"  "PRJ : $2"  "IMG : $3"
+print_ita  "DO   : $1"  "$2"  "$3"
 }
 
 
@@ -364,6 +366,39 @@ while [ $NUM -lt $MAX_STEP ]; do
 done
 }
 
+
+
+#$ARGV 
+function try_packet(){
+local PRJ=""
+local V=""
+declare -i NUM=$1
+REX='^[0-9]+$'
+if ! [[ $NUM =~ $REX ]] ; then
+   error_c "Input step isn't a number !!"
+fi
+if [ ! "$2" ]; then
+	error_c "Input project is empty !!"
+fi
+if [ $NUM -lt $MAX_STEP ]; then
+	prepare_seq_priority $NUM
+	for i in $SORTREQ; do
+		V=$(echo $i  | sed -e 's/%/   /g')
+		NAME=$( echo $V | awk '{print $2}' )
+		if [ "$NAME" == "$2" ]; then			
+			PRJ=$( echo $V | awk '{print $3}' )
+			break;
+		fi
+	done
+	V=$(pwd)
+	cd "$BUILD/$PRJ/$2"
+	bash --init-file $BUILD/$PRJ/$2/setenv.sh
+	cd $V	
+else
+	error_c "Input step too BIG !!"
+fi
+}
+
 function usage(){
 	print_c "$BLUE_LIGHT" "usage : ./build.sh <-D> command  <args to pass subcommand>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
@@ -373,6 +408,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "build :   build all repo projects or specified projects in argv"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "install : install   all repo projects or specified projects in argv"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : clear all build and deploy aout and redo source + configure+do"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "try <step xx> <project nn>: open a bash with setenv for step xx of project nn"	
 	exit 1
 }
 
@@ -384,6 +420,7 @@ local MAKE=0
 local DO=0
 local INSTALL=0
 local REDOALL=0
+local TRY=0
 for i in $@; do
 case $i in 
 	-D|--debug)
@@ -394,6 +431,11 @@ case $i in
 	;;	
 	source)
 	SOURCE=1
+	shift
+	break
+	;;
+	try)
+	TRY=1
 	shift
 	break
 	;;	
@@ -472,7 +514,11 @@ else
 					if [ $INSTALL -ne 0 ]; then	
 						install_all_packet  "$@"
 					else
-						usage
+						if [ $TRY -ne 0 ]; then	
+							try_packet  "$@"
+						else
+							usage
+						fi
 					fi
 				fi
 			fi
