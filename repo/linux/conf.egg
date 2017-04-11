@@ -19,7 +19,7 @@
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
 				<cross>native</cross>	
-				<silent>no</silent>
+				<silent>yes</silent>
 				<threads>8</threads>			
 				<make>
 					<rule id="0">
@@ -39,8 +39,8 @@
 						<thread> 1 </thread>
 						<post id="0">
 							<mode>code</mode>
-							<value>cp -rv $BUILDS/$PROJECT/temp/include/* $DEPLOY/include</value>
-						</post>
+							<value>cp -rv $BUILDS/$PROJECT/temp/include/* $DEPLOY/include && rm -rf  $BUILDS/$PROJECT/temp</value>
+						</post>						
 					</rule>
 				</make>
 			</step>
