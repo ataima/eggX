@@ -13,7 +13,6 @@ source "$SCRIPT_DIR/functions.sh"
 
 
 
-
 declare -A MAP    
 
 declare -A BSEQ    
@@ -22,6 +21,13 @@ declare -A SORTREQ
 ALL_PACKETS=$(ls $OROOT/repo  | sed 's/conf.egg//g')
 
 declare -i MAX_STEP=0
+
+
+function forcestop(){
+	error_c "User Intenterrupt" " warning work not complete! "
+}
+
+trap "forcestop" SIGHUP SIGINT SIGTERM
 
 # test if exist project <name> from packets list...
 # $1 packet name
@@ -130,6 +136,16 @@ echo $PRJ_NAME
 }
 
 
+#print build start 
+#$1 pririty
+#$2 name
+#$3 project
+function print_build_msg(){
+print_c "$WHITE" "-------------------------------------------------------"
+print_c "$GREEN_LIGHT" "PRI : $1" "$WHITE" "  PRJ : $2" "$RED_LIGHT" "   IMG : $3"
+}
+
+
 #none
 function build_all(){
 local ID=0 
@@ -141,8 +157,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 		PRI=$(echo $V | awk '{print $1}')
 		NAME=$(echo $V | awk '{print $2}')
 		PRJ=$(echo $V | awk '{print $3}')
-		print_c "$WHITE" "-------------------------------------------------------"
-		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
+		print_build_msg "$PRI" "$NAME" "$PRJ"
 		cd "$BUILD/$PRJ/$NAME"
 		$BUILD/$PRJ/$NAME/bootstrap.sh
 		if [ $? -ne 0 ] ; then
@@ -157,7 +172,6 @@ while [ $ID -lt $MAX_STEP ] ; do
 			exit -1;
 		fi
 		sync
-		print_c "$WHITE" "-------------------------------------------------------"
 	done
 done
 }
@@ -173,15 +187,13 @@ while [ $ID -lt $MAX_STEP ] ; do
 		PRI=$(echo $V | awk '{print $1}')
 		NAME=$(echo $V | awk '{print $2}')
 		PRJ=$(echo $V | awk '{print $3}')
-		print_c "$WHITE" "-------------------------------------------------------"
-		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
+		print_build_msg "$PRI" "$NAME" "$PRJ"
 		cd "$BUILD/$PRJ/$NAME"
 		$BUILD/$PRJ/$NAME/build.sh
 		if [ $? -ne 0 ] ; then
 			exit -1;
 		fi
 		sync
-		print_c "$WHITE" "-------------------------------------------------------"
 	done
 done
 }
@@ -197,15 +209,13 @@ while [ $ID -lt $MAX_STEP ] ; do
 		PRI=$(echo $V | awk '{print $1}')
 		NAME=$(echo $V | awk '{print $2}')
 		PRJ=$(echo $V | awk '{print $3}')
-		print_c "$WHITE" "-------------------------------------------------------"
-		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
+		print_build_msg "$PRI" "$NAME" "$PRJ"
 		cd "$BUILD/$PRJ/$NAME"
 		$BUILD/$PRJ/$NAME/install.sh
 		if [ $? -ne 0 ] ; then
 			exit -1;
 		fi
 		sync
-		print_c "$WHITE" "-------------------------------------------------------"
 	done
 done
 }
@@ -234,8 +244,7 @@ for V in $PRJ_NAMES; do
 		PRI=$(echo $SEQ | awk '{print $1}')
 		NAME=$(echo $SEQ | awk '{print $2}')
 		PRJ=$(echo $SEQ | awk '{print $3}')
-		print_c "$WHITE" "-------------------------------------------------------"
-		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
+		print_build_msg "$PRI" "$NAME" "$PRJ"
 		cd "$BUILD/$V/$I"
 		$BUILD/$V/$I/bootstrap.sh
 		if [ $? -ne 0 ] ; then
@@ -277,8 +286,7 @@ for V in $PRJ_NAMES; do
 		PRI=$(echo $SEQ | awk '{print $1}')
 		NAME=$(echo $SEQ | awk '{print $2}')
 		PRJ=$(echo $SEQ | awk '{print $3}')
-		print_c "$WHITE" "-------------------------------------------------------"
-		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
+		print_build_msg "$PRI" "$NAME" "$PRJ"
 		cd "$BUILD/$V/$I"
 		$BUILD/$V/$I/build.sh
 		sync
@@ -309,8 +317,7 @@ for V in $PRJ_NAMES; do
 		PRI=$(echo $SEQ | awk '{print $1}')
 		NAME=$(echo $SEQ | awk '{print $2}')
 		PRJ=$(echo $SEQ | awk '{print $3}')
-		print_c "$WHITE" "-------------------------------------------------------"
-		print_c "$GREEN_LIGHT" "$PRI" "$WHITE" "$NAME" "$RED_LIGHT" "$PRJ"
+		print_build_msg "$PRI" "$NAME" "$PRJ"
 		cd "$BUILD/$V/$I"
 		$BUILD/$V/$I/install.sh
 		sync

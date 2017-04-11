@@ -470,9 +470,6 @@ echo "    error_c \"Configure return error: \$RES \" \"  - project : \$PROJECT s
 echo "fi" >> $3 
 }
 
-
-
-
 #$1 project
 #$2 step id
 #$3 path build
@@ -480,37 +477,24 @@ echo "fi" >> $3
 #$5 arch
 #$6 cross
 #$7 silent
-#$8 thread
+#$8 thread //max 
 #$9 deploy
 #$10 prefix
-function add_build_script(){
-echo "-->$@"
-generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6" "$9" "$10"
-local SH_CLEAN="$3/clean.sh"
-local SH_DISTCLEAN="$3/distclean.sh"
-local SH_BUILD="$3/build.sh"
-local SH_INSTALL="$3/install.sh"
-local SH_REBUILD="$3/rebuild.sh"
-rm -f "$SH_CLEAN" "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD" 
-touch "$SH_CLEAN" "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD"
-sync
-chmod +rwx "$SH_CLEAN" "$SH_DISTCLEAN" "$SH_BUILD" "$SH_INSTALL" "$SH_REBUILD"
-# clean 
-prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" "$5" "$6"
-echo "if [ -f Makefile ]; then " >> "$SH_CLEAN"
-echo " make -C \$BUILD clean " >> "$SH_CLEAN"
-echo "fi" >> "$SH_CLEAN"
-echo "" >> "$SH_CLEAN"
-echo "" >> "$SH_CLEAN"
-end_script_generic "$1" "$2" "done clean build " "$SH_CLEAN"
-#distclean 
-prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" "$5" "$6"
-echo "cd \$PWD " >> "$SH_DISTCLEAN"
-echo "rm -rf \$BUILD " >> "$SH_DISTCLEAN"
-echo "" >> "$SH_DISTCLEAN"
-echo "" >> "$SH_DISTCLEAN"
-end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
+#<make>
+#<rule id=0>
+#<name>all</name> 
+#<pre id=0></pre>    optional
+#<post id=0></post> optional
+#<tread></thread>    optional
+#</rule>
+#</make>
+#
+function generate_build_rules(){
 #build
+local SH_BUILD="$3/build.sh"
+rm -f "$SH_BUILD" 
+touch "$SH_BUILD"
+chmod +rwx "$SH_BUILD"
 prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" "$5" "$6"
 #$1 project
 #$2 step id
@@ -531,6 +515,72 @@ add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "$7" "$8"
 #$5 build name
 add_post_build "$1" "$2" "$SH_BUILD" "$3" "$4"
 end_script_generic "$1" "$2" "done  build " "$SH_BUILD"
+}
+
+#$1 project
+#$2 step id
+#$3 path build
+#$4 build name
+#$5 arch
+#$6 cross
+#$7 silent
+#$8 thread
+#$9 deploy
+#$10 prefix
+function generate_clean_rule(){
+local SH_CLEAN="$3/clean.sh"
+rm -f "$SH_CLEAN" 
+touch "$SH_CLEAN" 
+chmod +rwx "$SH_CLEAN" 
+# clean 
+prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" "$5" "$6"
+echo "if [ -f Makefile ]; then " >> "$SH_CLEAN"
+echo " make -C \$BUILD clean " >> "$SH_CLEAN"
+echo "fi" >> "$SH_CLEAN"
+echo "" >> "$SH_CLEAN"
+echo "" >> "$SH_CLEAN"
+end_script_generic "$1" "$2" "done clean build " "$SH_CLEAN"
+}
+
+#$1 project
+#$2 step id
+#$3 path build
+#$4 build name
+#$5 arch
+#$6 cross
+#$7 silent
+#$8 thread
+#$9 deploy
+#$10 prefix
+function generate_distclean_rule(){
+local SH_DISTCLEAN="$3/distclean.sh"
+rm -f "$SH_DISTCLEAN"  
+touch "$SH_DISTCLEAN" 
+chmod +rwx "$SH_DISTCLEAN" 
+#distclean 
+prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" "$5" "$6"
+echo "cd \$PWD " >> "$SH_DISTCLEAN"
+echo "rm -rf \$BUILD " >> "$SH_DISTCLEAN"
+echo "" >> "$SH_DISTCLEAN"
+echo "" >> "$SH_DISTCLEAN"
+end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
+}
+
+#$1 project
+#$2 step id
+#$3 path build
+#$4 build name
+#$5 arch
+#$6 cross
+#$7 silent
+#$8 thread
+#$9 deploy
+#$10 prefix
+function generate_install_rule(){
+local SH_INSTALL="$3/install.sh"
+rm -f "$SH_INSTALL" 
+touch "$SH_INSTALL"
+chmod +rwx "$SH_INSTALL"
 #install
 prepare_script_generic "$1" "$2" "Start install " "$SH_INSTALL" "$4" "$5" "$6"
 #$1 project
@@ -551,6 +601,24 @@ add_entry_in_main_install_script "$1" "$3"  "$SH_INSTALL" "$7"
 #$5 build name
 add_post_install "$1" "$2" "$SH_INSTALL" "$3" "$4"
 end_script_generic "$1" "$2" "done  install " "$SH_INSTALL"
+}
+
+
+#$1 project
+#$2 step id
+#$3 path build
+#$4 build name
+#$5 arch
+#$6 cross
+#$7 silent
+#$8 thread
+#$9 deploy
+#$10 prefix
+function generate_rebuild_rule(){
+local SH_REBUILD="$3/rebuild.sh"
+rm -f  "$SH_REBUILD" 
+touch "$SH_REBUILD"
+chmod +rwx "$SH_REBUILD"
 #rebuild
 prepare_script_generic "$1" "$2" "Start Rebuild " "$SH_REBUILD" "$4" "$5" "$6"
 echo "cd .." >> "$SH_REBUILD"
@@ -560,6 +628,24 @@ echo "$3/bootstrap.sh" >> "$SH_REBUILD"
 echo "$SH_BUILD" >> "$SH_REBUILD"
 echo "$SH_INSTALL" >> "$SH_REBUILD"
 end_script_generic "$1" "$2" "done  rebuild " "$SH_REBUILD"
+}
+#$1 project
+#$2 step id
+#$3 path build
+#$4 build name
+#$5 arch
+#$6 cross
+#$7 silent
+#$8 thread
+#$9 deploy
+#$10 prefix
+function add_build_script(){
+generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6" "$9" "$10"
+generate_clean_rule $@
+generate_distclean_rule $@ 
+generate_build_rules $@
+generate_install_rule $@
+generate_rebuild_rule $@
 }
 
 #$1 project
@@ -921,7 +1007,6 @@ local C_FILE="$C_BUILD/bootstrap.sh"
 local DEST="$IMAGES/$NAME"
 mkdir -p "$C_BUILD"
 rm -rf "$C_BUILD/*"
-mkdir -p "$C_BUILD/build"
 mkdir -p "$DEST"
 rm -rf "$DEST/*"
 touch "$C_FILE"
@@ -940,31 +1025,37 @@ if [ "$EXTSI" != "YES" ]; then
 	echo "set -x ">> $C_FILE
 fi
 if [ -e $SOURCES/$1/configure ]; then
+	mkdir -p "$C_BUILD/build"
 	echo -n "$SOURCES/$1/configure  --prefix=$DEST $BTARGET ">> $C_FILE
 	add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT"
 else
 	if [ -e $SOURCES/$1/$1-*/configure ]; then
+		mkdir -p "$C_BUILD/build"
 		AA=$(ls $SOURCES/$1/$1-*/configure)
 		echo -n "$AA  --prefix=$DEST $BTARGET ">> $C_FILE
 		add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT"
 	else
 		if [ -e $SOURCES/$1/configure.ac ]; then
+			mkdir -p "$C_BUILD/build"
 			echo -n "$SOURCES/$1/configure  --prefix=$DEST $BTARGET ">> $C_FILE
 			add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT"
 		else
 			if [ -e $SOURCES/$1/$1-*/configure.ac ]; then
+				mkdir -p "$C_BUILD/build"
 				AA=$(ls $SOURCES/$1/$1-*/configure)
 				echo -n "$AA  --prefix=$DEST $BTARGET">> $C_FILE
 				add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT"
 			else
 				if [ -e $SOURCES/$1/Makefile ]; then
-					echo  #no configure is needed .... ">> $C_FILE
+					ln -s  "$SOURCES/$1" "$C_BUILD/build"
+					echo  "#no configure is needed .... ">> $C_FILE
 				else
 					if [ -e $SOURCES/$1/$1-*/Makefile ]; then
-						echo  #no configure is needed .... ">> $C_FILE
+						ln -s  "$SOURCES/$1/$1-*" "$C_BUILD/build"
+						echo  "#no configure is needed .... ">> $C_FILE
 					else
-					#to add Makefile check
-					error_c "Cannot locate configure script" "  - project $BUILD_PROJECT"
+						#to add Makefile check
+						error_c "Cannot locate configure script" "  - project $BUILD_PROJECT"
 					fi
 				fi
 			fi
