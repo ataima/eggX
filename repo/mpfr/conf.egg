@@ -22,6 +22,11 @@
 					<extra   id="1">--enable-static</extra>
 					<extra   id="2">--with-gmp=$DEPLOY</extra>
 				</configure>
+				<make>
+					<rule id="0">
+						<name>all</name> 
+					</rule>
+				</make>
 			</step>
 		</build>	
 	</project>

@@ -22,6 +22,11 @@
 				<extra   id="0">--disable-werror</extra>	
 				<extra   id="1">--disable-nls</extra>	
 			</configure>
+			<make>
+				<rule id="0">
+					<name>all</name> 
+				</rule>
+			</make>			
 			</step>
 		</build>
 	</project>

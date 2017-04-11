@@ -24,7 +24,7 @@ declare -i MAX_STEP=0
 
 
 function forcestop(){
-	error_c "User Intenterrupt" " warning work not complete! "
+	error_c "User Interrupt" " warning work not complete! "
 }
 
 trap "forcestop" SIGHUP SIGINT SIGTERM
@@ -141,8 +141,7 @@ echo $PRJ_NAME
 #$2 name
 #$3 project
 function print_build_msg(){
-print_c "$WHITE" "-------------------------------------------------------"
-print_c "$GREEN_LIGHT" "PRI : $1" "$WHITE" "  PRJ : $2" "$RED_LIGHT" "   IMG : $3"
+print_ita  "PRI : $1"  "PRJ : $2"  "IMG : $3"
 }
 
 

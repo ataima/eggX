@@ -36,7 +36,14 @@ echo -e $(echo $1) "$2" $(echo $3) "$4"$(echo $5) "$6" $(echo $REPLACE)
 dolog "$2" "$4" "$6"
 }
 
-
+# $1..3 argv
+function print_ita(){
+local A1=$(printf "%-20s" "$1")
+local A2=$(printf "%-20s" "$2")
+local A3=$(printf "%-20s" "$3")
+print_c "$GREEN_LIGHT" "--------------------" "$WHITE" "--------------------" "$RED_LIGHT" "--------------------"
+print_c "$GREEN_LIGHT" "$A1" "$WHITE" "$A2" "$RED_LIGHT" "$A3"
+}
 
 #$1   string
 #$2   string

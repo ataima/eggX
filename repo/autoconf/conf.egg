@@ -17,6 +17,11 @@
 				 <cross>native</cross>	
 				<silent>yes</silent>
 				<threads>1</threads>	
+				<make>
+					<rule id="0">
+						<name>all</name> 
+					</rule>
+				</make>
 				<path>
 					<post>
 						<add id="0" >usr/bin</add >

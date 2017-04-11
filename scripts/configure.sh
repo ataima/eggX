@@ -491,29 +491,57 @@ echo "fi" >> $3
 #
 function generate_build_rules(){
 #build
+declare -i i=0
+local NAME
+local TREAD
+declare -i NUM_R=0
 local SH_BUILD="$3/build.sh"
 rm -f "$SH_BUILD" 
 touch "$SH_BUILD"
 chmod +rwx "$SH_BUILD"
 prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" "$5" "$6"
-#$1 project
-#$2 step id
-#$3 file out
-#$4 path build
-#$5 build name
-add_pre_build "$1" "$2" "$SH_BUILD" "$3" "$4"
-#$1 project
-#$2 build path
-#$3 file out
-#$3 silent 
-#S4 threads
-add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "$7" "$8"
-#$1 project
-#$2 step id
-#$3 file out
-#$4 path build
-#$5 build name
-add_post_build "$1" "$2" "$SH_BUILD" "$3" "$4"
+#------------------------------------------------------------------------------------------------------------------
+check_project $1
+if [ $? -eq 1 ]; then
+	if [ -f $REPO/$1/conf.egg ]; then
+		dolog "Read conf.egg from project $1 : action generate build rules"	
+		#set -x ; trap read debug
+		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
+		NUM_R=$?
+		if [ $NUM_R -ne 0 ]; then
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make/rule"
+			NUM_R=$?
+			if [ $NUM_R -ne 0 ]; then
+				while  [  $i -lt $NUM_R  ];  do
+					NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$i\"]/name")	
+					equs "$NAME $i"  
+					if [ $? -eq 1 ]; then 
+						error_c "Missing  make rule name id=$i Phase $2" "project : $1"
+					fi
+
+					THREAD=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$i\"]/tread")	
+					equs "$THREAD"  
+					if [ $? -eq 0 ]; then 
+						if  [  $THREAD -gt $8 ] ; then 
+							THREAD="$8"
+						fi
+					else
+						THREAD="$8"	
+					fi						
+					add_pre_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$i"
+					add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "$7" "$THREAD" "$NAME"
+					add_post_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$i"
+					i=$((i+1))
+				done 
+			fi
+		fi
+	else
+		error_c "Missing conf.egg file " "project : $1"
+	fi
+else
+	error_c "Missing project in $REPO " "project : $1"
+fi
+#------------------------------------------------------------------------------------------------------------------
 end_script_generic "$1" "$2" "done  build " "$SH_BUILD"
 }
 
@@ -653,6 +681,7 @@ generate_rebuild_rule $@
 #$3 file out
 #$4 path build
 #$5 build name
+#$6 rule index
 function add_pre_build(){
 declare -i i=0
 local VALUE=""
@@ -664,16 +693,16 @@ if [ $? -eq 1 ]; then
 		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make/pre"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/pre"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/pre[@id=\"$i\"]/value")	
+				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/pre[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre build id=$i value Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/pre[@id=\"$i\"]/mode")	
+				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/pre[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre build id=$i mode Phase $2" "project : $1"
@@ -779,6 +808,7 @@ echo " "  >> $3
 #$3 file out
 #$4 path build
 #$5 build name
+#$6 rule index
 function add_post_build(){
 declare -i i=0
 local VALUE=""
@@ -789,16 +819,16 @@ if [ $? -eq 1 ]; then
 		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make/post"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/post"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/post[@id=\"$i\"]/value")	
+				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/post[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post build id=$i Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/post[@id=\"$i\"]/mode")	
+				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/post[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post build id=$i mode Phase $2" "project : $1"
@@ -901,12 +931,13 @@ echo " "  >> $3
 #$2 build path
 #$3 file out
 #$4 silent 
-#S5 threads
+#$5 threads
+#$6 make rule name
 function add_entry_in_main_build_script(){
 if [ "$4" == "yes" ]; then 
-	echo "make --silent -C \$BUILD -j$5 \$1 > /dev/null" >> "$3"
+	echo "make --silent -C \$BUILD -j$5 $6 > /dev/null" >> "$3"
 else
-	echo "make -C \$BUILD  -j$5 \$1">> "$3"
+	echo "make -C \$BUILD  -j$5 $6 ">> "$3"
 fi
 echo "if [ \$? -ne 0 ]; then">> "$3"
 echo "    error_c \"Error on build \" \"  - project \$1\"" >>"$3"
@@ -1051,7 +1082,8 @@ else
 					echo  "#no configure is needed .... ">> $C_FILE
 				else
 					if [ -e $SOURCES/$1/$1-*/Makefile ]; then
-						ln -s  "$SOURCES/$1/$1-*" "$C_BUILD/build"
+						AA=$(ls -d $SOURCES/$1/$1-*)
+						ln -s  "$AA" "$C_BUILD/build"
 						echo  "#no configure is needed .... ">> $C_FILE
 					else
 						#to add Makefile check
@@ -1070,7 +1102,7 @@ add_post_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 #build
 add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$ARCH" "$CROSS" "$SILENT" "$THREADS" "$DEST" "$PREFIX"
-print_c "$GREEN_LIGHT" "STEP:$2" "$WHITE" "$1" "$RED_LIGHT" "configured done !"
+print_ita "STEP:$2" "$1"  "configured done !"
 }
 
 

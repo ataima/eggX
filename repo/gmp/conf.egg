@@ -23,6 +23,11 @@
 					<extra  id="2">--enable-cxx</extra>
 					<extra  id="3">--with-sysroot=$DEPLOYS</extra>
 				</configure>
+				<make>
+					<rule id="0">
+						<name>all</name> 
+					</rule>
+				</make>
 			</step>
 		</build>	
 	</project>

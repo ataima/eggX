@@ -82,7 +82,7 @@ if [ ! -f  $1.$4 ]; then
 			fi		
 		done
 		if [ $RES -eq 1 ]; then
-			print_c "$GREEN_LIGHT" "Key sign check " "$WHITE" "$3" "$RED_LIGHT" "...OK!"	
+			print_ita "Key sign"  "$3" "...OK!"	
 			chmod 444 $1
 		else
 			print_c "$RED_LIGHT" "   - SIG check source FAIL" "$YELLOW" $3	
@@ -93,7 +93,7 @@ if [ ! -f  $1.$4 ]; then
 		rm -f  "$1.$4"
 	fi
 else
-print_c "$GREEN_LIGHT" "Key sign check " "$WHITE" "$3" "$RED_LIGHT" "...OK!"	
+print_ita "Key sign"  "$3" "...OK!"	
 RES=1
 fi	
 return $RES
@@ -735,16 +735,15 @@ fi
 function download_all_packets(){
 local RES=0
 local i=""
-for i in $ALL_PACKETS; do
-	
+for i in $ALL_PACKETS; do	
 	download_request $i
 	RES=$?
 	if [ "$RES"  -ne 0 ]; then 
 	verify_packet $i $RES
 	verify_patch $i $RES
-	print_c "$GREEN_LIGHT" "Source for project" "$WHITE" $i "$RED_LIGHT" "...OK!"
+	print_ita "Source :"  "$i"  "...OK!"
 	else
-	print_c "$GREEN_LIGHT" "   - SKIP Download STAGE" "$YELLOW" $i	
+	print_ita "SKIP Download " "$i"  "...OK!"
 	fi
 done	
 }

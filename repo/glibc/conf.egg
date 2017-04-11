@@ -36,6 +36,8 @@
 					<extra id="3">--with-sysroot=$DEPLOYS</extra>
 				</configure>				
 				<make>
+					<rule id="0">
+						<name>all</name> 
 						<pre id="0">
 							<mode>code</mode>		
 							<value>export CC=$DEPLOY/bin/gcc</value>
@@ -44,6 +46,7 @@
 							<mode>code</mode>		
 							<value>export CXX=$DEPLOY/bin/g++</value>
 						</pre>
+					</rule>
 				</make>		
 			</step>
 		</build>	

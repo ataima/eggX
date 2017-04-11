@@ -25,6 +25,11 @@
 					<extra id="1">--disable-multilib</extra>	
 					<extra id="2">--with-sysroot=$DEPLOYS</extra>			
 				</configure>
+				<make>
+					<rule id="0">
+						<name>all</name> 
+					</rule>
+				</make>
 			</step>
 		</build>
 	</project>
