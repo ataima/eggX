@@ -50,20 +50,16 @@
 						<name>all</name> 
 					</rule>
 					<rule id="1">
-						<name>check</name> 
-						<thread>1</thread>
-					</rule>
-					<rule id="2">
 						<name>install</name> 
 						<thread>1</thread>						
-						<pre  id="0">
+						<post  id="0">
 							<mode>code</mode>		
 							<value>echo $PATH; which gcc</value>
-						</pre >
-						<pre  id="1">
+						</post >
+						<post  id="1">
 							<mode>code</mode>		
 							<value>gcc -fsyntax-only -xc -v -H </value>
-						</pre >
+						</post >
 					</rule>
 				</make>
 			</step>

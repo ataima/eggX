@@ -27,11 +27,11 @@
 							<mode>code</mode>
 							<value>mkdir -p $BUILDS/$PROJECT/temp</value>
 						</pre>
-						<name> V=1 INSTALL_HDR_PATH=$BUILDS/$PROJECT/temp headers_install</name>
+						<name> INSTALL_HDR_PATH=$BUILDS/$PROJECT/temp headers_install</name>
 						<thread> 1 </thread>
 						<post id="0">
 							<mode>code</mode>
-							<value>cp -rv $BUILDS/$PROJECT/temp/include/* $DEPLOY/include </value>
+							<value>cp -r $BUILDS/$PROJECT/temp/include/* $DEPLOY/include </value>
 						</post>						
 						<post id="1">
 							<mode>code</mode>

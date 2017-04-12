@@ -95,8 +95,13 @@ if [ $? -eq 1 ]; then
 				fi 
 				#optional				
 				INDEX="$PRI%$1%$NAME"
+				echo "-->$INDEX"
 				BSEQ[$INDEX]="$INDEX"	
-			fi	
+			else
+				error_c " no build step $2  !" "project : $1"
+			fi
+		else
+			error_c " no build  !" "project : $1"
 		fi
 	else
 		error_c "Missing conf.egg file " "project : $1"
@@ -528,7 +533,7 @@ if [ $? -eq 1 ]; then
 						error_c "Missing  make rule name id=$i Phase $2" "project : $1"
 					fi
 
-					THREAD=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$i\"]/tread")	
+					THREAD=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$i\"]/thread")
 					equs "$THREAD"  
 					if [ $? -eq 0 ]; then 
 						if  [  $THREAD -gt $8 ] ; then 
@@ -538,7 +543,7 @@ if [ $? -eq 1 ]; then
 						THREAD="$8"	
 					fi						
 					add_pre_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$i"
-					add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "$7" "$THREAD" "$NAME"
+					add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "$7" "$THREAD" "$8" "$NAME"
 					add_post_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$i"
 					i=$((i+1))
 				done 
@@ -787,14 +792,15 @@ echo " "  >> $3
 #$3 file out
 #$4 silent 
 #$5 threads
-#$6 make rule name
+#$6 max thread
+#$7 make rule name
 function add_entry_in_main_build_script(){
 echo "start_time=\$(date +%s)">> "$3"
-echo " print_s_ita \"       Make \"  \"$6:$5\"  \"start\"" >> "$3"
+echo " print_s_ita \"       Make \"  \"$7-$6:$5\"  \"start\"" >> "$3"
 if [ "$4" == "yes" ]; then 
-	echo "make --silent -C \$BUILD -j$5 $6 > /dev/null 2>&1 " >> "$3"
+	echo "make --silent -C \$BUILD -j$5 $7 > /dev/null 2>&1 " >> "$3"
 else
-	echo "make -C \$BUILD  -j$5 $6 ">> "$3"
+	echo "make -C \$BUILD  -j$5 $7 ">> "$3"
 fi
 echo "if [ \$? -ne 0 ]; then">> "$3"
 echo "    error_c \"Error on build \" \"  - project \$1\"" >>"$3"
@@ -947,7 +953,7 @@ add_post_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 #build
 add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$ARCH" "$CROSS" "$SILENT" "$THREADS" "$DEST" "$PREFIX"
-print_ita "STEP : $2" "$1"  "configured done !"
+print_ita "STEP : $2:$PRI" "$1"  "configured done !"
 }
 
 
@@ -983,7 +989,7 @@ else
 	shift
 	PRJS=$@
 fi
-
+echo "-->$PRJS"
 for V in $PRJS; do
 	insert_packet "$V" "$ID" 
 done

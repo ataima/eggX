@@ -85,7 +85,7 @@ if [ ! -f  $1.$4 ]; then
 			print_ita "Key sign"  "$3" "...OK!"	
 			chmod 444 $1
 		else
-			print_c "$RED_LIGHT" "   - SIG check source FAIL" "$YELLOW" $3	
+			print_c "$RED_LIGHT" "   - SIG check  FAIL :$2" "$YELLOW" $3	
 #			rm -f  "$1.$4"
 #			rm -f "$1"
 		fi
@@ -202,33 +202,52 @@ return $RES
 }
 
 
-#$1 filename 
-#$2 remote repository
-#$3 project
-function check_sign_fix(){
-local RES=0
-local i=$(echo $2 | sed 's/^.*//')
-case $i in
-	"sig"|"sign"|"asc")
-	check_pgp $1 $2 $3 $i  
-	RES=$?	
-	;;
-	"md5")
-	check_md5sum $1 $2 $3
-	RES=$?
-	;;
-	"sha1")
-	check_sha1sum $1 $2 $3
-	RES=$?
-	;;
-	*)
-	error_c "Unknow sign " "$i - project : $3"
-	;;
-esac 
-if [ $RES -eq 1 ] || [ $RES -eq 99 ]; then 
-	break
+
+
+#$1 source path
+#$2 file
+#$3 sign file
+# ex file.tar & file.tar.sign ok check
+# ex file.tar.gz  & file.tar.gz.sign  ok ckeck
+# ex file.tar.gz  & file.tar.sign -> gunzip tar and check 
+function test_sign_file(){
+local RES=100
+local OUTNAME="$2"
+local BNAME_FILE=$(basename $2)
+local BNAME_SIGN=$(basename $3)
+local EXT=${BNAME_FILE##*.}
+local V=$(echo $BNAME_SIGN | grep $EXT )
+local TT=$(echo $EXT |   tr '[:lower:]' '[:upper:]')
+if [ ! $V ]; then 
+	#no match V="" expand file 
+	case $TT in
+		"XZ")
+		OUTNAME="$1/"$(echo $BNAME_FILE | sed "s/.$EXT//g")
+		if [ ! -e $OUTNAME ]; then
+			unxz "$2"
+			touch "$2"
+		fi
+		;;
+		"GZ")
+		OUTNAME="$1/"$(echo $BNAME_FILE | sed "s/.$EXT//g")
+		if [ ! -e $OUTNAME ]; then
+			gunzip "$2"
+			touch "$2"
+		fi
+		;;
+		"BZ2")
+		OUTNAME="$1/"$(echo $BNAME_FILE | sed "s/.$EXT//g")
+		if [ ! -e $OUTNAME ]; then
+			bzip2 -d  "$2"
+			touch "$2"
+		fi
+		;;
+		*)
+		error_c "Unknow methos for ext $EXT  " "$i - project : $3"
+		;;
+	esac
 fi
-return $RES
+echo $OUTNAME
 }
 
 # get a packet from internet
@@ -239,6 +258,7 @@ return $RES
 # $5  sign key file
 function wget_packet(){
 local RES=0
+local FILEIN="$REPO/$1/$3"
 print_c "$GREEN_LIGHT" "   - Download source" "$YELLOW" $i
 if [ ! -d  $REPO/$1/logs ]; then 
 	mkdir -p  $REPO/$1/logs
@@ -249,13 +269,12 @@ local PNAME="$2/$3"
 rm -f $REPO/$1/logs/$LOG/*
 dolog "Created download log file : $REPO/$1/logs/$LOG"
 wget  --show-progress -q -o "$REPO/$1/logs/$LOG" "$PNAME" -O "$REPO/$1/$3"
-if [ -f  "$REPO/$1/$3" ]; then
-	if [ "$4/$5" != "" ] ; then
-		#check_sign_fix "$REPO/$1/$3" "$4/$5" "$1"
-		echo "TODO"
-	else
-		check_sign "$REPO/$1/$3" "$PNAME" "$1"
+if [  $4 ] && [ $5 ]; then
+		FILEIN=$(test_sign_file "$REPO/$1" "$REPO/$1/$3" "$4/$5") 		
+		PNAME="$4/$5"
 	fi
+if [ -f  "$FILEIN" ]; then	
+	check_sign "$FILEIN" "$PNAME" "$1"
 	RES=$?
 	if [ $RES -eq 99 ]; then 
 		wget_packet $1 $2 $3 $4 $5
@@ -269,7 +288,7 @@ if [ -f  "$REPO/$1/$3" ]; then
 			mkdir -p "$SOURCES/$1"
 		fi
 		#echo "-->tar -xf $REPO/$1/$3 -C  $SOURCES/$1"
-		tar -xf "$REPO/$1/$3" -C  "$SOURCES/$1"
+		tar -xf "$FILEIN" -C  "$SOURCES/$1"
 		if [ $? -ne 0 ]; then
 			error_c "Unable to untar file " "$REPO/$1/$3 project $1"
 		fi
@@ -286,13 +305,13 @@ fi
 # $5 sign key file
 function wget_update_packet(){
 local PNAME="$2/$3"
-if [ -f  "$REPO/$1/$3" ]; then
-	if [ "$4/$5" != "" ] ; then
-		#check_sign_fix "$REPO/$1/$3" "$4/$5" "$1"
-		echo "TODO"
-	else
-		check_sign "$REPO/$1/$3" "$PNAME" "$1"
+local FILEIN="$REPO/$1/$3"
+if [  $4 ] && [ $5 ]; then
+		FILEIN=$( test_sign_file "$REPO/$1" "$REPO/$1/$3" "$4/$5" ) 		
+		PNAME="$4/$5"		
 	fi
+if [ -f  "$FILEIN" ]; then		
+	check_sign "$FILEIN" "$PNAME" "$1"
 	RES=$?
 	if [ $RES -eq 99 ]; then 
 		wget_packet $1 $2 $3 $4 $5
@@ -787,7 +806,7 @@ done
 
 # $1 requested
 function download_sign_key(){
-local KEYS="ftp://ftp.gnu.org/gnu/gnu-keyring.gpg http://www.cs.unipr.it/~bagnara/pgp_public_key"
+local KEYS="ftp://ftp.gnu.org/gnu/gnu-keyring.gpg "
 
 if [ ! -d $RKEYS ]; then 
 	dolog "Create dir for gpg keys"
@@ -820,6 +839,13 @@ else
 		fi
 	fi
 fi
+}
+
+
+# none
+function download_linux_key(){
+gpg --keyserver hkp://keys.gnupg.net --recv-keys 38DBBDC86092693E
+
 }
 
 # none 
@@ -1026,6 +1052,7 @@ if [ $? -ne 0 ]; then
 fi
 #download all key to verify sign
 download_sign_key
+#download_linux_key
 }
 
 
@@ -1096,6 +1123,7 @@ fi
 
 init 
 
+
 if [ $GPG -eq 1 ]; then
 	download_sign_key "$ARGV"
 else
@@ -1106,7 +1134,14 @@ else
 		create_patch_source "$ARGV"
 		else
 			if [  $FORCE -eq 0 ]; then
-				download_all_packets
+				if [ $ARGV ]; then 
+					for i in $ARGV; do
+						verify_packet $i 
+						verify_patch $i 
+					done 
+				else
+					download_all_packets
+				fi
 			else
 				for i in $ARGV; do
 					verify_packet $i $FORCE
