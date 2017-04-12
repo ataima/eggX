@@ -36,14 +36,13 @@
 					<extra id="15">--enable-lto	</extra>			
 					<extra id="16">--enable-threads=posix</extra>			
 					<extra id="17">--enable-tls</extra>	
-					<extra id="18">--disable-threads</extra>
-					<extra id="19">--disable-libatomic</extra>
-					<extra id="20">--disable-libgomp</extra>
-					<extra id="21">--disable-libmpx</extra>
-					<extra id="22">--disable-libquadmath</extra>
-					<extra id="23">--disable-libssp</extra>
-					<extra id="24">--disable-libvtv</extra>
-					<extra id="25">--disable-libstdcxx</extra>
+					<extra id="18">--disable-libatomic</extra>
+					<extra id="19">--disable-libgomp</extra>
+					<extra id="20">--disable-libmpx</extra>
+					<extra id="21">--disable-libquadmath</extra>
+					<extra id="22">--disable-libssp</extra>
+					<extra id="23">--disable-libvtv</extra>
+					<extra id="24">--disable-libstdcxx</extra>
 				</configure>
 				<make>
 					<rule id="0">

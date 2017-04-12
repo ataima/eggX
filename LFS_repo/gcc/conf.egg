@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>gcc</name>
+		<download>check</download>		
+		<remote>
+			<method>wget</method>
+			<url>ftp://ftp.gnu.org/gnu/gcc/gcc-6.3.0</url>
+			<file>gcc-6.3.0.tar.gz</file>			
+		</remote>	
+		<build>
+			<step id="0">
+				<priority>10</priority>
+				<name> prepare_gcc_native</name>
+				<prefix>usr</prefix>
+				<arch>x86_64</arch>
+				<cross>native</cross>	
+				<silent>yes</silent>
+				<threads>8</threads>	
+				<configure>
+					<extra id="0">--enable-languages=c,c++</extra>
+					<extra id="1">--without-headers</extra>
+					<extra id="2">--disable-nls</extra>							
+					<extra id="3">--disable-libstdcxx-pch</extra>	
+					<extra id="4">--with-gmp=$DEPLOY</extra>	
+					<extra id="5">--with-mpc=$DEPLOY</extra>	
+					<extra id="6">--with-mpfr=$DEPLOY</extra>	
+					<extra id="7">--with-sysroot=$DEPLOYS</extra>				
+					<extra id="8">--with-newlib</extra>	
+					<extra id="9">--with-local-prefix=$DEPLOY</extra>
+					<extra id="10">--disable-warnings</extra>
+					<extra id="11">--disable-shared</extra>
+					<extra id="12">--disable-multilib</extra>
+					<extra id="13">--disable-bootstrap</extra>	
+					<extra id="14">--enable-libgomp</extra>			
+					<extra id="15">--enable-lto	</extra>			
+					<extra id="16">--disable-threads</extra>			
+					<extra id="17">--enable-tls</extra>	
+					<extra id="18">--disable-libatomic</extra>
+					<extra id="19">--disable-libgomp</extra>
+					<extra id="20">--disable-libmpx</extra>
+					<extra id="21">--disable-libquadmath</extra>
+					<extra id="22">--disable-libssp</extra>
+					<extra id="23">--disable-libvtv</extra>
+					<extra id="24">--disable-libstdcxx</extra>
+				</configure>
+				<make>
+					<rule id="0">
+						<name>all</name> 
+					</rule>
+					<rule id="1">
+						<name>install</name> 
+						<thread>1</thread>						
+						<post  id="0">
+							<mode>code</mode>		
+							<value>echo $PATH; which gcc</value>
+						</post >
+						<post  id="1">
+							<mode>code</mode>		
+							<value>gcc -fsyntax-only -xc -v -H </value>
+						</post >
+					</rule>
+				</make>
+			</step>
+		</build>	
+	</project>
+</egg>

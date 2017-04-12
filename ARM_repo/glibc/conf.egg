@@ -15,7 +15,7 @@
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
 				<cross>native</cross>	
-				<silent>yes</silent>
+				<silent>no</silent>
 				<threads>8</threads>	
 				<configure>
 					<pre id="0">
@@ -30,10 +30,13 @@
 						<mode>code</mode>		
 						<value>export LDFLAGS=$DEPLOY/lib</value>
 					</pre>
-					<extra id="0">--enable-kernel=2.6.32</extra>
-					<extra id="1">libc_cv_forced_unwind=yes</extra>	
-					<extra id="2">libc_cv_c_cleanup=yes</extra>
-					<extra id="3">--with-sysroot=$DEPLOYS</extra>
+					<extra id="0">--with-sysroot=$DEPLOYS</extra>
+					<extra id="1"> --build=$(../scripts/config.guess)</extra>
+					<extra id="2"> --with-headers=$DEPLOY/$PREFIX/include</extra>					
+					<extra id="3">--enable-kernel=2.6.32</extra>
+					<extra id="4">libc_cv_forced_unwind=yes</extra>	
+					<extra id="5">libc_cv_c_cleanup=yes</extra>
+					<extra id="6">libc_cv_ctors_header=yes</extra>					
 				</configure>				
 				<make>
 					<rule id="0">

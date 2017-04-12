@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<egg>
+	<defaults>
+	<step id="0">
+		<setup id="0"> CFLAGS=-g 02</setup>
+	</step>
+	<defaults>
+</egg>

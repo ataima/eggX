@@ -61,6 +61,12 @@ done
 MYPATH="$NEW:"$MYPATH
 }
 
+#$1 build name
+#$2 dir
+function set_path(){
+local NEW=$IMAGES/$1/$2
+MYPATH="$NEW"
+}
 
 #$1 project
 #$2 build phase number 0,1,2.....
@@ -95,7 +101,7 @@ if [ $? -eq 1 ]; then
 				fi 
 				#optional				
 				INDEX="$PRI%$1%$NAME"
-				echo "-->$INDEX"
+				#echo "-->$INDEX"
 				BSEQ[$INDEX]="$INDEX"	
 			else
 				error_c " no build step $2  !" "project : $1"
@@ -145,7 +151,7 @@ if [ $? -eq 1 ]; then
 					MAX=$?
 					if [ $NUM -gt $MAX ]; then
 						MAX=$NUM
-					fi					
+					fi										
 					ID=0
 					while [ $ID -lt $MAX ]; do
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/remove[@id=\"$ID\"]")
@@ -155,6 +161,11 @@ if [ $? -eq 1 ]; then
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/add[@id=\"$ID\"]")
 						if [ "$TPATH" != "" ]; then
 							add_path $NAME $TPATH
+						fi
+						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/set")
+						if [ "$TPATH" != "" ]; then
+							set_path $NAME $TPATH
+							break
 						fi
 						ID=$((ID+1))
 					done 
@@ -212,6 +223,11 @@ if [ $? -eq 1 ]; then
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/post/add[@id=\"$ID\"]")
 						if [  "$TPATH"  !=  ""  ]; then
 							add_path $NAME $TPATH
+						fi
+						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/post/set")
+						if [ "$TPATH" != "" ]; then
+							set_path $NAME $TPATH
+							break
 						fi
 						ID=$((ID+1))
 					done 
@@ -976,20 +992,19 @@ sync
 
 
 
-#$1 force 0=0ff 99 0=on
-#$2.... 1=build id number 2 argv optional
+#$1 force 0=0ff 99=on
+#$@ argv optional
 function configure_all_packet(){
 local V=""
 local ID=$2
 local PRJS=""
-if [ $1 -eq  0 ]; then
+if [ $1 -eq  99 ]; then
 	PRJS=$ALL_PACKETS
 else
 	shift 
 	shift
 	PRJS=$@
 fi
-echo "-->$PRJS"
 for V in $PRJS; do
 	insert_packet "$V" "$ID" 
 done

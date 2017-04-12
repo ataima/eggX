@@ -293,7 +293,7 @@ fi
 function config_all_step(){
 declare -i NUM=0
 while [ $NUM -lt $MAX_STEP ]; do 
-	$SCRIPT_DIR/configure.sh $NUM $@
+	$SCRIPT_DIR/configure.sh --force $NUM $@
 	if [ $? -ne 0 ]; then 
 		exit 1
 	fi

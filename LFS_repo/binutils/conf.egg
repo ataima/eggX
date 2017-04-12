@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>binutils</name>
+		<download>check</download>		
+		<remote>
+			<method>wget</method>
+			<url>ftp://ftp.gnu.org/gnu/binutils</url>
+			<file>binutils-2.28.tar.bz2</file>		
+		</remote>	
+		<build>
+			<step id="0">
+				<priority>1</priority>
+				<name> prepare_gcc_native</name>
+				<prefix>usr</prefix>
+				<arch>x86_64</arch>
+				<cross>native</cross>	
+				<silent>yes</silent>
+				<threads>8</threads>
+				<path>
+					<add id="0" >usr/x86_64-pc-linux-gnu</add >
+				</path>
+				<configure>
+					<extra id="0">--disable-nls</extra>
+					<extra id="1">--disable-multilib</extra>	
+					<extra id="2">--with-sysroot=$DEPLOYS</extra>			
+				</configure>
+				<make>
+					<rule id="0">
+						<name>all</name> 
+					</rule>
+					<rule id="1">
+						<name>install</name> 
+						<thread>1</thread>						
+					</rule>
+				</make>
+			</step>
+		</build>
+	</project>
+</egg>
