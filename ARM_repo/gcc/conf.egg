@@ -17,17 +17,32 @@
 				<cross>native</cross>	
 				<silent>yes</silent>
 				<threads>8</threads>	
+				<path>
+					<pre>
+						<add> $DEPLOY/$PREFIX </add>
+					</pre>
+				</path>
 				<configure>
 					<extra id="0">--enable-languages=c,c++</extra>
 					<extra id="1">--without-headers</extra>
 					<extra id="2">--disable-nls</extra>							
-					<extra id="3">--with-gmp=$DEPLOY</extra>	
-					<extra id="4">--with-mpc=$DEPLOY</extra>	
-					<extra id="5">--with-mpfr=$DEPLOY</extra>	
-					<extra id="6">--with-sysroot=$DEPLOYS</extra>				
+					<extra id="3">--with-sysroot=$DEPLOYS</extra>				
+					<extra id="4">--enable-multilib</extra>
 				</configure>
 				<make>
 					<rule id="0">
+						<pre id="0">
+							<mode>code</mode>
+							<value>A=$(ls -d $SOURCES/gmp/*); ln -s $SOURCES/gmp/$A $SOURCE/gmp</value>
+						</pre>
+						<pre id="1">
+							<mode>code</mode>
+							<value>A=$(ls -d $SOURCES/mpc/*); ln -s $SOURCES/mpc/$A $SOURCE/mpc</value>
+						</pre>
+						<pre id="2">
+							<mode>code</mode>
+							<value>A=$(ls -d $SOURCES/mpfr/*); ln -s $SOURCES/mpfr/$A $SOURCE/mpfr</value>
+						</pre>
 						<name>all</name> 
 					</rule>
 					<rule id="1">

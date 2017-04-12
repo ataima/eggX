@@ -7,32 +7,6 @@
 			<method>wget</method>
 			<url>ftp://ftp.gnu.org/gnu/gmp</url>
 			<file>gmp-6.1.2.tar.bz2</file>
-		</remote>	
-		<build>
-			<step id="0">
-				<priority>2</priority>
-				<name> arm_tools</name>
-				<prefix>usr</prefix>
-				<arch>x86_64</arch>
-				<cross>arm-none-eabi</cross>	
-				<silent>yes</silent>
-				<threads>8</threads>		
-				<configure>
-					<extra  id="0">--disable-shared</extra>
-					<extra  id="1">--enable-static</extra>
-					<extra  id="2">--enable-cxx</extra>
-					<extra  id="3">--with-sysroot=$DEPLOYS</extra>
-				</configure>
-				<make>
-					<rule id="0">
-						<name>all</name> 
-					</rule>
-					<rule id="1">
-						<name>install</name> 
-						<thread>1</thread>												
-					</rule>					
-				</make>
-			</step>
-		</build>	
+		</remote>			
 	</project>
 </egg>

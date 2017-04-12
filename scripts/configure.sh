@@ -104,10 +104,10 @@ if [ $? -eq 1 ]; then
 				#echo "-->$INDEX"
 				BSEQ[$INDEX]="$INDEX"	
 			else
-				error_c " no build step $2  !" "project : $1"
+				warning_c " no build step $2  !" "project : $1"
 			fi
 		else
-			error_c " no build  !" "project : $1"
+			warning_c " no build  !" "project : $1"
 		fi
 	else
 		error_c "Missing conf.egg file " "project : $1"
@@ -916,7 +916,7 @@ BTARGET=$(echo $CROSS  | tr '[:lower:]' '[:upper:]')
 if [ "$BTARGET" == "NATIVE" ]; then
 	BTARGET=""
 else
-	BTARGET="--target=$C_BUILD"
+	BTARGET="--target=$CROSS"
 fi
 EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
