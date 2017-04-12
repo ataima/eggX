@@ -54,19 +54,16 @@
 						<thread>1</thread>
 					</rule>
 					<rule id="2">
-						<name>test</name> 
-						<thread>1</thread>
-						<post  id="0">
+						<name>install</name> 
+						<thread>1</thread>						
+						<pre  id="0">
 							<mode>code</mode>		
 							<value>echo $PATH; which gcc</value>
-						</post >
-						<post  id="1">
+						</pre >
+						<pre  id="1">
 							<mode>code</mode>		
 							<value>gcc -fsyntax-only -xc -v -H </value>
-						</post >
-					</rule>
-					<rule id="3">
-						<name>install</name> 
+						</pre >
 					</rule>
 				</make>
 			</step>

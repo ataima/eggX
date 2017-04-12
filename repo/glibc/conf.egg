@@ -49,6 +49,7 @@
 					</rule>
 					<rule id="1">
 						<name>install</name> 
+						<thread>1</thread>	
 					</rule>					
 				</make>		
 			</step>
