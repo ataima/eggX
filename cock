@@ -364,11 +364,28 @@ check_project "$1"
 if [ $? -ne 0 ]; then
 	$EDITOR "$OREPO/$1/conf.egg"
 else
-	error_c "Missing project in $OREPO " "project : $1"
+	if [ "$1" == "cock.conf" ]; then
+		$EDITOR "$OREPO/conf.egg"
+	else
+		if [ "$1" == "-S" ]; then
+			$EDITOR "$SCRIPT_DIR/$2.sh"
+		else
+			if [ "$1" == "self" ]; then
+				$EDITOR "cock"
+			else
+				error_c "Missing project in $OREPO " "project : $1"
+			fi
+		fi
+	fi
 fi
 }
 
-
+function show_info(){
+print_ita "author" "Angelo" "Coppi"
+print_ita "email" "angelogkcop@" "hotmail.com"
+print_ita "git" "https://github.com" "ataima"
+exit 0
+}
 
 function usage(){
 	print_c "$BLUE_LIGHT" "usage : ./build.sh <-D> command  <args to pass subcommand>"
@@ -380,7 +397,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : clear all build and deploy aout and redo source + configure+do"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "bash <step xx> <project nn>: open a bash with setenv for step xx of project nn"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "vim <project nn>: edit a conf.egg file of project nn"	
-	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "info : show program info..."
 	exit 1
 }
 
@@ -393,6 +410,8 @@ local DO=0
 local REDOALL=0
 local TRY=0
 local VIM=0
+local TRY=0
+local INFO=0
 for i in $@; do
 case $i in 
 	-D|--debug)
@@ -436,12 +455,20 @@ case $i in
 	shift
 	break
 	;;	
+	info)
+	INFO=1		
+	break
+	;;	
 	*)
 	usage
 	error_c "Command line" " unknow option $i"
 	;;
 esac
 done
+
+if [ $INFO -eq 1 ]; then 
+	show_info
+fi
 
 #set log to download
 if [ ! -d $ROOT ]; then 
@@ -451,6 +478,7 @@ fi
 if ! [ -e $LOGFILE ]; then
 	touch "$LOGFILE"
 fi
+
 
 if [ $(wc -c < "$LOGFILE" ) -gt 1000000 ]; then 
 	VV=$(wc -l < "$LOGFILE")
@@ -508,5 +536,5 @@ else
 fi
 }
 
-
+xml_get_env 
 main "$@"

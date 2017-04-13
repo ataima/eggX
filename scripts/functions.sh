@@ -139,16 +139,15 @@ done
 function xml_value(){
  local PRJ=$(xmlstarlet sel -t  -v '/egg/project/name' -n $REPO/$1/conf.egg)
  if [ "$PRJ" == "$1" ];then	
- local VALUE=$(xmlstarlet sel -t  -v "$2" -n $REPO/$1/conf.egg)
- if [  "${VALUE:0:1}" == "$" ]; then 
- #if a env variable
- local UV=$(echo $VALUE | sed -e 's/\$//g')
- VALUE=$(env | grep $UV | sed -e 's/=/ /g' | awk '{print $2}')
- fi
- echo $VALUE
+	 local VALUE=$(xmlstarlet sel -t  -v "$2" -n $REPO/$1/conf.egg)
+	 if [  "${VALUE:0:1}" == "$" ]; then 
+		 #if a env variable
+		 local UV=$(echo $VALUE | sed -e 's/\$//g')
+		 VALUE=$(env | grep $UV | sed -e 's/=/ /g' | awk '{print $2}')
+	 fi
+	 echo $VALUE
  else
-	echo "Con
-#$1 projectf.egg referred to project $PRJ"
+	error_c "Mistake in project name" "Conf.egg referred to $PRJ : $1"
  fi
 }
 
@@ -166,4 +165,19 @@ return $RES
 }
 
 
+#$1 project
+#$2 xml node
+#return num node match
+function xml_get_env(){
+local MAINFILE="$OREPO/conf.egg"
+declare -A XNAME="root logfile repo sources images repobackup build editor \
+				 start_path"
+local II=""
+for II in $XNAME; do
+	local VALUE=$(xmlstarlet sel -t  -v "egg/conf/$II" -n $MAINFILE)
+	if [ "$VALUE" ]; then
+		eval $(echo $II |   tr '[:lower:]' '[:upper:]')="$VALUE"
+	fi	
+done
+}
 

@@ -17,7 +17,7 @@ REPOBACKUP="$ROOT/backup"
 BUILD="$ROOT/build"
 EDITOR="vim"
 #initial value PATH
-RESPATH="/usr/bin:/sbin:/bin"
+START_PATH="/usr/bin:/sbin:/bin"
 MYPATH=""
 
 # include io functions
@@ -190,6 +190,9 @@ fi
 }
 
 
+
+
+
 #$1 project
 #$2 build phase number 0,1,2.....
 function manage_path_post(){
@@ -276,7 +279,7 @@ function generate_setenv(){
 		fi
 	fi
 	echo "#!/bin/sh" > "$3"
-	echo "#unset all ..." >> "$3"
+	echo "#unset all except $HOME ..." >> "$3"
 	ENV=$(env | sed 's/=.*//' | tr '\n' ' ' | sed -e 's/HOME//g')
 	echo "ENV=\"$ENV\"" >> "$3"		
 	echo "for i in \$ENV ; do ">> "$3"
@@ -293,6 +296,12 @@ function generate_setenv(){
 	echo "export DEPLOY=$7" >> "$3"
 	echo "export ARCH=$5">> "$3"
 	echo "export CROSS=$6">> "$3"
+	echo "export CFLAGS=$CFLAGS" >> "$3"
+	echo "export CPPFLAGS=$CPPFLAGS" >> "$3"
+	echo "export CXXFLAGS=$CXXFLAGS" >> "$3"
+	echo "export LDFLAGS=$LDFLAGS" >> "$3"
+	echo "export LIBS=$LIBS" >> "$3"
+	
 }
 
 #$1 projects
@@ -993,10 +1002,37 @@ sync
 }
 
 
+#$1 build phase number 0,1,2.....
+function read_default_for_step(){
+
+local VV=""
+local VALUE=""
+local NAME=""
+local NAMES="step_name cflags cppflags cxxflags ldflags libs"
+if [ -f $REPO/conf.egg ]; then
+	dolog "Read MAIN conf.egg : action set default "
+	NUM=$(xmlstarlet sel -t  -v "count(/egg/defaults/step[@id=\"$1\"])" -n $REPO/conf.egg)	
+	if [ $NUM -eq 1 ]; then
+		for VV in $NAMES; do
+			VALUE=$(xmlstarlet sel -t  -v "egg/defaults/step[@id=\"$1\"]/$VV" -n $REPO/conf.egg)
+			if [ "$VALUE" ]; then 
+				NAME=$(echo $VV |   tr '[:lower:]' '[:upper:]')
+				eval "$NAME"="$VALUE"
+			fi
+		done
+	else
+		if [ $NUM -eq 0 ]; then
+			warning_c "missing defaults conf for step $1"
+		else
+			error_c "errata conf in main conf.egg" "Step id=$1 duplicate" 
+		fi
+	fi
+else
+	error_c "Missing conf.egg file " "on repo"
+fi
+}
 
 
-
-#$1 force 0=0ff 99=on
 #$@ argv optional
 function configure_all_packet(){
 local V=""
@@ -1018,8 +1054,9 @@ fi
 for V in $PRJS; do
 	insert_packet "$V" "$ID" 
 done
+read_default_for_step "$ID"
 SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
-MYPATH=$RESPATH
+MYPATH=$START_PATH
 for V in $SORTREQ; do
 	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
 	if [ "$PRJS" ] ; then 
@@ -1076,5 +1113,5 @@ configure_all_packet  $ARGV
 
 
 #$1 step id build number ex : ./configire.sh 0 -> configure build step id==0
-
+xml_get_env
 main "$@"

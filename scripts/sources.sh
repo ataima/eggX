@@ -75,7 +75,7 @@ tmp=$( ls -al  "$1.$4"  |  awk  '{print $5}' )
 if [  $tmp -ne 0  ]; then
 	KEYS=$(ls $RKEYS/* )
 	for i in $KEYS; do
-		gpg --verify --keyring "$i" "$1.$4"
+		gpg --verify --keyring "$i" "$1.$4" >> "$LOGFILE" 2>&1
 		RES=$?
 		if [ $RES -eq 2 ]; then 
 			continue
@@ -861,8 +861,10 @@ fi
 
 # none
 function download_linux_key(){
-gpg --keyserver hkp://keys.gnupg.net --recv-keys 38DBBDC86092693E
-
+local TEST=$(gpg --list-key  | grep "Linux kernel stable release signing key")
+if [ ! "$TEST" ]; then
+	gpg --keyserver hkp://keys.gnupg.net --recv-keys 38DBBDC86092693E >> "$LOGFILE" 2>&1
+fi
 }
 
 # none 
@@ -1067,7 +1069,7 @@ if [ $? -ne 0 ]; then
 fi
 #download all key to verify sign
 download_sign_key
-#download_linux_key
+download_linux_key
 }
 
 
@@ -1168,5 +1170,5 @@ else
 fi
 }
 
-
+xml_get_env
 main "$@"
