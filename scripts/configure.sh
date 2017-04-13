@@ -916,7 +916,7 @@ BTARGET=$(echo $CROSS  | tr '[:lower:]' '[:upper:]')
 if [ "$BTARGET" == "NATIVE" ]; then
 	BTARGET=""
 else
-	BTARGET="--target=$CROSS"
+	BTARGET="--target=$CROSS "
 fi
 EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
