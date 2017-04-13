@@ -16,7 +16,6 @@ IMAGES="$ROOT/images"
 REPOBACKUP="$ROOT/backup"
 BUILD="$ROOT/build"
 EDITOR="vim"
-
 #initial value PATH
 RESPATH="/usr/bin:/sbin:/bin"
 MYPATH=""
@@ -1005,6 +1004,7 @@ REX='^[0-9]+$'
 if ! [[ $1 =~ $REX ]] ; then
 	error_c "first input param must be the step number!" "configure.sh <step x> <optional projets>"
 fi
+
 local ID=$1
 local PRJS=""
 shift
@@ -1023,7 +1023,7 @@ MYPATH=$RESPATH
 for V in $SORTREQ; do
 	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
 	if [ "$PRJS" ] ; then 
-		configure_packet  "$PRJS" "$2"
+		configure_packet  "$PRJS" "$ID"
 	fi
 done
 }

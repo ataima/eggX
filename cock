@@ -256,7 +256,6 @@ done
 
 local PWD=$(pwd)
 for V in $PRJ_NAMES; do
-	set -x
 	for I in $@; do
 		for T in $SORTREQ; do
 			SEQ=$(echo $T | grep $V | grep $I )

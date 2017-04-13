@@ -69,41 +69,40 @@ local KEYS=""
 if [ ! -f  $1.$4 ]; then 
 	dolog "Download sign file : $1.$4"
 	wget  --show-progress -q "$2" -O "$1.$4"
-	tmp=$( ls -al  "$1.$4"  |  awk  '{print $5}' )
-	if [  $tmp -ne 0  ]; then
-		KEYS=$(ls $RKEYS/* )
-		for i in $KEYS; do
-			gpg --verify --keyring "$i" "$1.$4"
-			RES=$?
-			if [ $RES -eq 2 ]; then 
-				continue
-			fi
-			if [ $RES -eq 1 ]; then 
-				dolog "Gpg sign  fail redo download : $1.$4"
-				RES=99
-				break
-			fi
-			if [ $RES -eq 0 ]; then 
-				dolog "Gpg sign  ok : $1.$4"
-				RES=1
-				break
-			fi		
-		done
-		if [ $RES -eq 1 ]; then
-			print_ita "Key sign"  "$3" "...OK!"	
-			chmod 444 $1
-		else
-			print_c "$RED_LIGHT" "   - SIG check  FAIL :$2" "$YELLOW" $3	
-#			rm -f  "$1.$4"
-#			rm -f "$1"
+fi	
+
+tmp=$( ls -al  "$1.$4"  |  awk  '{print $5}' )
+if [  $tmp -ne 0  ]; then
+	KEYS=$(ls $RKEYS/* )
+	for i in $KEYS; do
+		gpg --verify --keyring "$i" "$1.$4"
+		RES=$?
+		if [ $RES -eq 2 ]; then 
+			continue
 		fi
+		if [ $RES -eq 1 ]; then 
+			dolog "Gpg sign  fail redo download : $1.$4"
+			RES=99
+			break
+		fi
+		if [ $RES -eq 0 ]; then 
+			dolog "Gpg sign  ok : $1.$4"
+			RES=1
+			break
+		fi		
+	done
+	if [ $RES -eq 1 ]; then
+		print_ita "Key sign"  "$3" "...OK!"	
+		chmod 444 $1
 	else
-		rm -f  "$1.$4"
+		print_c "$RED_LIGHT" "   - SIG check  FAIL :$2" "$YELLOW" $3	
+			rm -f  "$1.$4"
+			check_pgp $@
+#			rm -f "$1"
 	fi
 else
-print_ita "Key sign"  "$3" "...OK!"	
-RES=1
-fi	
+	rm -f  "$1.$4"
+fi
 return $RES
 }
 
@@ -180,6 +179,7 @@ return $RES
 #$1 filename 
 #$2 remote repository
 #$3 project
+#$4 custom sign file name 
 function check_sign(){
 local RES=0
 local ASIGN="sig sign asc md5 sha1"
@@ -187,15 +187,27 @@ local i=""
 for i in $ASIGN; do
  case $i in
 	"sig"|"sign"|"asc")
-	check_pgp $1 $2 $3 $i  
+	if [ $4 -eq 1 ]; then 
+		check_pgp $1 $2 $3 $i  
+	else
+		check_pgp $1 "$2.$i" $3 $i  
+	fi
 	RES=$?	
 	;;
 	"md5")
-	check_md5sum $1 $2 $3
+	if [ $4 -eq 1 ]; then 
+		check_md5sum $1 $2 $3
+	else
+		check_md5sum $1 "$2.$i" $3
+	fi
 	RES=$?
 	;;
 	"sha1")
-	check_sha1sum $1 $2 $3
+	if [ $4 -eq 1 ]; then 
+		check_sha1sum $1 $2 $3
+	else
+		check_sha1sum $1 "$2.$i" $3
+	fi
 	RES=$?
 	;;
 	*)
@@ -266,23 +278,18 @@ echo $OUTNAME
 # $5  sign key file
 function wget_packet(){
 local RES=0
+local CUSTOM=0
 local FILEIN="$REPO/$1/$3"
 print_c "$GREEN_LIGHT" "   - Download source" "$YELLOW" $i
-if [ ! -d  $REPO/$1/logs ]; then 
-	mkdir -p  $REPO/$1/logs
-fi
-local LOG=$(date +%d-%m-%y-%H:%M:%S)-log.txt
-local tmp=$(touch $REPO/$1/logs/$LOG)
 local PNAME="$2/$3"
-rm -f $REPO/$1/logs/$LOG/*
-dolog "Created download log file : $REPO/$1/logs/$LOG"
-wget  --show-progress -q -o "$REPO/$1/logs/$LOG" "$PNAME" -O "$REPO/$1/$3"
+wget  --show-progress -q -o "$LOGFILE" "$PNAME" -O "$REPO/$1/$3"
 if [  $4 ] && [ $5 ]; then
 		FILEIN=$(test_sign_file "$REPO/$1" "$REPO/$1/$3" "$4/$5") 		
 		PNAME="$4/$5"
+		CUSTOM=1
 	fi
 if [ -f  "$FILEIN" ]; then	
-	check_sign "$FILEIN" "$PNAME" "$1"
+	check_sign "$FILEIN" "$PNAME" "$1" "$CUSTOM"
 	RES=$?
 	if [ $RES -eq 99 ]; then 
 		wget_packet $1 $2 $3 $4 $5
@@ -314,12 +321,14 @@ fi
 function wget_update_packet(){
 local PNAME="$2/$3"
 local FILEIN="$REPO/$1/$3"
+local CUSTOM=0
 if [  $4 ] && [ $5 ]; then
 		FILEIN=$( test_sign_file "$REPO/$1" "$REPO/$1/$3" "$4/$5" ) 		
-		PNAME="$4/$5"		
+		PNAME="$4/$5"	
+		CUSTOM=1		
 	fi
 if [ -f  "$FILEIN" ]; then		
-	check_sign "$FILEIN" "$PNAME" "$1"
+	check_sign "$FILEIN" "$PNAME" "$1" "$CUSTOM"
 	RES=$?
 	if [ $RES -eq 99 ]; then 
 		wget_packet $1 $2 $3 $4 $5

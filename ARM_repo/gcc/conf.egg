@@ -15,7 +15,7 @@
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
 				<cross>arm-none-eabi</cross>	
-				<silent>no</silent>
+				<silent>yes</silent>
 				<threads>8</threads>	
 				<path>
 					<pre>
@@ -50,7 +50,7 @@
 					<extra id="0">--enable-languages=c,c++</extra>					
 					<extra id="1">--disable-nls</extra>											
 					<extra id="2">--without-headers</extra>
-					<extra id="3">--sysroot=$DEPLOY</extra>
+					<extra id="3">--with-build-sysroot=$DEPLOY</extra>
 				</configure>
 				<make>
 					<rule id="0">						
