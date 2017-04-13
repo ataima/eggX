@@ -11,10 +11,10 @@
 		<build>
 			<step id="0">
 				<priority>10</priority>
-				<name> prepare_gcc_native</name>
+				<name>arm_tools</name>
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
-				<cross>native</cross>	
+				<cross>arm-none-eabi</cross>	
 				<silent>no</silent>
 				<threads>8</threads>	
 				<path>
@@ -50,6 +50,7 @@
 					<extra id="0">--enable-languages=c,c++</extra>					
 					<extra id="1">--disable-nls</extra>											
 					<extra id="2">--without-headers</extra>
+					<extra id="3">--sysroot=$DEPLOY</extra>
 				</configure>
 				<make>
 					<rule id="0">						

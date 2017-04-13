@@ -6,8 +6,17 @@ export OROOT="$HOME/eggX"
 SCRIPT_DIR=$OROOT/scripts
 OREPO=$OROOT/repo/.
 
-# include configuration
-source "$SCRIPT_DIR/conf.sh"
+# eggX working path default before read general conf.egg
+ROOT="$HOME/ebuild"
+LOGFILE="$ROOT/log_$(date +%d-%m-%y).txt"
+REPO="$ROOT/repo"
+SOURCES="$ROOT/sources"
+IMAGES="$ROOT/images"
+REPOBACKUP="$ROOT/backup"
+BUILD="$ROOT/build"
+EDITOR="vim"
+
+
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
 
@@ -292,18 +301,28 @@ fi
 #$ARGV TODO
 function config_all_step(){
 declare -i NUM=0
-while [ $NUM -lt $MAX_STEP ]; do 
-	$SCRIPT_DIR/configure.sh --force $NUM $@
+REX='^[0-9]+$'
+if ! [[ $1 =~ $REX ]] ; then
+	while [ $NUM -lt $MAX_STEP ]; do 
+		$SCRIPT_DIR/configure.sh  $NUM $@
+		if [ $? -ne 0 ]; then 
+			exit 1
+		fi
+		NUM=$((NUM+1))
+	done
+else
+	shift
+	$SCRIPT_DIR/configure.sh $NUM $@
 	if [ $? -ne 0 ]; then 
 		exit 1
 	fi
-	NUM=$((NUM+1))
-done
+fi
 }
 
 
 
 #$ARGV 
+# ex 0 gcc -> try step of project gcc
 function try_packet(){
 local PRJ=""
 local V=""
@@ -313,7 +332,7 @@ if ! [[ $NUM =~ $REX ]] ; then
    error_c "Input step isn't a number !!"
 fi
 if [ ! "$2" ]; then
-	error_c "Input project is empty !!"
+	error_c "Input missing project  !!"
 fi
 if [ $NUM -lt $MAX_STEP ]; then
 	prepare_seq_priority $NUM
@@ -334,6 +353,24 @@ else
 fi
 }
 
+#$ARGV 
+#  gcc -> edit conf.egg of project gcc
+function edit_packet(){
+local PRJ=""
+local V=""
+if [ ! "$1" ]; then
+	error_c "Missing Input project "
+fi
+check_project "$1"
+if [ $? -ne 0 ]; then
+	$EDITOR "$OREPO/$1/conf.egg"
+else
+	error_c "Missing project in $OREPO " "project : $1"
+fi
+}
+
+
+
 function usage(){
 	print_c "$BLUE_LIGHT" "usage : ./build.sh <-D> command  <args to pass subcommand>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
@@ -342,7 +379,9 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure+build    all repo projects or specified projects in argv"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "build :   build all repo projects or specified projects in argv"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : clear all build and deploy aout and redo source + configure+do"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "try <step xx> <project nn>: open a bash with setenv for step xx of project nn"	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "bash <step xx> <project nn>: open a bash with setenv for step xx of project nn"	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "vim <project nn>: edit a conf.egg file of project nn"	
+	
 	exit 1
 }
 
@@ -354,6 +393,7 @@ local MAKE=0
 local DO=0
 local REDOALL=0
 local TRY=0
+local VIM=0
 for i in $@; do
 case $i in 
 	-D|--debug)
@@ -367,13 +407,18 @@ case $i in
 	shift
 	break
 	;;
-	try)
+	bash)
 	TRY=1
 	shift
 	break
 	;;	
 	configure)
 	CONFIGURE=1
+	shift
+	break
+	;;	
+	vim)
+	VIM=1
 	shift
 	break
 	;;	
@@ -403,8 +448,17 @@ done
 if [ ! -d $ROOT ]; then 
 	mkdir -p $ROOT
 fi
-LOGFILE="$LOGFILE""-do.txt"
-touch "$LOGFILE"
+
+if ! [ -e $LOGFILE ]; then
+	touch "$LOGFILE"
+fi
+
+if [ $(wc -c < "$LOGFILE" ) -gt 1000000 ]; then 
+	VV=$(wc -l < "$LOGFILE")
+	VV=$((VV-VV/3))
+	sed -i '1,$VVd' "$LOGFILE" >> "$LOGFILE_temp"
+	mv "$LOGFILE_temp" "$LOGFILE"
+fi
 #sort project in repo to bin search
 for key in $ALL_PACKETS; do MAP[$key]="$key"; done  
 # sync repo file to build path 
@@ -442,7 +496,11 @@ else
 					if [ $TRY -ne 0 ]; then	
 						try_packet  "$@"
 					else
-						usage
+						if [ $VIM -ne 0 ]; then	
+							edit_packet  "$@"
+						else
+							usage
+						fi
 					fi
 				fi
 			fi

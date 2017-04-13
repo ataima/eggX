@@ -7,14 +7,24 @@ fi
 SCRIPT_DIR=$OROOT/scripts
 OREPO=$OROOT/repo/.
 
-# include configuration
-source "$SCRIPT_DIR/conf.sh"
-# include io functions
-source "$SCRIPT_DIR/functions.sh"
+# eggX working path default before read general conf.egg
+ROOT="$HOME/ebuild"
+LOGFILE="$ROOT/log_$(date +%d-%m-%y).txt"
+REPO="$ROOT/repo"
+SOURCES="$ROOT/sources"
+IMAGES="$ROOT/images"
+REPOBACKUP="$ROOT/backup"
+BUILD="$ROOT/build"
+EDITOR="vim"
 
 #initial value PATH
 RESPATH="/usr/bin:/sbin:/bin"
 MYPATH=""
+
+# include io functions
+source "$SCRIPT_DIR/functions.sh"
+
+
 
 declare -A MAP    
 
@@ -268,7 +278,7 @@ function generate_setenv(){
 	fi
 	echo "#!/bin/sh" > "$3"
 	echo "#unset all ..." >> "$3"
-	ENV=$(env | sed 's/=.*//' | tr '\n' ' ')
+	ENV=$(env | sed 's/=.*//' | tr '\n' ' ' | sed -e 's/HOME//g')
 	echo "ENV=\"$ENV\"" >> "$3"		
 	echo "for i in \$ENV ; do ">> "$3"
 	echo " unset \$i" >> "$3"
@@ -987,24 +997,24 @@ sync
 
 
 
-
-
-
-
-
 #$1 force 0=0ff 99=on
 #$@ argv optional
 function configure_all_packet(){
 local V=""
-local ID=$2
+REX='^[0-9]+$'
+if ! [[ $1 =~ $REX ]] ; then
+	error_c "first input param must be the step number!" "configure.sh <step x> <optional projets>"
+fi
+local ID=$1
 local PRJS=""
-if [ $1 -eq  99 ]; then
+shift
+
+if [ "$#" -eq  0 ]; then
 	PRJS=$ALL_PACKETS
 else
-	shift 
-	shift
 	PRJS=$@
 fi
+
 for V in $PRJS; do
 	insert_packet "$V" "$ID" 
 done
@@ -1023,7 +1033,6 @@ done
 function usage(){
 	print_c "$BLUE_LIGHT" "usage : ./configure.sh <opt> <phase=always> <args>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
-	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-F or --force : set debug mode"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "phase = 0,1,2..." 
 	print_c  "$PURPLE" "ARGS" "$GREEN" "args for options"
 	exit 1
@@ -1042,10 +1051,6 @@ if [ "$OPT_ARGV" != "" ]; then
 		set -x
 		dolog "Set Debug ON"
 		;;
-		-F|--force)
-		FORCE=99
-		dolog "Set Debug ON"
-		;;	
 		*)
 		usage
 		error_c "Command line" " unknow option $i"
@@ -1058,13 +1063,6 @@ if [ "$ARGV" == "" ]; then
 	usage
 fi
 
-if [ $FORCE -eq 0 ] && [ ${#ARGV[@]} -gt 1 ]; then
-	warning_c "Discarding extra args on command line :\n to force a specific project(s) have to set\n --force flag , ex: :/configure.sh -F 2 binutils"
-fi
-
-#set log to download
-LOGFILE="$LOGFILE""-configure.txt"
-touch "$LOGFILE"
 #sort project in repo to bin search
 for key in $ALL_PACKETS; do MAP[$key]="$key"; done  
 # sync repo file to build path 
@@ -1073,7 +1071,7 @@ rsync -ry $OREPO $REPO
 if [ $? -ne 0 ]; then
 	error_c "Cannot  sync work repository"
 fi
-configure_all_packet  "$FORCE" $ARGV
+configure_all_packet  $ARGV
 }
 
 

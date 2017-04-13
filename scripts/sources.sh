@@ -8,8 +8,16 @@ SCRIPT_DIR=$OROOT/scripts
 OREPO=$OROOT/repo/.
 RKEYS=$OROOT/Keys
 
-# include configuration
-source "$SCRIPT_DIR/conf.sh"
+# eggX working path default before read general conf.egg
+ROOT="$HOME/ebuild"
+LOGFILE="$ROOT/log_$(date +%d-%m-%y).txt"
+REPO="$ROOT/repo"
+SOURCES="$ROOT/sources"
+IMAGES="$ROOT/images"
+REPOBACKUP="$ROOT/backup"
+BUILD="$ROOT/build"
+EDITOR="vim"
+
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
 
@@ -855,9 +863,7 @@ function check_work_dir(){
 if [ ! -d "$ROOT" ]; then 
 	mkdir -p "$ROOT"
 fi
-#set log to download
-LOGFILE="$LOGFILE""-download.txt"
-touch "$LOGFILE"
+
 #REPO
 if [ ! -d "$REPO" ]; then 
 	dolog "Create $REPO path"
