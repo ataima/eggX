@@ -7,7 +7,7 @@
 		<sources>$ROOT/sources</sources>
 		<images>$ROOT/images</images>
 		<build>$ROOT/build</build>
-		<editor>vim</editor>
+		<editor>scite</editor>
 		<start_path>/usr/bin:/sbin:/bin</start_path>
 	</conf>	
 	<defaults>

@@ -152,9 +152,16 @@ echo $PRJ_NAME
 #$2 name
 #$3 project
 function print_build_msg(){
-print_ita  "DO   : $1"  "$2"  "$3"
+print_ita  "DO    : $1"  "$2"  "$3"
 }
 
+#print build start 
+#$1 pririty
+#$2 name
+#$3 project
+function print_clean_msg(){
+print_ita  "CLEAN : $1"  "$2"  "$3"
+}
 
 #none
 function build_all(){
@@ -204,7 +211,27 @@ while [ $ID -lt $MAX_STEP ] ; do
 done
 }
 
-
+#none
+function clean_all(){
+local ID=0 
+local V=""
+while [ $ID -lt $MAX_STEP ] ; do
+	prepare_seq_priority $ID
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		PRI=$(echo $V | awk '{print $1}')
+		NAME=$(echo $V | awk '{print $2}')
+		PRJ=$(echo $V | awk '{print $3}')
+		print_clean_msg "$PRI" "$NAME" "$PRJ"
+		cd "$BUILD/$PRJ/$NAME"
+		$BUILD/$PRJ/$NAME/clean.sh
+		if [ $? -ne 0 ] ; then
+			exit -1;
+		fi
+		sync
+	done
+done
+}
 
 #$@ from argv build.sh
 function build_single(){
@@ -277,7 +304,36 @@ done
 }
 
 
+#$@ from argv build.sh
+function clean_single(){
+set -x ; trap read debug
+#trovo nomi build per ogni progetto
+local PRJ_NAMES=""
+for V in $@; do
+	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
+done
 
+local PWD=$(pwd)
+for V in $PRJ_NAMES; do
+	for I in $@; do
+		for T in $SORTREQ; do
+			SEQ=$(echo $T | grep $V | grep $I )
+			if [ "$SEQ" != "" ]; then 
+				break;
+			fi
+		done
+		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
+		PRI=$(echo $SEQ | awk '{print $1}')
+		NAME=$(echo $SEQ | awk '{print $2}')
+		PRJ=$(echo $SEQ | awk '{print $3}')
+		print_clean_msg "$PRI" "$NAME" "$PRJ"
+		cd "$BUILD/$V/$I"
+		$BUILD/$V/$I/clean.sh
+		sync
+		print_c "$WHITE" "-------------------------------------------------------"
+	done 
+done
+}
 #$@
 function build_all_packet(){
 if [ "$1" == "" ]; then
@@ -296,11 +352,20 @@ else
 fi
 }
 
+#$@
+function clean_all_packet(){
+if [ "$1" == "" ]; then
+	clean_all
+else
+	clean_single $@
+fi
+}
+
 
 #$ARGV TODO
 function config_all_step(){
 declare -i NUM=0
-REX='^[0-9]+$'
+REX='^[0-9]+$1'
 if ! [[ $1 =~ $REX ]] ; then
 	while [ $NUM -lt $MAX_STEP ]; do 
 		$SCRIPT_DIR/configure.sh  $NUM $@
@@ -326,9 +391,9 @@ function try_packet(){
 local PRJ=""
 local V=""
 declare -i NUM=$1
-REX='^[0-9]+$'
+REX='^[0-9]+$1'
 if ! [[ $NUM =~ $REX ]] ; then
-   error_c "Input step isn't a number !!"
+   error_c "$1 : Input step isn't a number !!"
 fi
 if [ ! "$2" ]; then
 	error_c "Input missing project  !!"
@@ -396,10 +461,22 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "build :   build all repo projects or specified projects in argv"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : clear all build and deploy aout and redo source + configure+do"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "bash <step xx> <project nn>: open a bash with setenv for step xx of project nn"	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "clean <option step xx> <option project nn>: clean all, clean all step, clean all step:project"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "vim <project nn>: edit a conf.egg file of project nn"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "info : show program info..."
 	exit 1
 }
+
+
+function default_do(){
+        $SCRIPT_DIR/sources.sh
+        if [ $? -ne 0 ]; then
+                exit 1
+        fi
+        config_all_step
+        build_all_packet
+}
+
 
 #$1 build id number
 function main(){
@@ -412,6 +489,10 @@ local TRY=0
 local VIM=0
 local TRY=0
 local INFO=0
+local CLEAN=0
+
+
+if [ $# -ne 0 ]; then
 for i in $@; do
 case $i in 
 	-D|--debug)
@@ -445,6 +526,11 @@ case $i in
 	shift
 	break
 	;;	
+	clean)
+	CLEAN=1
+	shift
+	break
+	;;	
 	do)
 	DO=1		
 	shift
@@ -465,6 +551,8 @@ case $i in
 	;;
 esac
 done
+
+fi
 
 if [ $INFO -eq 1 ]; then 
 	show_info
@@ -526,7 +614,11 @@ else
 						if [ $VIM -ne 0 ]; then	
 							edit_packet  "$@"
 						else
-							usage
+							if [ $CLEAN -ne 0 ]; then	
+								clean_all_packet "$@"
+							else
+								default_do
+							fi
 						fi
 					fi
 				fi
