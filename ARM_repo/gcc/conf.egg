@@ -15,11 +15,11 @@
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
 				<cross>arm-none-eabi</cross>	
-				<silent>yes</silent>
+				<silent>no</silent>
 				<threads>8</threads>	
 				<path>
 					<pre>
-						<add> $DEPLOY/$PREFIX </add>
+						<add> $DEPLOY </add>
 					</pre>
 				</path>
 				<configure>
@@ -49,8 +49,10 @@
 						</pre>
 					<extra id="0">--enable-languages=c,c++</extra>					
 					<extra id="1">--disable-nls</extra>											
-					<extra id="2">--without-headers</extra>
-					<extra id="3">--with-build-sysroot=$DEPLOY</extra>
+					<extra id="2">--with-headers=$DEPLOY/include</extra>
+					<extra id="3"> --disable-libstdcxx</extra>
+					<extra id="4"> --disable-libssp</extra>
+					
 				</configure>
 				<make>
 					<rule id="0">						

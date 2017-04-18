@@ -610,8 +610,15 @@ touch "$SH_CLEAN"
 chmod +rwx "$SH_CLEAN" 
 # clean 
 prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" "$5" "$6"
-echo "if [ -f Makefile ]; then " >> "$SH_CLEAN"
-echo " make -C \$BUILD clean " >> "$SH_CLEAN"
+echo "if [ -f \$BUILD/Makefile ]; then " >> "$SH_CLEAN"
+if [ "$7" == "yes" ]; then 
+	echo "	make --silent -C \$BUILD clean > /dev/null 2>&1 " >> "$SH_CLEAN"
+else
+	echo "	make -C \$BUILD  clean ">> "$SH_CLEAN"
+fi
+echo "	if [ \$? -ne 0 ]; then">> "$SH_CLEAN"
+echo "    	error_c \"Error on clean \" \"  - project \$1\"" >>"$SH_CLEAN"
+echo "	fi"  >> "$SH_CLEAN"
 echo "fi" >> "$SH_CLEAN"
 echo "" >> "$SH_CLEAN"
 echo "" >> "$SH_CLEAN"
@@ -1036,8 +1043,8 @@ fi
 #$@ argv optional
 function configure_all_packet(){
 local V=""
-REX='^[0-9]+$'
-if ! [[ $1 =~ $REX ]] ; then
+isNumber $1
+if [ $? -ne 0 ]; then
 	error_c "first input param must be the step number!" "configure.sh <step x> <optional projets>"
 fi
 

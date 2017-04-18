@@ -46,10 +46,15 @@ echo  $(echo $GREEN_LIGHT) "$A1" $(echo $WHITE) "$A2" $(echo $RED_LIGHT) "$A3" $
 }
 
 
+
+
+#none
+function print_del_ita() {
+print_s_ita "--------------------" "--------------------" "--------------------"
+}
 # $1..3 argv
 function print_ita(){
-
-print_s_ita "--------------------" "--------------------" "--------------------"
+print_del_ita
 print_s_ita "$1" "$2" "$3"
 }
 
@@ -181,3 +186,12 @@ for II in $XNAME; do
 done
 }
 
+
+#$1 param to test
+function isNumber(){
+local RES='^[0-9]+$'
+if ! [[ $1 =~ $RES ]] ; then
+   return 1
+fi
+return 0
+}

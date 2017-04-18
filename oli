@@ -152,7 +152,7 @@ echo $PRJ_NAME
 #$2 name
 #$3 project
 function print_build_msg(){
-print_ita  "DO    : $1"  "$2"  "$3"
+print_ita  "BUILD : $1"  "$2"  "$3"
 }
 
 #print build start 
@@ -236,22 +236,28 @@ done
 #$@ from argv build.sh
 function build_single(){
 #trovo nomi build per ogni progetto
-local V=""
-local T=""
-local SEQ=""
+local ID=0
 local PRJ_NAMES=""
+isNumber $1
+if [ $? -ne 0 ]; then
+   error_c "$1 : Input step isn't a number !!"
+fi
+if [ ! "$2" ]; then
+	error_c "Input missing project  !!"
+fi
+shift
 for V in $@; do
 	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
 done
-
 local PWD=$(pwd)
+prepare_seq_priority $NUM
 for V in $PRJ_NAMES; do
 	for I in $@; do
 		for T in $SORTREQ; do
 			SEQ=$(echo $T | grep $V | grep $I )
-			if [ "$SEQ" != "" ]; then 
-				break;
-			fi
+				if [ "$SEQ" != "" ]; then 
+					break;
+				fi
 		done
 		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
 		PRI=$(echo $SEQ | awk '{print $1}')
@@ -259,6 +265,7 @@ for V in $PRJ_NAMES; do
 		PRJ=$(echo $SEQ | awk '{print $3}')
 		print_build_msg "$PRI" "$NAME" "$PRJ"
 		cd "$BUILD/$V/$I"
+		$BUILD/$V/$I/clean.sh
 		$BUILD/$V/$I/bootstrap.sh
 		if [ $? -ne 0 ] ; then
 			exit -1;
@@ -267,8 +274,6 @@ for V in $PRJ_NAMES; do
 		if [ $? -ne 0 ] ; then
 			exit -1;
 		fi
-		sync
-		print_c "$WHITE" "-------------------------------------------------------"
 	done 
 done
 }
@@ -276,19 +281,28 @@ done
 #$@ from argv build.sh
 function compile_single(){
 #trovo nomi build per ogni progetto
+local ID=0
 local PRJ_NAMES=""
+isNumber $1
+if [ $? -ne 0 ] ; then
+   error_c "$1 : Input step isn't a number !!"
+fi
+if [ ! "$2" ]; then
+	error_c "Input missing project  !!"
+fi
+shift
 for V in $@; do
 	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
 done
-
 local PWD=$(pwd)
+prepare_seq_priority $NUM
 for V in $PRJ_NAMES; do
 	for I in $@; do
 		for T in $SORTREQ; do
 			SEQ=$(echo $T | grep $V | grep $I )
-			if [ "$SEQ" != "" ]; then 
-				break;
-			fi
+				if [ "$SEQ" != "" ]; then 
+					break;
+				fi
 		done
 		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
 		PRI=$(echo $SEQ | awk '{print $1}')
@@ -297,30 +311,40 @@ for V in $PRJ_NAMES; do
 		print_build_msg "$PRI" "$NAME" "$PRJ"
 		cd "$BUILD/$V/$I"
 		$BUILD/$V/$I/build.sh
-		sync
-		print_c "$WHITE" "-------------------------------------------------------"
+		if [ $? -ne 0 ] ; then
+			exit -1;
+		fi
 	done 
 done
 }
 
 
 #$@ from argv build.sh
+# 0 gcc linux input step + project/s
 function clean_single(){
-set -x ; trap read debug
 #trovo nomi build per ogni progetto
+local ID=0
 local PRJ_NAMES=""
+isNumber $1
+if [ $? -ne 0 ]; then
+   error_c "$1 : Input step isn't a number !!"
+fi
+if [ ! "$2" ]; then
+	error_c "Input missing project  !!"
+fi
+shift
 for V in $@; do
 	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
 done
-
 local PWD=$(pwd)
+prepare_seq_priority $NUM
 for V in $PRJ_NAMES; do
 	for I in $@; do
 		for T in $SORTREQ; do
 			SEQ=$(echo $T | grep $V | grep $I )
-			if [ "$SEQ" != "" ]; then 
-				break;
-			fi
+				if [ "$SEQ" != "" ]; then 
+					break;
+				fi
 		done
 		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
 		PRI=$(echo $SEQ | awk '{print $1}')
@@ -329,8 +353,6 @@ for V in $PRJ_NAMES; do
 		print_clean_msg "$PRI" "$NAME" "$PRJ"
 		cd "$BUILD/$V/$I"
 		$BUILD/$V/$I/clean.sh
-		sync
-		print_c "$WHITE" "-------------------------------------------------------"
 	done 
 done
 }
@@ -341,6 +363,8 @@ if [ "$1" == "" ]; then
 else
 	build_single $@
 fi
+sync
+print_del_ita
 }
 
 #$@
@@ -350,6 +374,8 @@ if [ "$1" == "" ]; then
 else
 	compile_single $@
 fi
+sync
+print_del_ita
 }
 
 #$@
@@ -359,14 +385,16 @@ if [ "$1" == "" ]; then
 else
 	clean_single $@
 fi
+sync
+print_del_ita
 }
 
 
 #$ARGV TODO
 function config_all_step(){
 declare -i NUM=0
-REX='^[0-9]+$1'
-if ! [[ $1 =~ $REX ]] ; then
+isNumber $1
+if [ $? -ne 0 ]; then
 	while [ $NUM -lt $MAX_STEP ]; do 
 		$SCRIPT_DIR/configure.sh  $NUM $@
 		if [ $? -ne 0 ]; then 
@@ -375,12 +403,15 @@ if ! [[ $1 =~ $REX ]] ; then
 		NUM=$((NUM+1))
 	done
 else
+	NUM=$1
 	shift
 	$SCRIPT_DIR/configure.sh $NUM $@
 	if [ $? -ne 0 ]; then 
 		exit 1
 	fi
 fi
+sync
+print_del_ita
 }
 
 
@@ -390,9 +421,9 @@ fi
 function try_packet(){
 local PRJ=""
 local V=""
-declare -i NUM=$1
-REX='^[0-9]+$1'
-if ! [[ $NUM =~ $REX ]] ; then
+local NUM=$1
+isNumber $1
+if [ $? -ne 0 ]; then
    error_c "$1 : Input step isn't a number !!"
 fi
 if [ ! "$2" ]; then
@@ -429,14 +460,14 @@ check_project "$1"
 if [ $? -ne 0 ]; then
 	$EDITOR "$OREPO/$1/conf.egg"
 else
-	if [ "$1" == "cock.conf" ]; then
+	if [ "$1" == "oli.conf" ]; then
 		$EDITOR "$OREPO/conf.egg"
 	else
 		if [ "$1" == "-S" ]; then
 			$EDITOR "$SCRIPT_DIR/$2.sh"
 		else
 			if [ "$1" == "self" ]; then
-				$EDITOR "cock"
+				$EDITOR "oli"
 			else
 				error_c "Missing project in $OREPO " "project : $1"
 			fi

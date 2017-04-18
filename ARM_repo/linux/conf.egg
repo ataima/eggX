@@ -19,7 +19,7 @@
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
 				<cross>arm-none-eabi</cross>
-				<silent>yes</silent>
+				<silent>no</silent>
 				<threads>8</threads>			
 				<make>
 					<rule id="0">
@@ -27,13 +27,21 @@
 							<mode>code</mode>
 							<value>mkdir -p $BUILDS/$PROJECT/temp</value>
 						</pre>
+						<pre id="1">
+							<mode>code</mode>
+							<value>export ARCH=arm</value>
+						</pre>
 						<name> INSTALL_HDR_PATH=$BUILDS/$PROJECT/temp headers_install</name>
 						<thread> 1 </thread>
 						<post id="0">
 							<mode>code</mode>
+							<value>mkdir -p $DEPLOY/include </value>
+						</post>	
+						<post id="1">
+							<mode>code</mode>
 							<value>cp -r $BUILDS/$PROJECT/temp/include/* $DEPLOY/include </value>
 						</post>						
-						<post id="1">
+						<post id="2">
 							<mode>code</mode>
 							<value>rm -rf  $BUILDS/$PROJECT/temp </value>
 						</post>						
