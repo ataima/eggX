@@ -186,6 +186,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 		fi
 		sync
 	done
+	ID=$((ID+1))
 done
 }
 

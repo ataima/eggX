@@ -11,11 +11,11 @@
 		<build>
 			<step id="0">
 				<priority>10</priority>
-				<name>arm_tools</name>
+				<name>arm-none-tools</name>
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
 				<cross>arm-none-eabi</cross>	
-				<silent>no</silent>
+				<silent>yes</silent>
 				<threads>8</threads>	
 				<path>
 					<pre>
