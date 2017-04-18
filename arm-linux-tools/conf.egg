@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<egg>   
+	<conf>
+		<root>$HOME/ebuild</root>
+		<logfile>$ROOT/log_$(date +%d-%m-%y).txt</logfile>
+		<repo>$ROOT/repo</repo>
+		<sources>$ROOT/sources</sources>
+		<images>$ROOT/images</images>
+		<build>$ROOT/build</build>
+		<editor>scite</editor>
+		<start_path>/usr/bin:/sbin:/bin</start_path>
+	</conf>	
+	<defaults>
+		<step id="0">
+			<step_name>arm-linux-tools</step_name>
+			<cflags>-O3</cflags>
+			<cppflags>-O3</cppflags>
+			<cxxflags>-O3</cxxflags>
+			<ldflags></ldflags>
+			<libs></libs>
+		</step>
+	</defaults>
+</egg>

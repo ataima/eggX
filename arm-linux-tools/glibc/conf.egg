@@ -11,20 +11,28 @@
 		<build>
 			<step id="0">
 				<priority>20</priority>
-				<name> arm_tools</name>
+				<name> arm-linux-tools</name>
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
-				<cross>arm-none-eabi</cross>	
+				<cross>arm-linux-eabi</cross>	
 				<silent>yes</silent>
 				<threads>8</threads>	
 				<configure>					
 					<extra id="0">--with-sysroot=$DEPLOYS</extra>
-					<extra id="1">--enable-kernel=2.6.32</extra>					
-					<extra id="2"> -enable-add-ons</extra>
+					<extra id="1"> --build=$(../scripts/config.guess)</extra>					
+					<extra id="2">--enable-kernel=2.6.32</extra>					
 				</configure>				
 				<make>
 					<rule id="0">
 						<name>all</name> 
+						<pre id="0">
+							<mode>code</mode>		
+							<value>export CC=$DEPLOY/bin/gcc</value>
+						</pre>
+						<pre id="1">
+							<mode>code</mode>		
+							<value>export CXX=$DEPLOY/bin/g++</value>
+						</pre>
 					</rule>
 					<rule id="1">
 						<name>install</name> 

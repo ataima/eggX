@@ -15,10 +15,10 @@
 		<build>
 			<step id="0">
 				<priority>9</priority>
-				<name>arm_tools</name>
+				<name>arm-linux-tools</name>
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
-				<cross>arm-none-eabi</cross>
+				<cross>arm-linux-eabi</cross>
 				<silent>no</silent>
 				<threads>8</threads>			
 				<make>

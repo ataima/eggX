@@ -11,10 +11,10 @@
 		<build>
 			<step id="0">
 				<priority>10</priority>
-				<name>arm_tools</name>
+				<name>arm-linux-tools</name>
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
-				<cross>arm-none-eabi</cross>	
+				<cross>arm-linux-eabi</cross>	
 				<silent>no</silent>
 				<threads>8</threads>	
 				<path>
@@ -49,7 +49,7 @@
 						</pre>
 					<extra id="0">--enable-languages=c,c++</extra>					
 					<extra id="1">--disable-nls</extra>	
-					<extra id="2">--without-headers</extra>	
+					<extra id="2">  --with-headers=$DEPLOY/include</extra>
 					<extra id="3"> --disable-libstdcxx</extra>
 					<extra id="4"> --disable-libssp</extra>
 					
@@ -63,11 +63,11 @@
 						<thread>1</thread>						
 						<post  id="0">
 							<mode>code</mode>		
-							<value>echo $PATH;arm-none-eabi-gcc  -v</value>
+							<value>arm-linux-eabi-gcc --version</value>
 						</post >
 						<post  id="1">
 							<mode>code</mode>		
-							<value>arm-none-eabi-gcc -fsyntax-only -xc -v -H </value>
+							<value>arm-linux-eabi-gcc -fsyntax-only -xc -v -H </value>
 						</post >
 					</rule>
 				</make>
