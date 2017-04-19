@@ -14,7 +14,7 @@
 				<name> arm-none-tools</name>
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
-				<cross>arm-linux-eabi</cross>	
+				<cross>arm-none-eabi</cross>	
 				<silent>yes</silent>
 				<threads>8</threads>
 				<path>
