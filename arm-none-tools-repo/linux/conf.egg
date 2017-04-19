@@ -16,7 +16,7 @@
 			<step id="0">
 				<priority>9</priority>
 				<name>arm-none-tools</name>
-				<prefix>usr</prefix>
+				<prefix></prefix>
 				<arch>x86_64</arch>
 				<cross>arm-none-eabi</cross>
 				<silent>yes</silent>
@@ -34,25 +34,9 @@
 						<name> ARCH=arm headers_check</name>
 						<thread> 1 </thread>
 					</rule>
-					<rule id="3">
-						<pre id="0">
-							<mode>code</mode>
-							<value>mkdir -p $BUILDS/$PROJECT/temp</value>
-						</pre>
-						<name> ARCH=arm INSTALL_HDR_PATH=$BUILDS/$PROJECT/temp headers_install</name>
-						<thread> 1 </thread>
-						<post id="0">
-							<mode>code</mode>
-							<value>mkdir -p $DEPLOY/include </value>
-						</post>	
-						<post id="1">
-							<mode>code</mode>
-							<value>cp -r $BUILDS/$PROJECT/temp/include/* $DEPLOY/include </value>
-						</post>						
-						<post id="2">
-							<mode>code</mode>
-							<value>rm -rf  $BUILDS/$PROJECT/temp </value>
-						</post>						
+					<rule id="3">						
+						<name> ARCH=arm INSTALL_HDR_PATH=$DEPLOY/$CROSS headers_install</name>
+						<thread> 1 </thread>							
 					</rule>
 				</make>
 			</step>

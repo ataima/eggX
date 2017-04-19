@@ -12,7 +12,7 @@
 			<step id="0">
 				<priority>10</priority>
 				<name>arm-none-tools</name>
-				<prefix>usr</prefix>
+				<prefix></prefix>
 				<arch>x86_64</arch>
 				<cross>arm-none-eabi</cross>	
 				<silent>yes</silent>
@@ -37,31 +37,36 @@
 						</pre>
 						<pre id="3">
 							<mode>code</mode>
-							<value>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</value>
+							<value>rm -rf $SOURCE/isl</value>
 						</pre>
 						<pre id="4">
 							<mode>code</mode>
-							<value>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</value>
+							<value>rm -rf $SOURCE/cloog</value>
 						</pre>
 						<pre id="5">
 							<mode>code</mode>
+							<value>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</value>
+						</pre>
+						<pre id="6">
+							<mode>code</mode>
+							<value>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</value>
+						</pre>
+						<pre id="7">
+							<mode>code</mode>
 							<value>A=$(ls -d $SOURCES/mpfr/*); ln -s $A $SOURCE/mpfr</value>
+						</pre>
+						<pre id="8">
+							<mode>code</mode>
+							<value>A=$(ls -d $SOURCES/isl/*); ln -s $A $SOURCE/isl</value>
+						</pre>
+						<pre id="9">
+							<mode>code</mode>
+							<value>A=$(ls -d $SOURCES/cloog/*); ln -s $A $SOURCE/cloog</value>
 						</pre>
 					<extra id="0">--build=$NATIVE</extra>	
 					<extra id="1">--host=$NATIVE</extra>
-					<extra id="2">--enable-languages=c</extra>					
-					<extra id="3">--disable-nls</extra>	
-					<extra id="4">--without-headers</extra>	
-					<extra id="5"> --disable-libstdcxx</extra>
-					<extra id="6"> --disable-libssp</extra>	
-					<extra id="7"> --enable-boostrap</extra>	
-					<extra id="8"> --disable-threads</extra>	
-					<extra id="9"> --enable-__cxa_atexit</extra>		
-					<extra id="10"> --disable-libmudflap</extra>
-					<extra id="11"> --with-gnu-ld</extra>
-					<extra id="12"> --with-gnu-as</extra>
-					<extra id="13"> --disable-libgomp</extra>
-					<extra id="14"> --disable-shared</extra>					 
+					<extra id="2">--enable-languages=c,c++</extra>					
+					<extra id="3">--disable-multilib</extra>										 
 				</configure>
 				<make>
 					<rule id="0">						
@@ -72,28 +77,9 @@
 						<thread>1</thread>						
 						<post  id="0">
 							<mode>code</mode>		
-							<value>echo $PATH;arm-none-eabi-gcc  -v</value>
+							<value>arm-none-eabi-gcc  -v</value>
 						</post >
-						<post  id="1">
-							<mode>code</mode>		
-							<value>arm-none-eabi-gcc -fsyntax-only -xc -v -H </value>
-						</post >
-					</rule>
-					<rule id="2">						
-						<name>all-target-libgcc</name> 
-					</rule>
-					<rule id="3">
-						<name>install-target-libgcc</name> 
-						<thread>1</thread>						
-						<post id="0">
-							<mode>code</mode>		
-							<value>export VERS=$(arm-none-eabi-gcc --version | grep arm-none-eabi-gcc | awk '{print $3}')</value>
-						</post>
-						<post id="1">
-							<mode>code</mode>		
-							<value>ln -s $DEPLOY/lib/gcc/arm-none-eabi/$VERS/libgcc.a $DEPLOY/lib/gcc/arm-none-eabi/$VERS/libgcc_sh.a</value>
-						</post>
-					</rule>
+					</rule>										
 				</make>
 			</step>
 		</build>	
