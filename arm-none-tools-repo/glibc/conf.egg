@@ -22,38 +22,43 @@
 						<add id="0"> $DEPLOY/bin </add>
 					</pre>
 				</path>
-				<configure>					
-					<pre id="0">
-							<mode>code</mode>
-							<value>export CC=arm-none-eabi-gcc</value>
+				<configure>		
+					<pre id="0">					
+						<mode>code</mode>
+						<value>echo libc_cv_forced_unwind=yes | tee  $BUILD/config.cache</value>
 					</pre>
-					<pre id="1">
-							<mode>code</mode>
-							<value>export CXX=arm-none-eabi-g++</value>
+					<pre id="1">					
+						<mode>code</mode>
+						<value>echo libc_cv_c_cleanup=yes | tee $BUILD/config.cache</value>
 					</pre>
 					<pre id="2">
 							<mode>code</mode>
-							<value>export CPATH=$DEPLOY/include</value>
+							<value>export CC=$CROSS-gcc</value>
 					</pre>
-					<extra id="0">--build=x86_64-linux-gnu</extra>
-					<extra id="1">--host=arm-none-eabi</extra>
+					<pre id="3">
+							<mode>code</mode>
+							<value>export CXX=$CROSS-g++</value>
+					</pre>
+					<pre id="4">
+							<mode>code</mode>
+							<value>export LD=$CROSS-ls</value>
+					</pre>
+					<pre id="5">
+							<mode>code</mode>
+							<value>export AS=$CROSS-as</value>
+					</pre>
+					<extra id="0">--build=$NATIVE</extra>
+					<extra id="1">--host=$CROSS</extra>
 					<extra id="2">--with-sysroot=$DEPLOY</extra>
 					<extra id="3">--enable-kernel=2.6.32</extra>					
 					<extra id="4">--enable-add-ons</extra>
 					<extra id="5">--with-headers=$DEPLOY/include</extra>
+					<extra id="6">--config-cache</extra>
 				</configure>				
 				<make>
 					<rule id="0">
-						<pre id="0">
-							<mode>code</mode>
-							<value>export CPATH=$DEPLOY/include</value>
-						</pre>
-						<name>all</name> 
-					</rule>
-					<rule id="1">
-						<name>install</name> 
-						<thread>1</thread>	
-					</rule>					
+						<name>-k install-headers cross_compiling=yes install_root=$DEPLOY</name> 
+					</rule>				
 				</make>		
 			</step>
 		</build>	

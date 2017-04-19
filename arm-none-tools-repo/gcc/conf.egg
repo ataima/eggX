@@ -47,18 +47,28 @@
 							<mode>code</mode>
 							<value>A=$(ls -d $SOURCES/mpfr/*); ln -s $A $SOURCE/mpfr</value>
 						</pre>
-					<extra id="0">--enable-languages=c,c++</extra>					
-					<extra id="1">--disable-nls</extra>	
-					<extra id="2">--without-headers</extra>	
-					<extra id="3"> --disable-libstdcxx</extra>
-					<extra id="4"> --disable-libssp</extra>					
+					<extra id="0">--build=$NATIVE</extra>	
+					<extra id="1">--host=$NATIVE</extra>
+					<extra id="2">--enable-languages=c</extra>					
+					<extra id="3">--disable-nls</extra>	
+					<extra id="4">--without-headers</extra>	
+					<extra id="5"> --disable-libstdcxx</extra>
+					<extra id="6"> --disable-libssp</extra>	
+					<extra id="7"> --enable-boostrap</extra>	
+					<extra id="8"> --disable-threads</extra>	
+					<extra id="9"> --enable-__cxa_atexit</extra>		
+					<extra id="10"> --disable-libmudflap</extra>
+					<extra id="11"> --with-gnu-ld</extra>
+					<extra id="12"> --with-gnu-as</extra>
+					<extra id="13"> --disable-libgomp</extra>
+					<extra id="14"> --disable-shared</extra>					 
 				</configure>
 				<make>
 					<rule id="0">						
-						<name>all</name> 
+						<name>all-gcc</name> 
 					</rule>
 					<rule id="1">
-						<name>install</name> 
+						<name>install-gcc</name> 
 						<thread>1</thread>						
 						<post  id="0">
 							<mode>code</mode>		
@@ -68,6 +78,21 @@
 							<mode>code</mode>		
 							<value>arm-none-eabi-gcc -fsyntax-only -xc -v -H </value>
 						</post >
+					</rule>
+					<rule id="2">						
+						<name>all-target-libgcc</name> 
+					</rule>
+					<rule id="3">
+						<name>install-target-libgcc</name> 
+						<thread>1</thread>						
+						<post id="0">
+							<mode>code</mode>		
+							<value>export VERS=$(arm-none-eabi-gcc --version | grep arm-none-eabi-gcc | awk '{print $3}')</value>
+						</post>
+						<post id="1">
+							<mode>code</mode>		
+							<value>ln -s $DEPLOY/lib/gcc/arm-none-eabi/$VERS/libgcc.a $DEPLOY/lib/gcc/arm-none-eabi/$VERS/libgcc_sh.a</value>
+						</post>
 					</rule>
 				</make>
 			</step>
