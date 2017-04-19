@@ -35,10 +35,12 @@
 							<mode>code</mode>
 							<value>export CPATH=$DEPLOY/include</value>
 					</pre>
-					<extra id="0">--with-sysroot=$DEPLOY</extra>
-					<extra id="1">--enable-kernel=2.6.32</extra>					
-					<extra id="2">--enable-add-ons</extra>
-					<extra id="3">--with-headers=$DEPLOY/include</extra>
+					<extra id="0">--build=x86_64-linux-gnu</extra>
+					<extra id="1">--host=arm-none-eabi</extra>
+					<extra id="2">--with-sysroot=$DEPLOY</extra>
+					<extra id="3">--enable-kernel=2.6.32</extra>					
+					<extra id="4">--enable-add-ons</extra>
+					<extra id="5">--with-headers=$DEPLOY/include</extra>
 				</configure>				
 				<make>
 					<rule id="0">

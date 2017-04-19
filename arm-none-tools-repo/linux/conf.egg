@@ -23,15 +23,23 @@
 				<threads>8</threads>			
 				<make>
 					<rule id="0">
+						<name> mrproper</name>
+						<thread> 1 </thread>
+					</rule>					
+					<rule id="1">
+						<name> ARCH=arm bcm2835_defconfig</name>
+						<thread> 1 </thread>
+					</rule>
+					<rule id="2">
+						<name> ARCH=arm headers_check</name>
+						<thread> 1 </thread>
+					</rule>
+					<rule id="3">
 						<pre id="0">
 							<mode>code</mode>
 							<value>mkdir -p $BUILDS/$PROJECT/temp</value>
 						</pre>
-						<pre id="1">
-							<mode>code</mode>
-							<value>export ARCH=arm</value>
-						</pre>
-						<name> INSTALL_HDR_PATH=$BUILDS/$PROJECT/temp headers_install</name>
+						<name> ARCH=arm INSTALL_HDR_PATH=$BUILDS/$PROJECT/temp headers_install</name>
 						<thread> 1 </thread>
 						<post id="0">
 							<mode>code</mode>

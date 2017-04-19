@@ -17,9 +17,6 @@
 				<cross>arm-none-eabi</cross>	
 				<silent>yes</silent>
 				<threads>8</threads>
-				<path>
-					<add id="0" >usr/arm-none-eabi</add >
-				</path>
 				<configure>
 					<extra id="0">--disable-nls</extra>	
 					<extra id="1">--with-sysroot=$DEPLOYS</extra>			

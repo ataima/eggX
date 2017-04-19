@@ -307,6 +307,7 @@ function generate_setenv(){
 	echo "export C_INCLUDE_PATH=$C_INCLUDE_PATH" >> "$3"
 	echo "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH" >> "$3"	
 	echo "export PATH=$MYPATH" >> "$3"	
+	echo "export NATIVE=$(/usr/bin/gcc -dumpmachine)" >> "$3"
 }
 
 #$1 projects
@@ -479,6 +480,8 @@ echo " "  >> $3
 #$2 step id
 #$3 file out
 #$4 silent
+#$5 prefix 
+#$6 target
 function add_extra_conf(){
 declare -i i=0
 local VALUE=""
@@ -498,14 +501,16 @@ if [ $? -eq 1 ]; then
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  extra conf id=$i Phase $2" "project : $1"
 				fi
-				echo "\\"  >> $3
-				echo -n	"$VALUE "  >> $3
+				echo 	"$VALUE \\"  >> $3
 				i=$((i+1))
 				done 
 			fi
 		fi
+		echo 	"$5 \\"  >> $3
 		if  [ "$4" == "yes" ]; then 
-			echo " > /dev/null" >>  $3
+			echo " $6 > /dev/null" >>  $3
+		else
+			echo 	"$6 "  >> $3		
 		fi
 	else
 		error_c "Missing conf.egg file " "project : $1"
@@ -867,6 +872,8 @@ local CROSS=""
 local SILENT=""
 local INDEX=""
 local PREFIX=""
+local BTARGET=""
+local BDEST=""
 local NUM=0
 check_project $1
 if [ $? -eq 1 ]; then
@@ -933,10 +940,9 @@ fi
 local C_BUILD="$BUILD/$NAME/$1"
 local C_FILE="$C_BUILD/bootstrap.sh"
 local DEST="$IMAGES/$NAME/$PREFIX"
+rm  -rf "$C_BUILD"
 mkdir -p "$C_BUILD"
-rm -rf "$C_BUILD/*"
-mkdir -p "$DEST"
-rm -rf "$DEST/*"
+if [ ! -e "$DEST" ] ; then mkdir -p "$DEST"; fi
 touch "$C_FILE"
 sync
 chmod +x "$C_FILE" 
@@ -948,31 +954,32 @@ if [ "$BTARGET" == "NATIVE" ]; then
 else
 	BTARGET="--target=$CROSS "
 fi
+BDEST="--prefix=$DEST"
 EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
 	echo "set -x ">> $C_FILE
 fi
 if [ -e $SOURCES/$1/configure ]; then
 	mkdir -p "$C_BUILD/build"
-	echo -n "$SOURCES/$1/configure  --prefix=$DEST $BTARGET ">> $C_FILE
-	add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT"
+	echo "$SOURCES/$1/configure \\">> $C_FILE
+	add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" "$BDEST " "$BTARGET"
 else
 	if [ -e $SOURCES/$1/$1-*/configure ]; then
 		mkdir -p "$C_BUILD/build"
-		AA=$(ls $SOURCES/$1/$1-*/configure)
-		echo -n "$AA  --prefix=$DEST $BTARGET ">> $C_FILE
-		add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT"
+		AA=$(ls $SOURCES/$1/$1-*/configure )
+		echo "$AA  \\">> $C_FILE
+		add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" "$BDEST " "$BTARGET"
 	else
 		if [ -e $SOURCES/$1/configure.ac ]; then
 			mkdir -p "$C_BUILD/build"
-			echo -n "$SOURCES/$1/configure  --prefix=$DEST $BTARGET ">> $C_FILE
-			add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT"
+			echo "$SOURCES/$1/configure  \\">> $C_FILE
+			add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" "$BDEST " "$BTARGET"
 		else
 			if [ -e $SOURCES/$1/$1-*/configure.ac ]; then
 				mkdir -p "$C_BUILD/build"
 				AA=$(ls $SOURCES/$1/$1-*/configure)
-				echo -n "$AA  --prefix=$DEST $BTARGET">> $C_FILE
-				add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT"
+				echo "$AA  \\">> $C_FILE
+				add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" "$BDEST " "$BTARGET"
 			else
 				if [ -e $SOURCES/$1/Makefile ]; then
 					ln -s  "$SOURCES/$1" "$C_BUILD/build"

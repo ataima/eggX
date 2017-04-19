@@ -234,6 +234,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 		fi
 		sync
 	done
+	ID=$((ID+1))
 done
 }
 
@@ -462,19 +463,28 @@ if [ ! "$1" ]; then
 fi
 check_project "$1"
 if [ $? -ne 0 ]; then
-	$EDITOR "$OREPO/$1/conf.egg"
+	$EDITOR "$OREPO/$1/conf.egg" > /dev/null  &
 else
 	if [ "$1" == "oli.conf" ]; then
-		$EDITOR "$OREPO/conf.egg"
+		$EDITOR "$OREPO/conf.egg" > /dev/null  &
 	else
-		if [ "$1" == "-S" ]; then
-			$EDITOR "$SCRIPT_DIR/$2.sh"
+		if [ "$1" == "self" ]; then
+				$EDITOR "oli" > /dev/null  &
 		else
-			if [ "$1" == "self" ]; then
-				$EDITOR "oli"
-			else
+			case $1 in
+				self.configure)
+				$EDITOR "$SCRIPT_DIR/configure.sh" > /dev/null  &
+				;;
+				self.source)
+				$EDITOR "$SCRIPT_DIR/sources.sh" > /dev/null  &
+				;;
+				self.functions)
+				$EDITOR "$SCRIPT_DIR/functions.sh"  > /dev/null  &
+				;;
+				*)
 				error_c "Missing project in $OREPO " "project : $1"
-			fi
+				;;
+			esac	
 		fi
 	fi
 fi
