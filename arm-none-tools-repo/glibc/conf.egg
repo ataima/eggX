@@ -15,15 +15,37 @@
 				<prefix>usr</prefix>
 				<arch>x86_64</arch>
 				<cross>arm-none-eabi</cross>	
-				<silent>yes</silent>
+				<silent>no</silent>
 				<threads>8</threads>	
+				<path>
+					<pre >
+						<add id="0"> $DEPLOY/bin </add>
+					</pre>
+				</path>
 				<configure>					
-					<extra id="0">--with-sysroot=$DEPLOYS</extra>
+					<pre id="0">
+							<mode>code</mode>
+							<value>export CC=arm-none-eabi-gcc</value>
+					</pre>
+					<pre id="1">
+							<mode>code</mode>
+							<value>export CXX=arm-none-eabi-g++</value>
+					</pre>
+					<pre id="2">
+							<mode>code</mode>
+							<value>export CPATH=$DEPLOY/include</value>
+					</pre>
+					<extra id="0">--with-sysroot=$DEPLOY</extra>
 					<extra id="1">--enable-kernel=2.6.32</extra>					
-					<extra id="2"> -enable-add-ons</extra>
+					<extra id="2">--enable-add-ons</extra>
+					<extra id="3">--with-headers=$DEPLOY/include</extra>
 				</configure>				
 				<make>
 					<rule id="0">
+						<pre id="0">
+							<mode>code</mode>
+							<value>export CPATH=$DEPLOY/include</value>
+						</pre>
 						<name>all</name> 
 					</rule>
 					<rule id="1">

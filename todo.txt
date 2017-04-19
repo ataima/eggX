@@ -1,0 +1,7 @@
+todo :
+ - move images to deploy
+ - install packgaes in deploy/<package name>/...
+ - create  born path with collection of builded package
+ - move source packet from ebuild/repo/<package>/source.tar.gz to ebuild/docks/<package>/source.tar.gz: docks will never cleared to store source and reuse the same source for different repos...
+
+done :

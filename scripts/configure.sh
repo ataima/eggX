@@ -19,6 +19,10 @@ EDITOR="vim"
 #initial value PATH
 START_PATH="/usr/bin:/sbin:/bin"
 MYPATH=""
+CPATH=""
+C_INCLUDE_PATH=""
+CPLUS_INCLUDE_PATH=""
+
 
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
@@ -47,7 +51,7 @@ return 0
 #$2 dir
 function remove_path(){
 local V=$(echo $MYPATH | sed -e 's/:/  /g')
-local OLD=$IMAGES/$1/$2
+local OLD=$2
 MYPATH=""
 for I in $V; do
 	if [ "$I" != "$OLD" ]; then
@@ -60,7 +64,7 @@ done
 #$1 build name
 #$2 dir
 function add_path(){
-local NEW=$IMAGES/$1/$2
+local NEW=$2
 local V=$(echo $MYPATH | sed -e 's/:/  /g')
 for I in $V; do
 	if [ "$I" == "$NEW" ]; then
@@ -73,8 +77,7 @@ MYPATH="$NEW:"$MYPATH
 #$1 build name
 #$2 dir
 function set_path(){
-local NEW=$IMAGES/$1/$2
-MYPATH="$NEW"
+MYPATH="$2"
 }
 
 #$1 project
@@ -286,7 +289,6 @@ function generate_setenv(){
 	echo " unset \$i" >> "$3"
 	echo "done" >> "$3"
 	echo "#done unset all" >> "$3"
-	echo "export PATH=$MYPATH" >> "$3"
 	echo "export PROJECT=$1" >> "$3"
 	echo "export SOURCES=$SOURCES" >> "$3"
 	echo "export BUILDS=$BUILD/$4">> "$3"
@@ -301,7 +303,10 @@ function generate_setenv(){
 	echo "export CXXFLAGS=$CXXFLAGS" >> "$3"
 	echo "export LDFLAGS=$LDFLAGS" >> "$3"
 	echo "export LIBS=$LIBS" >> "$3"
-	
+	echo "export CPATH=$CPATH" >> "$3"
+	echo "export C_INCLUDE_PATH=$C_INCLUDE_PATH" >> "$3"
+	echo "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH" >> "$3"	
+	echo "export PATH=$MYPATH" >> "$3"	
 }
 
 #$1 projects
@@ -1015,7 +1020,7 @@ function read_default_for_step(){
 local VV=""
 local VALUE=""
 local NAME=""
-local NAMES="step_name cflags cppflags cxxflags ldflags libs"
+local NAMES="step_name cflags cppflags cxxflags ldflags libs cpath c_include_path cplus_include_path"
 if [ -f $REPO/conf.egg ]; then
 	dolog "Read MAIN conf.egg : action set default "
 	NUM=$(xmlstarlet sel -t  -v "count(/egg/defaults/step[@id=\"$1\"])" -n $REPO/conf.egg)	

@@ -18,8 +18,8 @@
 				<silent>yes</silent>
 				<threads>8</threads>	
 				<path>
-					<pre>
-						<add> $DEPLOY </add>
+					<pre >
+						<add id="0"> $DEPLOY/bin </add>
 					</pre>
 				</path>
 				<configure>
@@ -51,8 +51,7 @@
 					<extra id="1">--disable-nls</extra>	
 					<extra id="2">--without-headers</extra>	
 					<extra id="3"> --disable-libstdcxx</extra>
-					<extra id="4"> --disable-libssp</extra>
-					
+					<extra id="4"> --disable-libssp</extra>					
 				</configure>
 				<make>
 					<rule id="0">						

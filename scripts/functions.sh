@@ -62,10 +62,10 @@ print_s_ita "$1" "$2" "$3"
 #$2   string
 #$3   string
 function error_c(){
-print_c "$WHITE" "--------------------------------------------------"
+print_del_ita
 print_c "$RED_LIGHT" "ERROR : " "$BLUE_LIGHT" " - $1" 
 print_c "$YELLOW" "   -  $2" "$BLUE_LIGHT" "$3"
-print_c "$WHITE" "--------------------------------------------------"
+print_del_ita
 exit 1
 }
 
@@ -75,10 +75,10 @@ exit 1
 #$2   string
 #$3   string
 function warning_c(){
-print_c "$WHITE" "--------------------------------------------------"
+print_del_ita
 print_c "$RED_LIGHT" "WARNING : " "$BLUE_LIGHT" " - $1" 
 print_c "$GREEN_LIGHT" "   -  $2" "$BLUE_LIGHT" "$3"
-print_c "$WHITE" "--------------------------------------------------"
+print_del_ita
 }
 
 #COPYTODEFAULTSCRIPT DO NOT REMOVE MARK TO COPY FUNCTION.Sh IN default_script
