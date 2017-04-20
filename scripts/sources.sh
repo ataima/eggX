@@ -99,7 +99,8 @@ if [  $tmp -ne 0  ]; then
 	done
 	if [ $RES -eq 1 ]; then
 		print_ita "Key sign"  "$3" "...OK!"	
-		chmod 444 $1
+		chmod 444 "$1"
+		chmod 444 "$1.$4"
 	else
 		print_c "$RED_LIGHT" "   - SIG check  FAIL :$2" "$YELLOW" $3	
 			rm -f  "$1.$4"
@@ -134,8 +135,9 @@ fi
 #	if [  $tmp -ne 0 ]; then
 		md5sum  -c "$1.md5" >  /dev/null 
 		if [ $? -eq 0 ]; then
-			print_c "$GREEN_LIGHT" "   - MD5 check source OK" "$YELLOW" $3
-			chmod 444 $1
+			print_ita "Key sign"  "$3" "...OK!"
+			chmod 444 "$1"
+			chmod 444 "$1.md5"
 			RES=1
 		else
 			print_c "$RED_LIGHT" "   - MD5 check source FAIL" "$YELLOW" $3	 
@@ -167,10 +169,11 @@ if [ ! -f  $1.sha1 ]; then
 fi	
 #	tmp=$( ls -al  "$1.sha1"  |  awk  '{print $5}' )
 #	if [  $tmp -ne 0 ]; then
-		sha1sum  "$1" > /dev/null
+		sha1sum  -c "$1" > /dev/null
 		if [ $? -eq 0 ]; then
-			print_c "$GREEN_LIGHT" "   - SHA1 check source OK" "$YELLOW" $3
-			chmod 444 $1
+			print_ita "Key sign"  "$3" "...OK!"
+			chmod 444 "$1"
+			chmod 444 "$1.sha1"
 			RES=1
 		else
 			print_c "$RED_LIGHT" "   - SHA1 check source FAIL" "$YELLOW" $3	
@@ -223,7 +226,7 @@ for i in $ASIGN; do
 	;;	
 esac 
 if [ $RES -eq 8 ]; then
-	print_c "$GREEN_LIGHT" "   _- Missing file" "$YELLOW" "$2.$i"
+	print_c "$GREEN_LIGHT" "   - Missing file" "$YELLOW" "$2.$i"
 fi
 if [ $RES -eq 1 ] || [ $RES -eq 99 ]; then 
 	break
@@ -232,7 +235,75 @@ done
 return $RES
 }
 
-
+#$1 filename 
+#$2 remote repository
+#$3 project
+#$4 custom sign file name 
+function ver_sign(){
+local i=""
+local RES=0
+if [ -e "$1.sig" ] || [ -e "$1.sign" ] || [ -e "$1.asc" ]; then
+	local KEYS=$(ls $RKEYS/* )
+	local FILE;
+	if [ -e "$1.sig" ]; then FILE="$1.sig"; fi
+	if [ -e "$1.sign" ]; then FILE="$1.sign"; fi
+	if [ -e "$1.asc" ]; then FILE="$1.asc"; fi
+	for i in $KEYS; do
+		gpg --verify --keyring "$i" "$FILE" >> "$LOGFILE" 2>&1
+		RES=$?
+		if [ $RES -eq 2 ]; then 
+			continue
+		fi
+		if [ $RES -eq 1 ]; then 
+			dolog "Gpg sign  fail redo download : $1.$4"
+			RES=99
+			break
+		fi
+		if [ $RES -eq 0 ]; then 
+			dolog "Gpg sign  ok : $1.$4"
+			RES=1
+			break
+		fi		
+	done
+	if [ $RES -eq 1 ]; then
+		print_ita "Key sign"  "$3" "...OK!"	
+	else
+		print_c "$RED_LIGHT" "   - SIG check  FAIL :$2" "$YELLOW" $3	
+			rm -f  "$1.$4"
+	fi
+else
+	if [ -e "$1.md5" ]; then
+		md5sum  -c "$1.md5" >  /dev/null 
+		if [ $? -eq 0 ]; then			
+			print_ita "Key sign"  "$3" "...OK!"	
+			chmod 444 	"$1.md5"		
+			RES=1
+		else
+			print_c "$RED_LIGHT" "   - MD5 check source FAIL" "$YELLOW" $3	 
+			rm -f "$1.md5"
+			rm -f "$1"
+			RES=99
+		fi 
+	else
+		if [ -e "$1.$4" ]; then
+			sha1sum  "$1" > /dev/null
+			if [ $? -eq 0 ]; then		
+				print_ita "Key sign"  "$3" "...OK!"	
+				chmod 444 	"$1.sha1"
+				RES=1
+			else
+				print_c "$RED_LIGHT" "   - SHA1 check source FAIL" "$YELLOW" $3	
+				rm -f "$1.sha1"
+				rm -f "$1"
+				RES=99
+			fi 
+		else
+			error_c "Missing sign file "    "$i - project : $3"
+		fi
+	fi
+fi
+return $RES
+}
 
 
 #$1 source path
@@ -308,6 +379,8 @@ if [ -f  "$FILEIN" ]; then
 	if [ $RES -eq 8 ]; then
 	warning_c "No sign file found !" "$3" "add md5sum to it"
 	md5sum "$REPO/$1/$3" > "$REPO/$1/$3.md5"
+	chmod 444 	 "$REPO/$1/$3.md5"
+	RES=1
 	fi
 	if [ $RES -eq 1 ]; then 
 		if [ ! -d "$SOURCES/$1" ]; then 
@@ -324,6 +397,7 @@ if [ -f  "$FILEIN" ]; then
 		fi
 	fi
 fi
+return $RES
 }
 
 
@@ -343,7 +417,7 @@ if [  $4 ] && [ $5 ]; then
 		CUSTOM=1		
 	fi
 if [ -f  "$FILEIN" ]; then		
-	check_sign "$FILEIN" "$PNAME" "$1" "$CUSTOM"
+	ver_sign "$FILEIN" "$PNAME" "$1" "$CUSTOM"
 	RES=$?
 	if [ $RES -eq 99 ]; then 
 		wget_packet $1 $2 $3 $4 $5
@@ -593,11 +667,11 @@ esac
 #$7 sign key file optional
 function download_action(){
 local PWD_SVN=""
-
 if [ "$5" == 99 ]; then	
 	if [ -f "$REPO/$1/$4" ]; then 
 		dolog "Remove file $REPO/$1/$4 to execute force action"
-		rm -f  "$REPO/$1/$4"
+		rm  -f  "$REPO/$1/$4"
+		rm  -f  "$REPO/$1/$4.*"
 	fi
 	if [ -d "$SOURCES/$1" ]; then 
 		dolog "Remove path $SOURCES/$1 to execute force action"
@@ -805,10 +879,6 @@ if [ $? -eq 1 ]; then
 		fi
 		MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
 		download_action "$1" "$MODE"  "$REMOTE" "$PACKET" "$2" "$KEY_URL" "$KEY_FILE"
-		RES=1	
-		if [ $RES -ne 1 ]; then
-			error_c "Missing REMOTE key in conf.egg " "project : $1"
-		fi
 	else
 		error_c "Missing conf.egg file " "project : $1"
 	fi
