@@ -12,14 +12,14 @@
 			<step id="0">
 				<priority>10</priority>
 				<name>arm-linux-tools</name>
-				<prefix>usr</prefix>
+				<prefix></prefix>
 				<arch>x86_64</arch>
-				<cross>arm-linux-eabi</cross>	
-				<silent>no</silent>
+				<cross>arm-linux-gnueabi</cross>	
+				<silent>yes</silent>
 				<threads>8</threads>	
 				<path>
-					<pre>
-						<add> $DEPLOY </add>
+					<pre >
+						<add id="0"> $DEPLOY/bin </add>
 					</pre>
 				</path>
 				<configure>
@@ -37,39 +37,49 @@
 						</pre>
 						<pre id="3">
 							<mode>code</mode>
-							<value>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</value>
+							<value>rm -rf $SOURCE/isl</value>
 						</pre>
 						<pre id="4">
 							<mode>code</mode>
-							<value>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</value>
+							<value>rm -rf $SOURCE/cloog</value>
 						</pre>
 						<pre id="5">
 							<mode>code</mode>
+							<value>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</value>
+						</pre>
+						<pre id="6">
+							<mode>code</mode>
+							<value>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</value>
+						</pre>
+						<pre id="7">
+							<mode>code</mode>
 							<value>A=$(ls -d $SOURCES/mpfr/*); ln -s $A $SOURCE/mpfr</value>
 						</pre>
-					<extra id="0">--enable-languages=c,c++</extra>					
-					<extra id="1">--disable-nls</extra>	
-					<extra id="2">  --with-headers=$DEPLOY/include</extra>
-					<extra id="3"> --disable-libstdcxx</extra>
-					<extra id="4"> --disable-libssp</extra>
-					
+						<pre id="8">
+							<mode>code</mode>
+							<value>A=$(ls -d $SOURCES/isl/*); ln -s $A $SOURCE/isl</value>
+						</pre>
+						<pre id="9">
+							<mode>code</mode>
+							<value>A=$(ls -d $SOURCES/cloog/*); ln -s $A $SOURCE/cloog</value>
+						</pre>
+					<extra id="0">--build=$NATIVE</extra>	
+					<extra id="1">--host=$NATIVE</extra>
+					<extra id="2">--enable-languages=c,c++</extra>					
+					<extra id="3">--disable-multilib</extra>										 
 				</configure>
 				<make>
 					<rule id="0">						
-						<name>all</name> 
+						<name>all-gcc</name> 
 					</rule>
 					<rule id="1">
-						<name>install</name> 
+						<name>install-gcc</name> 
 						<thread>1</thread>						
 						<post  id="0">
 							<mode>code</mode>		
-							<value>arm-linux-eabi-gcc --version</value>
+							<value>arm-linux-gnueabi-gcc  -v</value>
 						</post >
-						<post  id="1">
-							<mode>code</mode>		
-							<value>arm-linux-eabi-gcc -fsyntax-only -xc -v -H </value>
-						</post >
-					</rule>
+					</rule>										
 				</make>
 			</step>
 		</build>	

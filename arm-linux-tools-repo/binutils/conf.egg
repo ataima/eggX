@@ -11,18 +11,14 @@
 		<build>
 			<step id="0">
 				<priority>1</priority>
-				<name> arm-linux-tools</name>
-				<prefix>usr</prefix>
+				<name>arm-linux-tools</name>
+				<prefix></prefix>
 				<arch>x86_64</arch>
-				<cross>arm-linux-eabi</cross>	
+				<cross>arm-linux-gnueabi</cross>	
 				<silent>yes</silent>
 				<threads>8</threads>
-				<path>
-					<add id="0" >usr/arm-none-eabi</add >
-				</path>
 				<configure>
-					<extra id="0">--disable-nls</extra>	
-					<extra id="1">--with-sysroot=$DEPLOYS</extra>			
+					<extra id="0">--disable-multilib</extra>	
 				</configure>
 				<make>
 					<rule id="0">

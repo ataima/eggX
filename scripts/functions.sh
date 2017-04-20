@@ -145,11 +145,12 @@ function xml_value(){
  local PRJ=$(xmlstarlet sel -t  -v '/egg/project/name' -n $REPO/$1/conf.egg)
  if [ "$PRJ" == "$1" ];then	
 	 local VALUE=$(xmlstarlet sel -t  -v "$2" -n $REPO/$1/conf.egg)
-	 if [  "${VALUE:0:1}" == "$" ]; then 
+	 
+	 #if [  "${VALUE:0:1}" == "$" ]; then 
 		 #if a env variable
-		 local UV=$(echo $VALUE | sed -e 's/\$//g')
-		 VALUE=$(env | grep $UV | sed -e 's/=/ /g' | awk '{print $2}')
-	 fi
+	#	 local UV=$(echo $VALUE | sed -e 's/\$//g')
+	#	 VALUE=$(env | grep $UV | sed -e 's/=/ /g' | awk '{print $2}')
+	 #fi
 	 echo $VALUE
  else
 	error_c "Mistake in project name" "Conf.egg referred to $PRJ : $1"

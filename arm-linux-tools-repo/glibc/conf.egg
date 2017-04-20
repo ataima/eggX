@@ -12,31 +12,37 @@
 			<step id="0">
 				<priority>20</priority>
 				<name> arm-linux-tools</name>
-				<prefix>usr</prefix>
+				<prefix>arm-linux-gnueabi</prefix>
 				<arch>x86_64</arch>
-				<cross>arm-linux-eabi</cross>	
+				<cross>arm-linux-gnueabi</cross>	
 				<silent>yes</silent>
 				<threads>8</threads>	
 				<configure>					
-					<extra id="0">--with-sysroot=$DEPLOYS</extra>
-					<extra id="1"> --build=$(../scripts/config.guess)</extra>					
-					<extra id="2">--enable-kernel=2.6.32</extra>					
+					<extra id="0"> --build=$NATIVE</extra>
+					<extra id="1"> --host=$CROSS</extra>					
+					<extra id="2">--with-headers=$DEPLOY/$CROSS/include</extra>						
+					<extra id="3"> --disable-multilib</extra>	
+					<extra id="4"> libc_cv_forced_unwind=yes</extra>										
 				</configure>				
 				<make>
 					<rule id="0">
-						<name>all</name> 
-						<pre id="0">
-							<mode>code</mode>		
-							<value>export CC=$DEPLOY/bin/gcc</value>
-						</pre>
-						<pre id="1">
-							<mode>code</mode>		
-							<value>export CXX=$DEPLOY/bin/g++</value>
-						</pre>
+						<name>install-bootstrap-headers=yes install-headers</name> 
+						<thread>1 </thread>
 					</rule>
 					<rule id="1">
-						<name>install</name> 
-						<thread>1</thread>	
+						<name>csu/subdir_lib</name> 
+						<post id="0">
+							<mode>code</mode>		
+							<value>install $BUILD/csu/crt1.o $BUILD/csu/crti.o $BUILD/csu/crtn.o $DEPLOY/$CROSS/lib</value>
+						</post>
+						<post id="1">
+							<mode>code</mode>		
+							<value>$CROSS-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $DEPLOY/$CROSS/lib/libc.so</value>
+						</post>
+						<post id="2">
+							<mode>code</mode>		
+							<value>touch $DEPLOY/$CROSS/include/gnu/stubs.h</value>
+						</post>
 					</rule>					
 				</make>		
 			</step>
