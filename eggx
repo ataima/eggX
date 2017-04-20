@@ -465,13 +465,13 @@ check_project "$1"
 if [ $? -ne 0 ]; then
 	$EDITOR "$OREPO/$1/conf.egg" > /dev/null  &
 else
-	if [ "$1" == "oli.conf" ]; then
-		$EDITOR "$OREPO/conf.egg" > /dev/null  &
-	else
 		if [ "$1" == "self" ]; then
-				$EDITOR "oli" > /dev/null  &
+				$EDITOR "eggx" > /dev/null  &
 		else
 			case $1 in
+				self.conf)
+				$EDITOR "$OREPO/conf.egg" > /dev/null  &
+				;;
 				self.configure)
 				$EDITOR "$SCRIPT_DIR/configure.sh" > /dev/null  &
 				;;
@@ -486,7 +486,6 @@ else
 				;;
 			esac	
 		fi
-	fi
 fi
 }
 
@@ -507,7 +506,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : clear all build and deploy aout and redo source + configure+do"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "bash <step xx> <project nn>: open a bash with setenv for step xx of project nn"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "clean <option step xx> <option project nn>: clean all, clean all step, clean all step:project"	
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "vim <project nn>: edit a conf.egg file of project nn"	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "edit <project nn>: edit a conf.egg file of project nn"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "info : show program info..."
 	exit 1
 }
@@ -561,7 +560,7 @@ case $i in
 	shift
 	break
 	;;	
-	vim)
+	edit)
 	VIM=1
 	shift
 	break

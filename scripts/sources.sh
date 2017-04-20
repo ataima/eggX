@@ -69,6 +69,12 @@ local KEYS=""
 if [ ! -f  $1.$4 ]; then 
 	dolog "Download sign file : $1.$4"
 	wget  --show-progress -q "$2" -O "$1.$4"
+	RES=$?
+	if [ $RES -eq 8 ]; then 
+	#file not found
+		rm -f "$1.$4"
+		return $RES
+	fi		
 fi	
 
 tmp=$( ls -al  "$1.$4"  |  awk  '{print $5}' )
@@ -117,12 +123,17 @@ local RES=0
 if [ ! -f  $1.md5 ]; then 
 	dolog "Download md5 file : $1.md5"
 	wget  --show-progress -q "$2.md5" -O "$1.md5"
-	tmp=$( ls -al  "$1.md5"  |  awk  '{print $5}' )
-	if [  $tmp -ne 0 ]; then
-		local sum=$(md5sum  "$1" | awk '{print $1}')
-		local req=$(cat "$1.md5" )
-		equs $sum $req
-		if [ $? -eq 1 ]; then
+	RES=$?
+	if [ $RES -eq 8 ]; then 
+	#file not found
+		rm -f "$1.md5"
+		return $RES
+	fi			
+fi	
+#	tmp=$( ls -al  "$1.md5"  |  awk  '{print $5}' )
+#	if [  $tmp -ne 0 ]; then
+		md5sum  -c "$1.md5" >  /dev/null 
+		if [ $? -eq 0 ]; then
 			print_c "$GREEN_LIGHT" "   - MD5 check source OK" "$YELLOW" $3
 			chmod 444 $1
 			RES=1
@@ -132,13 +143,9 @@ if [ ! -f  $1.md5 ]; then
 			rm -f "$1"
 			RES=99
 		fi 
-	else
-		rm -f  "$1.md5"
-	fi
-else
-print_c "$GREEN_LIGHT" "   - MD5 check source OK" "$YELLOW" $3	
-RES=1
-fi
+#	else
+#		rm -f  "$1.md5"
+#	fi
 return $RES
 }
 
@@ -151,12 +158,17 @@ local RES=0
 if [ ! -f  $1.sha1 ]; then
 	dolog "Download sha1 file : $1.sha1"
 	wget  --show-progress -q "$2.sha1" -O "$1.sha1"
-	tmp=$( ls -al  "$1.sha1"  |  awk  '{print $5}' )
-	if [  $tmp -ne 0 ]; then
-		local sum=$(sha1sum  "$1" | awk '{print $1}')
-		local req=$(cat "$1.sha1" )
-		equs $sum $req
-		if [ $? -eq 1 ]; then
+	RES=$?
+	if [ $RES -eq 8 ]; then 
+	#file not found
+		rm -f "$1.sha1"
+		return $RES
+	fi	
+fi	
+#	tmp=$( ls -al  "$1.sha1"  |  awk  '{print $5}' )
+#	if [  $tmp -ne 0 ]; then
+		sha1sum  "$1" > /dev/null
+		if [ $? -eq 0 ]; then
 			print_c "$GREEN_LIGHT" "   - SHA1 check source OK" "$YELLOW" $3
 			chmod 444 $1
 			RES=1
@@ -166,13 +178,9 @@ if [ ! -f  $1.sha1 ]; then
 			rm -f "$1"
 			RES=99
 		fi 
-	else
-		rm -f  "$1.sha1"	
-	fi
-else
-print_c "$GREEN_LIGHT" "   - SHA1 check source OK" "$YELLOW" $3
-RES=1
-fi
+#	else
+#		rm -f  "$1.sha1"	
+#	fi
 return $RES
 }
 
@@ -182,7 +190,7 @@ return $RES
 #$4 custom sign file name 
 function check_sign(){
 local RES=0
-local ASIGN="sig sign asc md5 sha1"
+local ASIGN="md5 sha1 sig sign asc"
 local i=""
 for i in $ASIGN; do
  case $i in
@@ -212,8 +220,11 @@ for i in $ASIGN; do
 	;;
 	*)
 	error_c "Unknow sign " "$i - project : $3"
-	;;
+	;;	
 esac 
+if [ $RES -eq 8 ]; then
+	print_c "$GREEN_LIGHT" "   _- Missing file" "$YELLOW" "$2.$i"
+fi
 if [ $RES -eq 1 ] || [ $RES -eq 99 ]; then 
 	break
 fi
@@ -293,6 +304,10 @@ if [ -f  "$FILEIN" ]; then
 	RES=$?
 	if [ $RES -eq 99 ]; then 
 		wget_packet $1 $2 $3 $4 $5
+	fi
+	if [ $RES -eq 8 ]; then
+	warning_c "No sign file found !" "$3" "add md5sum to it"
+	md5sum "$REPO/$1/$3" > "$REPO/$1/$3.md5"
 	fi
 	if [ $RES -eq 1 ]; then 
 		if [ ! -d "$SOURCES/$1" ]; then 
