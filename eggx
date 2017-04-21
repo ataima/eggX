@@ -539,14 +539,14 @@ fi
 function edit_repo_files(){
 local ALL_FILES=$(ls "$OREPO")
 local VV=""
+cp "$OREPO/conf.egg" "$OREPO/conf.egg_$(date +%d-%m-%y_%H:%M:%S).backup"
+$EDITOR "$OREPO/conf.egg"
 for VV in $ALL_FILES;  do
+if [ "$VV" == "." ]; then continue; fi
+if [ "$VV" == ".." ]; then continue; fi
 if [ -d "$OREPO/$VV" ]; then 
-	cp "$OREPO/$VV/conf.egg" "$OREPO/$VV/conf.egg_$(date +%d-%m-%y).backup"
+	cp "$OREPO/$VV/conf.egg" "$OREPO/$VV/conf.egg_$(date +%d-%m-%y_%H:%M:%S).backup"
 	$EDITOR "$OREPO/$VV/conf.egg" 
-fi
-if [ -f "$OREPO/$VV" ]; then 
-	cp "$OREPO/$VV" "$OREPO/$VV_$(date +%d-%m-%y).backup"
-	$EDITOR "$OREPO/$VV"
 fi
 done
 }
