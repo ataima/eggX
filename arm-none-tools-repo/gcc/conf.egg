@@ -12,7 +12,6 @@
 			<step id="0">
 				<priority>10</priority>
 				<name>arm-none-tools</name>
-				<prefix></prefix>
 				<arch>x86_64</arch>
 				<cross>arm-none-eabi</cross>	
 				<silent>yes</silent>
@@ -65,8 +64,10 @@
 						</pre>
 					<extra id="0">--build=$NATIVE</extra>	
 					<extra id="1">--host=$NATIVE</extra>
-					<extra id="2">--enable-languages=c,c++</extra>					
-					<extra id="3">--disable-multilib</extra>										 
+					<extra id="2">--target=$CROSS</extra>
+					<extra id="3">--prefix=$DEPLOY</extra>
+					<extra id="4">--enable-languages=c,c++</extra>					
+					<extra id="5">--disable-multilib</extra>										 
 				</configure>
 				<make>
 					<rule id="0">						

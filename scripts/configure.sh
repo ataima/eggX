@@ -264,8 +264,6 @@ fi
 #$4 build name
 #$5 arch
 #$6 cross
-#$7 deploy
-#$8 prefix
 function generate_setenv(){
 	local SRC=""
 	if [ -e $SOURCES/$1/$1-*/configure ]; then
@@ -294,8 +292,7 @@ function generate_setenv(){
 	echo "export BUILDS=$BUILD/$4">> "$3"
 	echo "export SOURCE=$SRC" >> "$3"
 	echo "export BUILD=$BUILD/$4/$1/build" >> "$3"
-	echo "export DEPLOYS=$IMAGES/$4" >> "$3"
-	echo "export DEPLOY=$7" >> "$3"
+	echo "export DEPLOY=$IMAGES/$4" >> "$3"
 	echo "export ARCH=$5">> "$3"
 	echo "export CROSS=$6">> "$3"
 	echo "export CFLAGS=$CFLAGS" >> "$3"
@@ -480,8 +477,6 @@ echo " "  >> $3
 #$2 step id
 #$3 file out
 #$4 silent
-#$5 prefix 
-#$6 target
 function add_extra_conf(){
 declare -i i=0
 local VALUE=""
@@ -505,13 +500,12 @@ if [ $? -eq 1 ]; then
 				i=$((i+1))
 				done 
 			fi
-		fi
-		echo 	"$5 \\"  >> $3
+		fi	
+		echo " "  >> $3		
 		if  [ "$4" == "yes" ]; then 
-			echo " $6 > /dev/null" >>  $3
-		else
-			echo 	"$6 "  >> $3		
+			echo "  > /dev/null" >>  $3		
 		fi
+		echo " "  >> $3	
 	else
 		error_c "Missing conf.egg file " "project : $1"
 	fi
@@ -534,7 +528,6 @@ echo "fi" >> $3
 #$7 silent
 #$8 thread //max 
 #$9 deploy
-#$10 prefix
 #<make>
 #<rule id=0>
 #<name>all</name> 
@@ -692,10 +685,8 @@ end_script_generic "$1" "$2" "done  rebuild " "$SH_REBUILD"
 #$6 cross
 #$7 silent
 #$8 thread
-#$9 deploy
 function add_build_script(){
-local PREFIX=$(basename "$9")
-generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6" "$9" "$PREFIX"
+generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6" 
 generate_clean_rule $@
 generate_distclean_rule $@ 
 generate_build_rules $@
@@ -870,10 +861,6 @@ local NAME=""
 local ARCH=""
 local CROSS=""
 local SILENT=""
-local INDEX=""
-local PREFIX=""
-local BTARGET=""
-local BDEST=""
 local NUM=0
 check_project $1
 if [ $? -eq 1 ]; then
@@ -926,9 +913,7 @@ if [ $? -eq 1 ]; then
 				else
 					#default
 					THREADS=1
-				fi
-				PREFIX=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/prefix")
-				#optional				
+				fi							
 			fi	
 		fi
 	else
@@ -939,7 +924,7 @@ else
 fi
 local C_BUILD="$BUILD/$NAME/$1"
 local C_FILE="$C_BUILD/bootstrap.sh"
-local DEST="$IMAGES/$NAME/$PREFIX"
+local DEST="$IMAGES/$NAME"
 rm  -rf "$C_BUILD"
 mkdir -p "$C_BUILD"
 if [ ! -e "$DEST" ] ; then mkdir -p "$DEST"; fi
@@ -948,13 +933,6 @@ sync
 chmod +x "$C_FILE" 
 prepare_script_generic "$1"  "$2" "START CONFIGURE" "$C_FILE" "$NAME" "$ARCH" "$CROSS"
 add_pre_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
-BTARGET=$(echo $CROSS  | tr '[:lower:]' '[:upper:]')
-if [ "$BTARGET" == "NATIVE" ]; then
-	BTARGET=""
-else
-	BTARGET="--target=$CROSS "
-fi
-BDEST="--prefix=$DEST"
 EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
 	echo "set -x ">> $C_FILE
@@ -962,24 +940,24 @@ fi
 if [ -e $SOURCES/$1/configure ]; then
 	mkdir -p "$C_BUILD/build"
 	echo "$SOURCES/$1/configure \\">> $C_FILE
-	add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" "$BDEST " "$BTARGET"
+	add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 else
 	if [ -e $SOURCES/$1/$1-*/configure ]; then
 		mkdir -p "$C_BUILD/build"
 		AA=$(ls $SOURCES/$1/$1-*/configure )
 		echo "$AA  \\">> $C_FILE
-		add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" "$BDEST " "$BTARGET"
+		add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 	else
 		if [ -e $SOURCES/$1/configure.ac ]; then
 			mkdir -p "$C_BUILD/build"
 			echo "$SOURCES/$1/configure  \\">> $C_FILE
-			add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" "$BDEST " "$BTARGET"
+			add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 		else
 			if [ -e $SOURCES/$1/$1-*/configure.ac ]; then
 				mkdir -p "$C_BUILD/build"
 				AA=$(ls $SOURCES/$1/$1-*/configure)
 				echo "$AA  \\">> $C_FILE
-				add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" "$BDEST " "$BTARGET"
+				add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 			else
 				if [ -e $SOURCES/$1/Makefile ]; then
 					ln -s  "$SOURCES/$1" "$C_BUILD/build"
@@ -1005,7 +983,7 @@ fi
 add_post_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 #build
-add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$ARCH" "$CROSS" "$SILENT" "$THREADS" "$DEST" "$PREFIX"
+add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$ARCH" "$CROSS" "$SILENT" "$THREADS" "$DEST" 
 print_ita "STEP : $2:$PRI" "$1"  "configured done !"
 }
 

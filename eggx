@@ -453,6 +453,23 @@ else
 fi
 }
 
+#recussive edit on repo project
+function edit_repo_files(){
+local ALL_FILES=$(ls "$OREPO")
+local VV=""
+for VV in $ALL_FILES;  do
+if [ -d "$OREPO/$VV" ]; then 
+	cp "$OREPO/$VV/conf.egg" "$OREPO/$VV/conf.egg_$(date +%d-%m-%y).backup"
+	$EDITOR "$OREPO/$VV/conf.egg" 
+fi
+if [ -f "$OREPO/$VV" ]; then 
+	cp "$OREPO/$VV" "$OREPO/$VV_$(date +%d-%m-%y).backup"
+	$EDITOR "$OREPO/$VV"
+fi
+done
+}
+
+
 #$ARGV 
 #  gcc -> edit conf.egg of project gcc
 function edit_packet(){
@@ -480,6 +497,9 @@ else
 				;;
 				self.functions)
 				$EDITOR "$SCRIPT_DIR/functions.sh"  > /dev/null  &
+				;;
+				self.repo)
+				edit_repo_files
 				;;
 				*)
 				error_c "Missing project in $OREPO " "project : $1"
