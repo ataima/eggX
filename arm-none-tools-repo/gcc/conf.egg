@@ -18,7 +18,7 @@
 				<threads>8</threads>	
 				<path>
 					<pre >
-						<add id="0"> $DEPLOY/bin </add>
+						<add id="0"> $DEPLOYS/bin </add>
 					</pre>
 				</path>
 				<configure>
@@ -78,7 +78,7 @@
 						<thread>1</thread>						
 						<post  id="0">
 							<mode>code</mode>		
-							<value>arm-none-eabi-gcc  -v</value>
+							<value>$DEPLOY/bin/arm-none-eabi-gcc  -v</value>
 						</post >
 					</rule>										
 				</make>

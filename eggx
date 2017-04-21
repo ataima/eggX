@@ -165,6 +165,14 @@ function print_clean_msg(){
 print_ita  "CLEAN : $1"  "$2"  "$3"
 }
 
+#print build start 
+#$1 pririty
+#$2 name
+#$3 project
+function print_deploy_msg(){
+print_ita  "DEPLOY: $1"  "$2"  "$3"
+}
+
 #none
 function build_all(){
 local ID=0 
@@ -229,6 +237,30 @@ while [ $ID -lt $MAX_STEP ] ; do
 		print_clean_msg "$PRI" "$NAME" "$PRJ"
 		cd "$BUILD/$PRJ/$NAME"
 		$BUILD/$PRJ/$NAME/clean.sh
+		if [ $? -ne 0 ] ; then
+			exit -1;
+		fi
+		sync
+	done
+	ID=$((ID+1))
+done
+}
+
+
+#none
+function deploy_all(){
+local ID=0 
+local V=""
+while [ $ID -lt $MAX_STEP ] ; do
+	prepare_seq_priority $ID
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		PRI=$(echo $V | awk '{print $1}')
+		NAME=$(echo $V | awk '{print $2}')
+		PRJ=$(echo $V | awk '{print $3}')
+		print_deploy_msg "$PRI" "$NAME" "$PRJ"
+		cd "$BUILD/$PRJ/$NAME"
+		$BUILD/$PRJ/$NAME/deploy.sh
 		if [ $? -ne 0 ] ; then
 			exit -1;
 		fi
@@ -361,6 +393,45 @@ for V in $PRJ_NAMES; do
 	done 
 done
 }
+
+#$@ from argv build.sh
+# 0 gcc linux input step + project/s
+function deploy_single(){
+#trovo nomi build per ogni progetto
+local ID=0
+local PRJ_NAMES=""
+isNumber $1
+if [ $? -ne 0 ]; then
+   error_c "$1 : Input step isn't a number !!"
+fi
+if [ ! "$2" ]; then
+	error_c "Input missing project  !!"
+fi
+shift
+for V in $@; do
+	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
+done
+local PWD=$(pwd)
+prepare_seq_priority $NUM
+for V in $PRJ_NAMES; do
+	for I in $@; do
+		for T in $SORTREQ; do
+			SEQ=$(echo $T | grep $V | grep $I )
+				if [ "$SEQ" != "" ]; then 
+					break;
+				fi
+		done
+		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
+		PRI=$(echo $SEQ | awk '{print $1}')
+		NAME=$(echo $SEQ | awk '{print $2}')
+		PRJ=$(echo $SEQ | awk '{print $3}')
+		print_deploy_msg "$PRI" "$NAME" "$PRJ"
+		cd "$BUILD/$V/$I"
+		$BUILD/$V/$I/deploy.sh
+	done 
+done
+}
+
 #$@
 function build_all_packet(){
 if [ "$1" == "" ]; then
@@ -394,6 +465,17 @@ sync
 print_del_ita
 }
 
+
+#$@
+function deploy_all_packet(){
+if [ "$1" == "" ]; then
+	deploy_all
+else
+	deploy_single $@
+fi
+sync
+print_del_ita
+}
 
 #$ARGV TODO
 function config_all_step(){
@@ -526,6 +608,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : clear all build and deploy aout and redo source + configure+do"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "bash <step xx> <project nn>: open a bash with setenv for step xx of project nn"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "clean <option step xx> <option project nn>: clean all, clean all step, clean all step:project"	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "deploy <option step xx> <option project nn>: clean all, deploy all step, deploy all step:project"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "edit <project nn>: edit a conf.egg file of project nn"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "info : show program info..."
 	exit 1
@@ -554,7 +637,7 @@ local VIM=0
 local TRY=0
 local INFO=0
 local CLEAN=0
-
+local DEPLOY=0
 
 if [ $# -ne 0 ]; then
 for i in $@; do
@@ -592,6 +675,11 @@ case $i in
 	;;	
 	clean)
 	CLEAN=1
+	shift
+	break
+	;;	
+	deploy)
+	DEPLOY=1
 	shift
 	break
 	;;	
@@ -681,7 +769,11 @@ else
 							if [ $CLEAN -ne 0 ]; then	
 								clean_all_packet "$@"
 							else
-								default_do
+								if [ $DEPLOY -ne 0 ]; then	
+									deploy_all_packet "$@"
+								else
+									default_do
+								fi								
 							fi
 						fi
 					fi

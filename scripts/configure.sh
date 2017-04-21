@@ -292,7 +292,8 @@ function generate_setenv(){
 	echo "export BUILDS=$BUILD/$4">> "$3"
 	echo "export SOURCE=$SRC" >> "$3"
 	echo "export BUILD=$BUILD/$4/$1/build" >> "$3"
-	echo "export DEPLOY=$IMAGES/$4" >> "$3"
+	echo "export DEPLOY=$BUILD/$4/$1/image" >> "$3"
+	echo "export DEPLOYS=$IMAGES/$4" >> "$3"
 	echo "export ARCH=$5">> "$3"
 	echo "export CROSS=$6">> "$3"
 	echo "export CFLAGS=$CFLAGS" >> "$3"
@@ -527,7 +528,6 @@ echo "fi" >> $3
 #$6 cross
 #$7 silent
 #$8 thread //max 
-#$9 deploy
 #<make>
 #<rule id=0>
 #<name>all</name> 
@@ -594,6 +594,7 @@ else
 fi
 #------------------------------------------------------------------------------------------------------------------
 end_script_generic "$1" "$2" "done  build " "$SH_BUILD"
+echo "$3/deploy.sh" >> "$SH_BUILD"
 }
 
 #$1 project
@@ -604,7 +605,6 @@ end_script_generic "$1" "$2" "done  build " "$SH_BUILD"
 #$6 cross
 #$7 silent
 #$8 thread
-#$9 deploy
 
 function generate_clean_rule(){
 local SH_CLEAN="$3/clean.sh"
@@ -615,18 +615,51 @@ chmod +rwx "$SH_CLEAN"
 prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" "$5" "$6"
 echo "if [ -f \$BUILD/Makefile ]; then " >> "$SH_CLEAN"
 if [ "$7" == "yes" ]; then 
-	echo "	make --silent -C \$BUILD clean > /dev/null 2>&1 " >> "$SH_CLEAN"
+	echo "	make -C \$BUILD clean > $SH_CLEAN 2>&1 " >> "$SH_CLEAN"
 else
 	echo "	make -C \$BUILD  clean ">> "$SH_CLEAN"
 fi
 echo "	if [ \$? -ne 0 ]; then">> "$SH_CLEAN"
-echo "    	error_c \"Error on clean \" \"  - project \$1\"" >>"$SH_CLEAN"
+echo "    	error_c \"Error on clean \" \"project $1\"" >>"$SH_CLEAN"
 echo "	fi"  >> "$SH_CLEAN"
 echo "fi" >> "$SH_CLEAN"
 echo "" >> "$SH_CLEAN"
 echo "" >> "$SH_CLEAN"
 end_script_generic "$1" "$2" "done clean build " "$SH_CLEAN"
 }
+
+
+
+
+#$1 project
+#$2 step id
+#$3 path build#$4 build name
+#$5 arch
+#$6 cross
+#$7 silent
+#$8 thread
+
+function generate_deploy_rule(){
+local SH_DEPLOY="$3/deploy.sh"
+rm -f "$SH_DEPLOY" 
+touch "$SH_DEPLOY" 
+chmod +rwx "$SH_DEPLOY" 
+# clean 
+prepare_script_generic "$1" "$2" "Start deploy image " "$SH_DEPLOY" "$4" "$5" "$6"
+echo "if [ -d \$DEPLOY ]; then">>"$SH_DEPLOY"
+echo "  tree \$DEPLOY > $SH_DEPLOY.log">>"$SH_DEPLOY"
+echo "  cp -a \$DEPLOY/* \$DEPLOYS">>"$SH_DEPLOY"
+echo "  if [ \$? -ne 0 ]; then">> "$SH_DEPLOY"
+echo "    	error_c \"Error on deploy\" \"project $1\"" >>"$SH_DEPLOY"
+echo "  fi"  >> "$SH_DEPLOY"
+echo "else">> "$SH_DEPLOY"
+echo "  warning_c \"No \$DEPLOY available\" \"project $1\"" >>"$SH_DEPLOY"
+echo "fi" >> "$SH_DEPLOY"
+echo "" >> "$SH_DEPLOY"
+echo "" >> "$SH_DEPLOY"
+end_script_generic "$1" "$2" "done deploy " "$SH_DEPLOY"
+}
+
 
 #$1 project
 #$2 step id
@@ -662,7 +695,6 @@ end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
 #$6 cross
 #$7 silent
 #$8 thread
-#$9 deploy
 function generate_rebuild_rule(){
 local SH_REBUILD="$3/rebuild.sh"
 rm -f  "$SH_REBUILD" 
@@ -691,6 +723,7 @@ generate_clean_rule $@
 generate_distclean_rule $@ 
 generate_build_rules $@
 generate_rebuild_rule $@
+generate_deploy_rule $@
 }
 
 #$1 project
@@ -845,7 +878,7 @@ else
 	echo "make -C \$BUILD  -j$5 $7 ">> "$3"
 fi
 echo "if [ \$? -ne 0 ]; then">> "$3"
-echo "    error_c \"Error on build \" \"  - project \$1\"" >>"$3"
+echo "    error_c \"Error on build \" \"  - project $1\"" >>"$3"
 echo "fi"  >> "$3"
 echo "stop_time=\$(date +%s)">> "$3" 
 echo "total_time=\$((stop_time-start_time))">> "$3" 
@@ -983,7 +1016,7 @@ fi
 add_post_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 #build
-add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$ARCH" "$CROSS" "$SILENT" "$THREADS" "$DEST" 
+add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$ARCH" "$CROSS" "$SILENT" "$THREADS" 
 print_ita "STEP : $2:$PRI" "$1"  "configured done !"
 }
 
