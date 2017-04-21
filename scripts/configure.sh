@@ -491,19 +491,19 @@ if [ $? -eq 1 ]; then
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
+				echo " \\" >> $3
 				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/extra[@id=\"$i\"]")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  extra conf id=$i Phase $2" "project : $1"
 				fi
-				echo 	"$VALUE \\"  >> $3
+				echo -n	"$VALUE "  >> $3
 				i=$((i+1))
 				done 
 			fi
 		fi	
-		echo " "  >> $3		
 		if  [ "$4" == "yes" ]; then 
-			echo "  > /dev/null" >>  $3		
+			echo "  > $3.log 2>&1" >>  $3		
 		fi
 		echo " "  >> $3	
 	else
@@ -840,7 +840,7 @@ function add_entry_in_main_build_script(){
 echo "start_time=\$(date +%s)">> "$3"
 echo " print_s_ita \"       Make \"  \"$7-$6:$5\"  \"start\"" >> "$3"
 if [ "$4" == "yes" ]; then 
-	echo "make --silent -C \$BUILD -j$5 $7 > /dev/null 2>&1 " >> "$3"
+	echo "make -C \$BUILD -j$5 $7 > $3.log 2>&1 " >> "$3"
 else
 	echo "make -C \$BUILD  -j$5 $7 ">> "$3"
 fi
@@ -939,24 +939,24 @@ if [ "$EXTSI" != "YES" ]; then
 fi
 if [ -e $SOURCES/$1/configure ]; then
 	mkdir -p "$C_BUILD/build"
-	echo "$SOURCES/$1/configure \\">> $C_FILE
+	echo -n "$SOURCES/$1/configure ">> $C_FILE
 	add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 else
 	if [ -e $SOURCES/$1/$1-*/configure ]; then
 		mkdir -p "$C_BUILD/build"
 		AA=$(ls $SOURCES/$1/$1-*/configure )
-		echo "$AA  \\">> $C_FILE
+		echo -n "$AA  ">> $C_FILE
 		add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 	else
 		if [ -e $SOURCES/$1/configure.ac ]; then
 			mkdir -p "$C_BUILD/build"
-			echo "$SOURCES/$1/configure  \\">> $C_FILE
+			echo -n "$SOURCES/$1/configure  ">> $C_FILE
 			add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 		else
 			if [ -e $SOURCES/$1/$1-*/configure.ac ]; then
 				mkdir -p "$C_BUILD/build"
 				AA=$(ls $SOURCES/$1/$1-*/configure)
-				echo "$AA  \\">> $C_FILE
+				echo -n "$AA  ">> $C_FILE
 				add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 			else
 				if [ -e $SOURCES/$1/Makefile ]; then
