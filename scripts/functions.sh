@@ -176,7 +176,7 @@ return $RES
 #return num node match
 function xml_get_env(){
 local MAINFILE="$OREPO/conf.egg"
-declare -A XNAME="root logfile repo sources images repobackup build editor \
+declare -A XNAME="root logfile repo sources images store repobackup build editor \
 				 start_path"
 local II=""
 for II in $XNAME; do

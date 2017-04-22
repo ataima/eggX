@@ -616,11 +616,6 @@ function usage(){
 
 
 function default_do(){
-        $SCRIPT_DIR/sources.sh
-        if [ $? -ne 0 ]; then
-                exit 1
-        fi
-        config_all_step
         build_all_packet
 }
 

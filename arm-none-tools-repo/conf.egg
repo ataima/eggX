@@ -6,6 +6,7 @@
 		<repo>$ROOT/repo</repo>
 		<sources>$ROOT/sources</sources>
 		<images>$ROOT/images</images>
+		<store>$ROOT/store</store>
 		<build>$ROOT/build</build>
 		<editor>scite</editor>
 		<start_path>/usr/bin:/sbin:/bin</start_path>

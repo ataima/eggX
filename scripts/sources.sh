@@ -17,7 +17,7 @@ IMAGES="$ROOT/images"
 REPOBACKUP="$ROOT/backup"
 BUILD="$ROOT/build"
 EDITOR="vim"
-
+STORE="$ROOT/store"
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
 
@@ -321,33 +321,28 @@ local EXT=${BNAME_FILE##*.}
 local V=$(echo $BNAME_SIGN | grep $EXT )
 local TT=$(echo $EXT |   tr '[:lower:]' '[:upper:]')
 if [ ! $V ]; then 
-	#no match V="" expand file 
-	case $TT in
-		"XZ")
-		OUTNAME="$1/"$(echo $BNAME_FILE | sed "s/.$EXT//g")
-		if [ ! -e $OUTNAME ]; then
-			unxz "$2"
-			touch "$2"
-		fi
-		;;
-		"GZ")
-		OUTNAME="$1/"$(echo $BNAME_FILE | sed "s/.$EXT//g")
-		if [ ! -e $OUTNAME ]; then
-			gunzip "$2"
-			touch "$2"
-		fi
-		;;
-		"BZ2")
-		OUTNAME="$1/"$(echo $BNAME_FILE | sed "s/.$EXT//g")
-		if [ ! -e $OUTNAME ]; then
-			bzip2 -d  "$2"
-			touch "$2"
-		fi
-		;;
-		*)
-		error_c "Unknow methos for ext $EXT  " "$i - project : $3"
-		;;
-	esac
+	OUTNAME="$1/"$(echo $BNAME_FILE | sed "s/.$EXT//g")
+	V=$(ls -al "$OUTNAME" )
+	if [  !  -f  "$OUTNAME"  ]; then
+		#no match V="" expand file 
+		case $TT in
+			"XZ")		
+				unxz "$2"
+				touch "$2"
+			;;
+			"GZ")
+				gunzip "$2"
+				touch "$2"
+			;;
+			"BZ2")
+				bzip2 -d  "$2"
+				touch "$2"
+			;;
+			*)
+			error_c "Unknow methos for ext $EXT  " "$i - project : $3"
+			;;
+		esac
+	fi
 fi
 echo $OUTNAME
 }
@@ -361,12 +356,12 @@ echo $OUTNAME
 function wget_packet(){
 local RES=0
 local CUSTOM=0
-local FILEIN="$REPO/$1/$3"
+local FILEIN="$STORE/$3"
 print_c "$GREEN_LIGHT" "   - Download source" "$YELLOW" $i
 local PNAME="$2/$3"
-wget  --show-progress -q -o "$LOGFILE" "$PNAME" -O "$REPO/$1/$3"
+wget  --show-progress -q -o "$LOGFILE" "$PNAME" -O "$FILEIN"
 if [  $4 ] && [ $5 ]; then
-		FILEIN=$(test_sign_file "$REPO/$1" "$REPO/$1/$3" "$4/$5") 		
+		FILEIN=$(test_sign_file "$STORE" "$STORE/$3" "$4/$5") 		
 		PNAME="$4/$5"
 		CUSTOM=1
 	fi
@@ -378,8 +373,8 @@ if [ -f  "$FILEIN" ]; then
 	fi
 	if [ $RES -eq 8 ]; then
 	warning_c "No sign file found !" "$3" "add md5sum to it"
-	md5sum "$REPO/$1/$3" > "$REPO/$1/$3.md5"
-	chmod 444 	 "$REPO/$1/$3.md5"
+	md5sum "$STORE/$3" > "$STORE/$3.md5"
+	chmod 444 	 "$STORE/$3.md5"
 	RES=1
 	fi
 	if [ $RES -eq 1 ]; then 
@@ -409,10 +404,10 @@ return $RES
 # $5 sign key file
 function wget_update_packet(){
 local PNAME="$2/$3"
-local FILEIN="$REPO/$1/$3"
+local FILEIN="$STORE/$3"
 local CUSTOM=0
 if [  $4 ] && [ $5 ]; then
-		FILEIN=$( test_sign_file "$REPO/$1" "$REPO/$1/$3" "$4/$5" ) 		
+		FILEIN=$( test_sign_file "$STORE" "$STORE/$3" "$4/$5" ) 		
 		PNAME="$4/$5"	
 		CUSTOM=1		
 	fi
@@ -443,6 +438,8 @@ svn   -q co $PNAME  $SOURCES/$1 $RPWD
 if [ $? -ne 0 ]; then 
 	error_c "Svn Checkout error " "   project $1"
 fi 
+tar -cjvSf $STORE/$3.tar.bz2  $SOURCES/$1
+md5sum $STORE/$3.tar.bz2 > $STORE/$3.tar.bz2.md5
 }
 
 # $1 project name
@@ -462,6 +459,8 @@ if [ ! -d "$SOURCES/$1" ]; then
 	if [ $? -ne 0 ]; then 
 		error_c "Svn Checkout error " "   project $1"
 	fi 
+	tar -cjvSf $STORE/$3.tar.bz2  $SOURCES/$1
+	md5sum $STORE/$3.tar.bz2 > $STORE/$3.tar.bz2.md5
 else
 	if [ -d ".svn" ]; then 
 		local PWD=$(pwd)
@@ -470,12 +469,16 @@ else
 		if [ $? -ne 0 ]; then 
 			error_c "Svn Update error " "   project $1"
 		fi 
+		tar -cjvSf $STORE/$3.tar.bz2  $SOURCES/$1
+		md5sum $STORE/$3.tar.bz2 > $STORE/$3.tar.bz2.md5
 		cd "$PWD"
 	else
 		svn   -q co $PNAME  $SOURCES/$1  $RPWD
 		if [ $? -ne 0 ]; then 
 			error_c "Svn Checkout error " "   project $1"
 		fi 	
+		tar -cjvSf $STORE/$3.tar.bz2  $SOURCES/$1
+		md5sum $STORE/$3.tar.bz2 > $STORE/$3.tar.bz2.md5
 	fi
 fi
 }
@@ -492,7 +495,9 @@ fi
 git   clone $PNAME  "$SOURCES/$1"
 if [ $? -ne 0 ]; then 
 	error_c "Git Clone error " "   project $1"
-fi 
+fi
+tar -cjvSf $STORE/$3.tar.bz2  $SOURCES/$1
+md5sum $STORE/$3.tar.bz2 > $STORE/$3.tar.bz2.md5
 }
 
 # $1 project name
@@ -508,12 +513,16 @@ if [ ! -d "$SOURCES/$1" ]; then
 	if [ $? -ne 0 ]; then 
 		error_c "Git clone error " "   project $1"
 	fi 
+	tar -cjvSf $STORE/$3.tar.bz2  $SOURCES/$1
+	md5sum $STORE/$3.tar.bz2 > $STORE/$3.tar.bz2.md5
 else
 	cd "$SOURCES/$1"
 	git pull origin master
 	if [ $? -ne 0 ]; then 
 		error_c "Git Update error " "   project $1"
 	fi 
+	tar -cjvSf $STORE/$3.tar.bz2  $SOURCES/$1
+	md5sum $STORE/$3.tar.bz2 > $STORE/$3.tar.bz2.md5
 	cd "$PWD"
 fi
 }
@@ -524,10 +533,12 @@ fi
 function file_packet(){
 print_c "$GREEN_LIGHT" "   - File copy source $3" "$YELLOW" $1
 local PNAME=$2/$3
-rsync -ry $PNAME $REPO/$1/$3
+rsync -ry $PNAME $SOURCE/$1/$3
 if [ $? -ne 0 ]; then
 	error_c "Cannot copy file $3" " project $1"
 fi
+tar -cjvSf $STORE/$3.tar.bz2  $SOURCES/$1
+md5sum $STORE/S3.tar.bz2 > $STORE/$3.tar.bz2.md5
 }
 
 # $1 project name
@@ -553,6 +564,8 @@ if [ -d $2 ]; then
 	if [ $? -ne  0 ] ; then 
 		error_c "Cannot copy downloaded source " " project $1"
 	fi
+	tar -cjvSf $STORE/$3.tar.bz2  $SOURCES/$1
+	md5sum $STORE/$3.tar.bz2 > $STORE/$3.tar.bz2.md5
 fi
 cd $PWD
 rm -rf /tmp/$3
@@ -668,10 +681,10 @@ esac
 function download_action(){
 local PWD_SVN=""
 if [ "$5" == 99 ]; then	
-	if [ -f "$REPO/$1/$4" ]; then 
-		dolog "Remove file $REPO/$1/$4 to execute force action"
-		rm  -f  "$REPO/$1/$4"
-		rm  -f  "$REPO/$1/$4.*"
+	if [ -f "$STORE/$4" ]; then 
+		dolog "Remove file $STORE/$4 to execute force action"
+		rm  -f  "$STORE/$4"
+		rm  -f  "$STORE/$4.*"
 	fi
 	if [ -d "$SOURCES/$1" ]; then 
 		dolog "Remove path $SOURCES/$1 to execute force action"
@@ -682,8 +695,8 @@ fi
 
 
 if [ "$2" == "WGET" ]; then 
-	if [ -f "$REPO/$1/$4" ] ; then 
-		dolog "File $REPO/$1/$4 exist : check sign"
+	if [ -f "$STORE/$4" ] ; then 
+		dolog "File $STORE/$4 exist : check sign"
 		is_updated $1 $2 $3 $4 $6 $7
 	else
 		dolog "Download $REPO/$1/$4 "
@@ -981,6 +994,11 @@ if [ ! -d "$BUILD" ]; then
 	mkdir -p "$BUILD"
 fi
 
+#BUILD
+if [ ! -d "$STORE" ]; then 
+	dolog "Create $STORE path"
+	mkdir -p "$STORE"
+fi
 }
 
 #$1  projects
