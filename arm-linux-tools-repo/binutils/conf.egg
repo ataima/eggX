@@ -12,13 +12,19 @@
 			<step id="0">
 				<priority>1</priority>
 				<name>arm-linux-tools</name>
-				<prefix></prefix>
 				<arch>x86_64</arch>
 				<cross>arm-linux-gnueabi</cross>	
 				<silent>yes</silent>
 				<threads>8</threads>
+				<path>
+					<add>$DEPLOYS/bin</add>
+				</path>
 				<configure>
-					<extra id="0">--disable-multilib</extra>	
+					<extra id="0">--prefix=$DEPLOY</extra>
+					<extra id="1">--target=$CROSS</extra>
+					<extra id="2">--build=$NATIVE</extra>
+					<extra id="3">--host=$NATIVE</extra>
+					<extra id="4">--disable-multilib</extra>	
 				</configure>
 				<make>
 					<rule id="0">
