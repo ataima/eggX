@@ -90,6 +90,7 @@ local CROSS=""
 local SILENT=""
 local INDEX=""
 local NUM=0
+local ID=0
 local TPATH=""
 check_project $1
 if [ $? -eq 1 ]; then
@@ -101,20 +102,28 @@ if [ $? -eq 1 ]; then
 			xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
-				PRI=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/priority")		
-				equs "$PRI"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  build priority Phase $2" "project : $1"
+				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make"
+				NUM=$?
+				if [ $NUM -ne 0 ]; then
+					ID=0
+					while [  $ID -lt $NUM ]; do
+						PRI=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$ID\"]/priority")		
+						equs "$PRI"  
+						if [ $? -eq 1 ]; then 
+							error_c "Missing  build make id=$ID priority Phase $2" "project : $1"
+						fi
+						NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")		
+						equs "$NAME"  
+						if [ $? -eq 1 ]; then 
+							error_c "Missing  build name Phase $2" "project : $1"
+						fi 
+						#optional				
+						INDEX="$PRI%$1%$NAME"
+						#echo "-->$INDEX"
+						BSEQ[$INDEX]="$INDEX"
+						ID=$((ID+1))
+					done	
 				fi
-				NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")		
-				equs "$NAME"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  build name Phase $2" "project : $1"
-				fi 
-				#optional				
-				INDEX="$PRI%$1%$NAME"
-				#echo "-->$INDEX"
-				BSEQ[$INDEX]="$INDEX"	
 			else
 				warning_c " no build step $2  !" "project : $1"
 			fi
@@ -539,51 +548,65 @@ echo "fi" >> $3
 #
 function generate_build_rules(){
 #build
-declare -i i=0
+declare -i II=0
+declare -i UU=0
 local NAME
 local TREAD
 declare -i NUM_R=0
-local SH_BUILD="$3/build.sh"
-rm -f "$SH_BUILD" 
-touch "$SH_BUILD"
-chmod +rwx "$SH_BUILD"
-prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" "$5" "$6"
-echo "declare -i start_time">> "$SH_BUILD"
-echo "declare -i stop_time">> "$SH_BUILD"
-echo "declare -i total_time">> "$SH_BUILD"
-#------------------------------------------------------------------------------------------------------------------
+declare -i NUM_M=0
+local PRI=""
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action generate build rules"	
-		#set -x ; trap read debug
 		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM_R=$?
 		if [ $NUM_R -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make/rule"
-			NUM_R=$?
-			if [ $NUM_R -ne 0 ]; then
-				while  [  $i -lt $NUM_R  ];  do
-					NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$i\"]/name")	
-					equs "$NAME $i"  
-					if [ $? -eq 1 ]; then 
-						error_c "Missing  make rule name id=$i Phase $2" "project : $1"
-					fi
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make"
+			NUM_M=$?
+			if [ $NUM_M -ne 0 ]; then
+				UU=0
+				while [  $UU -lt $NUM_M  ]; do
+					PRI=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$UU\"]/priority")
+					local SH_BUILD="$3/build_$PRI.sh"
+					rm -f "$SH_BUILD" 
+					touch "$SH_BUILD"
+					chmod +rwx "$SH_BUILD"
+					prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" "$5" "$6"
+					echo "declare -i start_time">> "$SH_BUILD"
+					echo "declare -i stop_time">> "$SH_BUILD"
+					echo "declare -i total_time">> "$SH_BUILD"	
+					dolog "Read conf.egg from project $1 : action generate build rules"	
+					#set -x ; trap read debug		
+					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$UU\"]/rule"
+					NUM_R=$?
+					if [ $NUM_R -ne 0 ]; then
+						II=0
+						while  [  $II -lt $NUM_R  ];  do
+							NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$UU\"]/rule[@id=\"$II\"]/name")	
+							equs "$NAME $i"  
+							if [ $? -eq 1 ]; then 
+								error_c "Missing  make rule name id=$i Phase $2" "project : $1"
+							fi
 
-					THREAD=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$i\"]/thread")
-					equs "$THREAD"  
-					if [ $? -eq 0 ]; then 
-						if  [  $THREAD -gt $8 ] ; then 
-							THREAD="$8"
-						fi
-					else
-						THREAD="$8"	
-					fi						
-					add_pre_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$i"
-					add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "$7" "$THREAD" "$8" "$NAME"
-					add_post_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$i"
-					i=$((i+1))
-				done 
+							THREAD=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$UU\"]/rule[@id=\"$II\"]/thread")
+							equs "$THREAD"  
+							if [ $? -eq 0 ]; then 
+								if  [  $THREAD -gt $8 ] ; then 
+									THREAD="$8"
+								fi
+							else
+								THREAD="$8"	
+							fi						
+							add_pre_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$II" "$UU"
+							add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "$7" "$THREAD" "$8" "$NAME"
+							add_post_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$II" "$UU"
+							II=$((II+1))
+						done 
+					fi	
+					UU=$((UU+1))
+					end_script_generic "$1" "$2" "done  build " "$SH_BUILD"
+					echo "$3/deploy.sh" >> "$SH_BUILD"
+				done	
 			fi
 		fi
 	else
@@ -593,8 +616,6 @@ else
 	error_c "Missing project in $REPO " "project : $1"
 fi
 #------------------------------------------------------------------------------------------------------------------
-end_script_generic "$1" "$2" "done  build " "$SH_BUILD"
-echo "$3/deploy.sh" >> "$SH_BUILD"
 }
 
 #$1 project
@@ -734,6 +755,7 @@ generate_deploy_rule $@
 #$4 path build
 #$5 build name
 #$6 rule index
+#$7 make index
 function add_pre_build(){
 declare -i i=0
 local VALUE=""
@@ -745,16 +767,16 @@ if [ $? -eq 1 ]; then
 		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/pre"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/pre[@id=\"$i\"]/value")	
+				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre build id=$i value Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/pre[@id=\"$i\"]/mode")	
+				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre build id=$i mode Phase $2" "project : $1"
@@ -802,6 +824,7 @@ echo " "  >> $3
 #$4 path build
 #$5 build name
 #$6 rule index
+#$7 make index
 function add_post_build(){
 declare -i i=0
 local VALUE=""
@@ -891,12 +914,12 @@ echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$3"
 #$1 project
 #$2 build phase number 0,1,2.....
 function create_configure_cmd(){
-local PRI=""
 local NAME=""
 local ARCH=""
 local CROSS=""
 local SILENT=""
 local NUM=0
+#set -x ; trap read debug
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
@@ -907,11 +930,6 @@ if [ $? -eq 1 ]; then
 			xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
-				PRI=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/priority")		
-				equs "$PRI"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  build priority Phase $2" "project : $1"
-				fi
 				NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")		
 				equs "$NAME"  
 				if [ $? -eq 1 ]; then 
@@ -1019,16 +1037,17 @@ add_post_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 #build
 add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$ARCH" "$CROSS" "$SILENT" "$THREADS" 
-print_ita "STEP : $2:$PRI" "$1"  "configured done !"
+print_ita "STEP : $2:$3" "$1"  "configured done !"
 }
 
 
 
 #$1 project
 #$2 build phase number 0,1,2.....
+#$3 make priority
 function configure_packet(){
 manage_path_pre  $1  $2
-create_configure_cmd "$1" "$2"
+create_configure_cmd "$1" "$2" "$3"
 manage_path_post $1  $2
 sync
 }
@@ -1067,6 +1086,7 @@ fi
 
 #$@ argv optional
 function configure_all_packet(){
+#set -x; trap read debug
 local V=""
 isNumber $1
 if [ $? -ne 0 ]; then
@@ -1075,6 +1095,7 @@ fi
 
 local ID=$1
 local PRJS=""
+local PRI=""
 shift
 
 if [ "$#" -eq  0 ]; then
@@ -1091,8 +1112,9 @@ SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 MYPATH=$START_PATH
 for V in $SORTREQ; do
 	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
+	PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')
 	if [ "$PRJS" ] ; then 
-		configure_packet  "$PRJS" "$ID"
+		configure_packet  "$PRJS" "$ID" "$PRI"
 	fi
 done
 }

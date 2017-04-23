@@ -10,7 +10,6 @@
 		</remote>	
 		<build>
 			<step id="0">
-				<priority>10</priority>
 				<name>arm-linux-tools</name>
 				<arch>x86_64</arch>
 				<cross>arm-linux-gnueabi</cross>	
@@ -69,7 +68,8 @@
 					<extra id="4">--enable-languages=c,c++</extra>
 					<extra id="5">--disable-multilib</extra>
 				</configure>
-				<make>
+				<make id="0">
+					<priority>3</priority>
 					<rule id="0">						
 						<name>all-gcc</name> 
 					</rule>
@@ -80,6 +80,16 @@
 							<mode>code</mode>		
 							<value>arm-linux-gnueabi-gcc  -v</value>
 						</post >
+					</rule>										
+				</make>
+				<make id="1">
+					<priority>5</priority>
+					<rule id="0">									
+						<name>all-target-libgcc</name> 
+					</rule>
+					<rule id="1">
+						<name>install-target-libgcc</name> 
+						<thread>1</thread>						
 					</rule>										
 				</make>
 			</step>

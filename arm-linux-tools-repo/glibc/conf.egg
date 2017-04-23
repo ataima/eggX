@@ -10,7 +10,6 @@
 		</remote>	
 		<build>
 			<step id="0">
-				<priority>20</priority>
 				<name> arm-linux-tools</name>
 				<arch>x86_64</arch>
 				<cross>arm-linux-gnueabi</cross>	
@@ -28,7 +27,8 @@
 					<extra id="5"> --disable-multilib</extra>	
 					<extra id="6"> libc_cv_forced_unwind=yes</extra>										
 				</configure>				
-				<make>
+				<make id="0">
+					<priority>4</priority>
 					<rule id="0">
 						<name>install-bootstrap-headers=yes install-headers</name> 
 						<thread>1 </thread>						
