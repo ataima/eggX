@@ -136,6 +136,7 @@ if [ $? -eq 1 ]; then
 else
 	error_c "Missing project in $REPO " "project : $1"
 fi
+
 }
 
 
@@ -301,18 +302,17 @@ function generate_setenv(){
 	echo "export BUILDS=$BUILD/$4">> "$3"
 	echo "export SOURCE=$SRC" >> "$3"
 	echo "export BUILD=$BUILD/$4/$1_$2/build" >> "$3"
-	echo "export DEPLOY=$BUILD/$4/$1_$2/image" >> "$3"
-	echo "export DEPLOYS=$IMAGES/$4" >> "$3"
+	echo "export DEPLOY=$IMAGES/$4" >> "$3"
 	echo "export ARCH=$5">> "$3"
 	echo "export CROSS=$6">> "$3"
-	echo "export CFLAGS=$CFLAGS" >> "$3"
-	echo "export CPPFLAGS=$CPPFLAGS" >> "$3"
-	echo "export CXXFLAGS=$CXXFLAGS" >> "$3"
-	echo "export LDFLAGS=$LDFLAGS" >> "$3"
-	echo "export LIBS=$LIBS" >> "$3"
-	echo "export CPATH=$CPATH" >> "$3"
-	echo "export C_INCLUDE_PATH=$C_INCLUDE_PATH" >> "$3"
-	echo "export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH" >> "$3"	
+	echo "export CFLAGS=\"$CFLAGS\"" >> "$3"
+	echo "export CPPFLAGS=\"$CPPFLAGS\"" >> "$3"
+	echo "export CXXFLAGS=\"$CXXFLAGS\"" >> "$3"
+	echo "export LDFLAGS=\"$LDFLAGS\"" >> "$3"
+	echo "export LIBS=\"$LIBS\"" >> "$3"
+	echo "export CPATH=\"$CPATH\"" >> "$3"
+	echo "export C_INCLUDE_PATH=\"$C_INCLUDE_PATH\"" >> "$3"
+	echo "export CPLUS_INCLUDE_PATH=\"$CPLUS_INCLUDE_PATH\"" >> "$3"	
 	echo "export PATH=$MYPATH" >> "$3"	
 	echo "export NATIVE=$(/usr/bin/gcc -dumpmachine)" >> "$3"
 }
@@ -605,7 +605,6 @@ if [ $? -eq 1 ]; then
 					fi	
 					UU=$((UU+1))
 					end_script_generic "$1" "$2" "done  build " "$SH_BUILD"
-					echo "$3/deploy.sh" >> "$SH_BUILD"
 				done	
 			fi
 		fi
@@ -652,36 +651,7 @@ end_script_generic "$1" "$2" "done clean build " "$SH_CLEAN"
 
 
 
-#$1 project
-#$2 step id
-#$3 path build#$4 build name
-#$5 arch
-#$6 cross
-#$7 silent
-#$8 thread
 
-function generate_deploy_rule(){
-local SH_DEPLOY="$3/deploy.sh"
-rm -f "$SH_DEPLOY" 
-touch "$SH_DEPLOY" 
-chmod +rwx "$SH_DEPLOY" 
-# clean 
-prepare_script_generic "$1" "$2" "Start deploy image " "$SH_DEPLOY" "$4" "$5" "$6"
-echo "if [ ! -d \$DEPLOYS ]; then mkdir -p \$DEPLOYS ; fi">>"$SH_DEPLOY"
-echo "if [ ! -d \$DEPLOY ]; then mkdir -p \$DEPLOY ; fi">>"$SH_DEPLOY"
-echo "if [ -d \$DEPLOY ]; then">>"$SH_DEPLOY"
-echo "  tree \$DEPLOY > $SH_DEPLOY.log">>"$SH_DEPLOY"
-echo "	if [ \"\$(ls -A \$DEPLOY )\" ] ; then"  >>"$SH_DEPLOY"
-echo "  		cp -a \$DEPLOY/* \$DEPLOYS">>"$SH_DEPLOY"
-echo "  		if [ \$? -ne 0 ]; then">> "$SH_DEPLOY"
-echo "    		error_c \"Error on deploy\" \"project $1\"" >>"$SH_DEPLOY"
-echo "  		fi"  >> "$SH_DEPLOY"
-echo "	fi" >> "$SH_DEPLOY"
-echo "fi" >> "$SH_DEPLOY"
-echo "" >> "$SH_DEPLOY"
-echo "" >> "$SH_DEPLOY"
-end_script_generic "$1" "$2" "done deploy " "$SH_DEPLOY"
-}
 
 
 #$1 project
@@ -692,7 +662,7 @@ end_script_generic "$1" "$2" "done deploy " "$SH_DEPLOY"
 #$6 cross
 #$7 silent
 #$8 thread
-#$9 deploy
+
 
 function generate_distclean_rule(){
 local SH_DISTCLEAN="$3/distclean.sh"
@@ -746,7 +716,6 @@ generate_clean_rule $@
 generate_distclean_rule $@ 
 generate_build_rules $@
 generate_rebuild_rule $@
-generate_deploy_rule $@
 }
 
 #$1 project
@@ -1054,21 +1023,26 @@ sync
 
 
 #$1 build phase number 0,1,2.....
+#$2 name build phase
 function read_default_for_step(){
-
 local VV=""
 local VALUE=""
-local NAME=""
-local NAMES="step_name cflags cppflags cxxflags ldflags libs cpath c_include_path cplus_include_path"
+local VAR=""
+local NAMES="step_name cc cxx cflags cppflags cxxflags ldflags libs cpath c_include_path cplus_include_path"
 if [ -f $REPO/conf.egg ]; then
+	#set -x ; trap read debug
 	dolog "Read MAIN conf.egg : action set default "
 	NUM=$(xmlstarlet sel -t  -v "count(/egg/defaults/step[@id=\"$1\"])" -n $REPO/conf.egg)	
 	if [ $NUM -eq 1 ]; then
 		for VV in $NAMES; do
+			VAR=$(echo $VV |   tr '[:lower:]' '[:upper:]')
 			VALUE=$(xmlstarlet sel -t  -v "egg/defaults/step[@id=\"$1\"]/$VV" -n $REPO/conf.egg)
-			if [ "$VALUE" ]; then 
-				NAME=$(echo $VV |   tr '[:lower:]' '[:upper:]')
-				eval "$NAME"="$VALUE"
+			if [ "$VALUE" ]; then 				
+				print_ita "Set " "$VAR" "$VALUE"
+				eval $VAR='$VALUE'
+			else
+				print_ita "Unset " "$VAR" $CC
+				unset "$VAR"	
 			fi
 		done
 	else
@@ -1096,6 +1070,7 @@ fi
 local ID=$1
 local PRJS=""
 local PRI=""
+local NAME=""
 shift
 
 if [ "$#" -eq  0 ]; then
@@ -1105,9 +1080,9 @@ else
 fi
 
 for V in $PRJS; do
-	insert_packet "$V" "$ID" 
+	insert_packet "$V" "$ID"
 done
-read_default_for_step "$ID"
+read_default_for_step "$ID" "$NAME"
 SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 MYPATH=$START_PATH
 for V in $SORTREQ; do
@@ -1159,6 +1134,7 @@ for key in $ALL_PACKETS; do MAP[$key]="$key"; done
 # sync repo file to build path 
 dolog "Force resync work repo"
 rsync -ry $OREPO $REPO
+xml_get_env
 if [ $? -ne 0 ]; then
 	error_c "Cannot  sync work repository"
 fi
@@ -1167,5 +1143,4 @@ configure_all_packet  $ARGV
 
 
 #$1 step id build number ex : ./configire.sh 0 -> configure build step id==0
-xml_get_env
 main "$@"

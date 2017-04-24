@@ -13,10 +13,12 @@
 	<defaults>
 		<step id="0">
 			<step_name>arm-linux-tools</step_name>
-			<cflags>-O3 -I \$DEPLOYS/include -I\$DEPLOYS/\$CROSS/include</cflags>
+			<cc></cc>
+			<cxx></cxx>
+			<cflags>-O3</cflags>
 			<cppflags>-O3</cppflags>
 			<cxxflags>-O3</cxxflags>
-			<ldflags>-L\$DEPLOYS/lib -L\$DEPLOY/\$CROSS/lib</ldflags>
+			<ldflags></ldflags>
 			<libs></libs>
 			<cpath></cpath>
 			<c_include_path></c_include_path>

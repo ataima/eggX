@@ -10,20 +10,28 @@
 		</remote>	
 		<build>
 			<step id="0">
-				<name> arm-linux-tools</name>
+				<name>arm-linux-tools</name>
 				<arch>x86_64</arch>
 				<cross>arm-linux-gnueabi</cross>	
 				<silent>yes</silent>
 				<threads>8</threads>	
 				<path>
-					<add>$DEPLOYS/bin</add>
+					<add>$DEPLOY/bin</add>
 				</path>
-				<configure>					
-					<extra id="0"> --build=$NATIVE</extra>
-					<extra id="1"> --host=$CROSS</extra>	
-					<extra id="2">--target=$CROSS</extra>
-					<extra id="3">--prefix=$DEPLOYS/$CROSS</extra>					
-					<extra id="4">--with-headers=$DEPLOYS/$CROSS/include</extra>						
+				<configure>		
+					<pre id="0">
+						<mode>code</mode>		
+						<value>mkdir -p $DEPLOY/$CROSS/lib</value>
+					</pre>					
+					<pre id="1">
+						<mode>code</mode>		
+						<value>mkdir -p $DEPLOY/$CROSS/include</value>
+					</pre>					
+					<extra id="0">--prefix=$DEPLOY/$CROSS</extra>					
+					<extra id="1"> --build=$NATIVE</extra>
+					<extra id="2"> --host=$CROSS</extra>	
+					<extra id="3">--target=$CROSS</extra>
+					<extra id="4">--with-headers=$DEPLOY/$CROSS/include</extra>						
 					<extra id="5"> --disable-multilib</extra>	
 					<extra id="6"> libc_cv_forced_unwind=yes</extra>										
 				</configure>				
@@ -45,7 +53,7 @@
 						</post>
 						<post id="2">
 							<mode>code</mode>		
-							<value>touch $DEPLOYS/$CROSS/include/gnu/stubs.h</value>
+							<value>touch $DEPLOY/$CROSS/include/gnu/stubs.h</value>
 						</post>
 					</rule>					
 				</make>		

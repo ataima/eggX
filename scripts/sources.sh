@@ -66,6 +66,7 @@ return 0
 function check_pgp(){
 local RES=0
 local KEYS=""
+#trap read debug
 if [ ! -f  $1.$4 ]; then 
 	dolog "Download sign file : $1.$4"
 	wget  --show-progress -q "$2" -O "$1.$4"
@@ -77,8 +78,8 @@ if [ ! -f  $1.$4 ]; then
 	fi		
 fi	
 
-tmp=$( ls -al  "$1.$4"  |  awk  '{print $5}' )
-if [  $tmp -ne 0  ]; then
+tmp=$(getFileSize  "$1.$4" )
+if [  "$tmp" != "0"  ]; then
 	KEYS=$(ls $RKEYS/* )
 	for i in $KEYS; do
 		gpg --verify --keyring "$i" "$1.$4" >> "$LOGFILE" 2>&1
@@ -359,13 +360,25 @@ local CUSTOM=0
 local FILEIN="$STORE/$3"
 print_c "$GREEN_LIGHT" "   - Download source" "$YELLOW" $i
 local PNAME="$2/$3"
-wget  --show-progress -q -o "$LOGFILE" "$PNAME" -O "$FILEIN"
+#set -x ; trap read debug
+tmp=$(getFileSize "$FILEIN")
+if [ "$tmp" == "0" ]; then
+	rm -f "$FILEIN"
+	wget  --show-progress -q -o "$LOGFILE" "$PNAME" -O "$FILEIN"
+	RES=$?
+	if [ $RES -ne 0 ]; then
+		error_c  "Wget fail : error $RES " " file $PNAME project $1"
+	fi
+else
+	print_c "$GREEN_LIGHT" "   - Checking $i source from local store " "$YELLOW" "$tmp bytes"
+fi
 if [  $4 ] && [ $5 ]; then
 		FILEIN=$(test_sign_file "$STORE" "$STORE/$3" "$4/$5") 		
 		PNAME="$4/$5"
 		CUSTOM=1
 	fi
-if [ -f  "$FILEIN" ]; then	
+tmp=$(getFileSize "$FILEIN")	
+if [ "$tmp" != "0" ]; then	
 	check_sign "$FILEIN" "$PNAME" "$1" "$CUSTOM"
 	RES=$?
 	if [ $RES -eq 99 ]; then 
@@ -411,7 +424,8 @@ if [  $4 ] && [ $5 ]; then
 		PNAME="$4/$5"	
 		CUSTOM=1		
 	fi
-if [ -f  "$FILEIN" ]; then		
+tmp=$(getFileSize "$FILEIN")	
+if [ "$tmp" != "0" ]; then			
 	ver_sign "$FILEIN" "$PNAME" "$1" "$CUSTOM"
 	RES=$?
 	if [ $RES -eq 99 ]; then 
@@ -695,7 +709,9 @@ fi
 
 
 if [ "$2" == "WGET" ]; then 
-	if [ -f "$STORE/$4" ] ; then 
+#set -x ; trap read debug
+	tmp=$(getFileSize "$STORE/$4")
+	if  [ "$tmp" != "0" ]  &&  [ -d "$SOURCES/$1" ] ; then 
 		dolog "File $STORE/$4 exist : check sign"
 		is_updated $1 $2 $3 $4 $6 $7
 	else
@@ -933,7 +949,8 @@ if [ "$1" == "" ]; then
 		if [ ! -f "$RKEYS/$key" ]; then 
 			dolog "Download keys from $i"
 			wget --show-progress -q "$i" -O "$RKEYS/$key"
-			if [ -s "$RKEYS/$key" ]; then
+			tmp=$(getFileSize "$RKEYS/$key")
+			if [ "$tmp" != "0" ]; then
 				dolog "Download keys from $i Okey"	
 			else		
 				rm -f "$RKEYS/$key"
@@ -946,7 +963,8 @@ else
 	if [ ! -f "$RKEYS/$key" ]; then 
 		dolog "Download keys from $1"
 		wget --show-progress -q "$1" -O "$RKEYS/$key"
-		if  [  -s "$RKEYS/$key" ]; then
+		tmp=$(getFileSize "$RKEYS/$key")
+		if [ "$tmp" != "0" ]; then
 			dolog "Download keys from $1 Okey"
 		else
 			rm -f "$RKEYS/$key"
@@ -1242,7 +1260,7 @@ if [ "$ARGV" != "" ]; then
 fi
 
 init 
-
+xml_get_env
 
 if [ $GPG -eq 1 ]; then
 	download_sign_key "$ARGV"
@@ -1273,5 +1291,5 @@ else
 fi
 }
 
-xml_get_env
+
 main "$@"

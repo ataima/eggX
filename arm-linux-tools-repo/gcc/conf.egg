@@ -17,7 +17,7 @@
 				<threads>8</threads>	
 				<path>
 					<pre >
-						<add id="0"> $DEPLOYS/bin </add>
+						<add id="0"> $DEPLOY/bin </add>
 					</pre>
 				</path>
 				<configure>
@@ -61,12 +61,10 @@
 						<mode>code</mode>
 						<value>A=$(ls -d $SOURCES/cloog/*); ln -s $A $SOURCE/cloog</value>
 					</pre>
-					<extra id="0">--build=$NATIVE</extra>
-					<extra id="1">--host=$NATIVE</extra>
-					<extra id="2">--target=$CROSS</extra>
-					<extra id="3">--prefix=$DEPLOY</extra>
-					<extra id="4">--enable-languages=c,c++</extra>
-					<extra id="5">--disable-multilib</extra>
+					<extra id="0">--prefix=$DEPLOY</extra>
+					<extra id="1">--target=$CROSS</extra>
+					<extra id="2">--enable-languages=c,c++</extra>
+					<extra id="3">--disable-multilib</extra>
 				</configure>
 				<make id="0">
 					<priority>3</priority>

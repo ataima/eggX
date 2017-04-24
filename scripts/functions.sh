@@ -175,7 +175,7 @@ return $RES
 #$2 xml node
 #return num node match
 function xml_get_env(){
-local MAINFILE="$OREPO/conf.egg"
+local MAINFILE="$REPO/conf.egg"
 declare -A XNAME="root logfile repo sources images store repobackup build editor \
 				 start_path"
 local II=""
@@ -194,5 +194,16 @@ local RES='^[0-9]+$'
 if ! [[ $1 =~ $RES ]] ; then
    return 1
 fi
+return 0
+}
+
+#$1 fulle filename
+function getFileSize(){
+if  [ -e "$1" ] && [ -f "$1" ] 
+then 
+	echo   -n $(wc -c < "$1")
+	return 1
+fi
+echo -n 0
 return 0
 }
