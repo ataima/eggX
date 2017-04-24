@@ -14,13 +14,13 @@
 		</remote>	
 		<build>
 			<step id="0">
-				<priority>9</priority>
 				<name>arm-none-tools</name>
 				<arch>x86_64</arch>
 				<cross>arm-none-eabi</cross>
 				<silent>yes</silent>
 				<threads>8</threads>			
-				<make>
+				<make id="0">
+					<priority>2</priority>
 					<rule id="0">
 						<name> mrproper</name>
 						<thread> 1 </thread>

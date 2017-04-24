@@ -10,7 +10,6 @@
 		</remote>	
 		<build>
 			<step id="0">
-				<priority>10</priority>
 				<name>arm-none-tools</name>
 				<arch>x86_64</arch>
 				<cross>arm-none-eabi</cross>	
@@ -69,7 +68,8 @@
 					<extra id="4">--enable-languages=c,c++</extra>					
 					<extra id="5">--disable-multilib</extra>										 
 				</configure>
-				<make>
+				<make id="0">
+					<priority>3</priority>
 					<rule id="0">						
 						<name>all-gcc</name> 
 					</rule>

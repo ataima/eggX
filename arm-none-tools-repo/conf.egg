@@ -14,6 +14,8 @@
 	<defaults>
 		<step id="0">
 			<step_name>arm-none-tools</step_name>
+			<cc></cc>
+			<cxx></cxx>
 			<cflags>-O3</cflags>
 			<cppflags>-O3</cppflags>
 			<cxxflags>-O3</cxxflags>
