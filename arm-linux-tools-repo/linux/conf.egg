@@ -15,8 +15,6 @@
 		<build>
 			<step id="0">
 				<name>arm-linux-tools</name>
-				<arch>x86_64</arch>
-				<cross>arm-linux-gnueabi</cross>
 				<silent>yes</silent>
 				<threads>8</threads>	
 				<path>
