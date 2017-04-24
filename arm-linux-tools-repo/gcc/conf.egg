@@ -92,7 +92,11 @@
 				</make>
 				<make id="2">
 					<priority>7</priority>
-					<rule id="0">									
+					<rule id="0">	
+						<pre id="0">
+							<mode>code</mode>		
+							<value>rm $DEPLOY/$CROSS/lib/libc.so ; echo  'GROUP ( libc.so.6 libc_nonshared.a )' | tee  $DEPLOY/$CROSS/lib/libc.so</value>
+						</pre>	
 						<name>all</name> 
 					</rule>
 					<rule id="1">

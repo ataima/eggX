@@ -61,20 +61,12 @@
 				</make>	
 				<make id="1">
 					<priority>6</priority>
-					<rule id="0">	
-						<pre id="0">
-							<mode>code</mode>		
-							<value>rm -rf  $DEPLOY/$CROSS/lib/libc.so</value>
-						</pre>					
+					<rule id="0">						
 						<name></name> 						
 					</rule>
 					<rule id="1">
 						<name>install</name> 
 						<thread>1</thread>	
-						<post id="0">
-							<mode>code</mode>		
-							<value>echo  'GROUP ( libc.so.6 libc_nonshared.a )' | tee  $DEPLOY/$CROSS/lib/libc.so</value>
-						</post>	
 					</rule>										
 				</make>				
 			</step>
