@@ -10,7 +10,6 @@ RKEYS=$OROOT/Keys
 
 # eggX working path default before read general conf.egg
 ROOT="$HOME/ebuild"
-LOGFILE="$ROOT/log_$(date +%d-%m-%y).txt"
 REPO="$ROOT/repo"
 SOURCES="$ROOT/sources"
 IMAGES="$ROOT/images"
@@ -68,7 +67,6 @@ local RES=0
 local KEYS=""
 #trap read debug
 if [ ! -f  $1.$4 ]; then 
-	dolog "Download sign file : $1.$4"
 	wget  --show-progress -q "$2" -O "$1.$4"
 	RES=$?
 	if [ $RES -eq 8 ]; then 
@@ -82,18 +80,16 @@ tmp=$(getFileSize  "$1.$4" )
 if [  "$tmp" != "0"  ]; then
 	KEYS=$(ls $RKEYS/* )
 	for i in $KEYS; do
-		gpg --verify --keyring "$i" "$1.$4" >> "$LOGFILE" 2>&1
+		gpg --verify --keyring "$i" "$1.$4" >> /dev/null 2>&1
 		RES=$?
 		if [ $RES -eq 2 ]; then 
 			continue
 		fi
 		if [ $RES -eq 1 ]; then 
-			dolog "Gpg sign  fail redo download : $1.$4"
 			RES=99
 			break
 		fi
 		if [ $RES -eq 0 ]; then 
-			dolog "Gpg sign  ok : $1.$4"
 			RES=1
 			break
 		fi		
@@ -123,7 +119,6 @@ return $RES
 function check_md5sum(){
 local RES=0
 if [ ! -f  $1.md5 ]; then 
-	dolog "Download md5 file : $1.md5"
 	wget  --show-progress -q "$2.md5" -O "$1.md5"
 	RES=$?
 	if [ $RES -eq 8 ]; then 
@@ -159,7 +154,6 @@ return $RES
 function check_sha1sum(){
 local RES=0
 if [ ! -f  $1.sha1 ]; then
-	dolog "Download sha1 file : $1.sha1"
 	wget  --show-progress -q "$2.sha1" -O "$1.sha1"
 	RES=$?
 	if [ $RES -eq 8 ]; then 
@@ -250,18 +244,16 @@ if [ -e "$1.sig" ] || [ -e "$1.sign" ] || [ -e "$1.asc" ]; then
 	if [ -e "$1.sign" ]; then FILE="$1.sign"; fi
 	if [ -e "$1.asc" ]; then FILE="$1.asc"; fi
 	for i in $KEYS; do
-		gpg --verify --keyring "$i" "$FILE" >> "$LOGFILE" 2>&1
+		gpg --verify --keyring "$i" "$FILE" >> /dev/null 2>&1
 		RES=$?
 		if [ $RES -eq 2 ]; then 
 			continue
 		fi
 		if [ $RES -eq 1 ]; then 
-			dolog "Gpg sign  fail redo download : $1.$4"
 			RES=99
 			break
 		fi
 		if [ $RES -eq 0 ]; then 
-			dolog "Gpg sign  ok : $1.$4"
 			RES=1
 			break
 		fi		
@@ -364,7 +356,7 @@ local PNAME="$2/$3"
 tmp=$(getFileSize "$FILEIN")
 if [ "$tmp" == "0" ]; then
 	rm -f "$FILEIN"
-	wget  --show-progress -q -o "$LOGFILE" "$PNAME" -O "$FILEIN"
+	wget  --show-progress -q  "$PNAME" -O "$FILEIN"
 	RES=$?
 	if [ $RES -ne 0 ]; then
 		error_c  "Wget fail : error $RES " " file $PNAME project $1"
@@ -394,7 +386,6 @@ if [ "$tmp" != "0" ]; then
 		if [ ! -d "$SOURCES/$1" ]; then 
 			mkdir -p "$SOURCES/$1"
 		fi
-		dolog "Untar file $REPO/$1/$3 "
 		if [ ! -e "$SOURCES/$1" ] ; then
 			mkdir -p "$SOURCES/$1"
 		fi
@@ -564,13 +555,11 @@ local PWD=$(pwd)
 rm -rf /tmp/$3
 mkdir -p /tmp/$3
 cd  /tmp/$3
-dolog "Download packet $3 with apt-get"
 apt-get source $3
 if [ $? -ne  0 ] ; then 
 	error_c "apt-get  fail to download source packet" " project $1"
 fi
 if [ -d $2 ]; then 
-	dolog "Copy source from apt-get"
 	if [ ! -d "$SOURCES/$1" ]; then
 		mkdir -p "$SOURCES/$1"
 	fi
@@ -595,7 +584,6 @@ local TPWD="";
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then		
-		dolog "Read conf.egg from project $1 : action GET PASSWORD"
 		TPWD=$(xml_value $1 '/egg/project/remote/password')
 		equs "$TPWD"  
 		if [ $? -eq 1 ]; then 
@@ -621,25 +609,20 @@ function download_packet(){
 local PW=""
 case  $2 in
 	"WGET")
-	dolog "Method to get source is : wget for project $1"
 	wget_packet $1 $3 $4 $5 $6
 	;;
 	"GIT")
-	dolog "Method to get source is : git for project $1"
 	PW=$(get_password "$1"  "$2")
 	git_packet $1 $3 $4 $PW
 	;;
 	"SVN")
-	dolog "Method to get source is : svn for project $1"
 	PW=$(get_password "$1"  "$2")
 	svn_packet $1 $3 $4 $PW 
 	;;
 	"FILE")
-	dolog "Method to get source is : rsync for project $1"
 	file_packet $1 $3 $4 
 	;;
 	"APT")
-	dolog "Method to get source is : apt-get for project $1"
 	apt_packet $1 $3 $4
 	;;
 	*)
@@ -696,12 +679,10 @@ function download_action(){
 local PWD_SVN=""
 if [ "$5" == 99 ]; then	
 	if [ -f "$STORE/$4" ]; then 
-		dolog "Remove file $STORE/$4 to execute force action"
 		rm  -f  "$STORE/$4"
 		rm  -f  "$STORE/$4.*"
 	fi
 	if [ -d "$SOURCES/$1" ]; then 
-		dolog "Remove path $SOURCES/$1 to execute force action"
 		rm -rf  "$SOURCES/$1"
 	fi
 	
@@ -712,18 +693,14 @@ if [ "$2" == "WGET" ]; then
 #set -x ; trap read debug
 	tmp=$(getFileSize "$STORE/$4")
 	if  [ "$tmp" != "0" ]  &&  [ -d "$SOURCES/$1" ] ; then 
-		dolog "File $STORE/$4 exist : check sign"
 		is_updated $1 $2 $3 $4 $6 $7
 	else
-		dolog "Download $REPO/$1/$4 "
 		download_packet $1 $2 $3 $4 $6 $7
 	fi
 else
 	if [ -d "$SOURCES/$1" ] ; then 
-		dolog "File $SOURCES/$1 exist : check sign"
 		is_updated $1 $2 $3 $4  $6 $7
 	else
-		dolog "Download $SOURCES/$1 "
 		download_packet $1 $2 $3 $4  $6 $7
 	fi
 fi
@@ -757,7 +734,6 @@ if [ $? -eq 1 ]; then
 #load prj/conf.egg to download the packet
 #conf.h REMOTE link packet name md5sum
 	if [ -f $REPO/$1/conf.egg ]; then		
-		dolog "Read conf.egg from project $1 : action PATCH"
 		xml_count $1 "/egg/project/patch"
 		tmp=$?
 		if [ $tmp -ne 0 ]; then
@@ -821,7 +797,6 @@ if [ $? -eq 1 ]; then
 #load prj/conf.egg to download the packet
 #conf.h REMOTE link packet name md5sum
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action DOWNLOAD"
 		MODE=$(xml_value $1 "/egg/project/download")
 		equs "$MODE"  
 		if [ $? -eq 1 ]; then 
@@ -876,7 +851,6 @@ if [ $? -eq 1 ]; then
 #load prj/conf.egg to download the packet
 #conf.h REMOTE link packet name md5sum
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action REMOTE"		
 		MODE=$(xml_value $1 "/egg/project/remote/method")
 		equs "$MODE"  
 		if [ $? -eq 1 ]; then 
@@ -940,19 +914,15 @@ function download_sign_key(){
 local KEYS="ftp://ftp.gnu.org/gnu/gnu-keyring.gpg "
 
 if [ ! -d $RKEYS ]; then 
-	dolog "Create dir for gpg keys"
 	mkdir -p $RKEYS
 fi
 if [ "$1" == "" ]; then
 	for i in $KEYS; do
 		key=$(basename "$i") 
 		if [ ! -f "$RKEYS/$key" ]; then 
-			dolog "Download keys from $i"
 			wget --show-progress -q "$i" -O "$RKEYS/$key"
 			tmp=$(getFileSize "$RKEYS/$key")
-			if [ "$tmp" != "0" ]; then
-				dolog "Download keys from $i Okey"	
-			else		
+			if [ "$tmp" == "0" ]; then
 				rm -f "$RKEYS/$key"
 				error_c "Download gpg certificate" "$key"						
 			fi
@@ -961,12 +931,9 @@ if [ "$1" == "" ]; then
 else
 	key=$(basename "$1") 
 	if [ ! -f "$RKEYS/$key" ]; then 
-		dolog "Download keys from $1"
 		wget --show-progress -q "$1" -O "$RKEYS/$key"
 		tmp=$(getFileSize "$RKEYS/$key")
-		if [ "$tmp" != "0" ]; then
-			dolog "Download keys from $1 Okey"
-		else
+		if [ "$tmp" == "0" ]; then
 			rm -f "$RKEYS/$key"
 			error_c "Download gpg certificate" "$key"		
 		fi
@@ -979,7 +946,7 @@ fi
 function download_linux_key(){
 local TEST=$(gpg --list-key  | grep "Linux kernel stable release signing key")
 if [ ! "$TEST" ]; then
-	gpg --keyserver hkp://keys.gnupg.net --recv-keys 38DBBDC86092693E >> "$LOGFILE" 2>&1
+	gpg --keyserver hkp://keys.gnupg.net --recv-keys 38DBBDC86092693E >> /dev/null 2>&1
 fi
 }
 
@@ -993,28 +960,23 @@ fi
 
 #REPO
 if [ ! -d "$REPO" ]; then 
-	dolog "Create $REPO path"
 	mkdir -p "$REPO"
 fi
 #SOURCES
 if [ ! -d "$SOURCES" ]; then 
-	dolog "Create $SOURCES path"
 	mkdir -p "$SOURCES"
 fi
 #IMAGES
 if [ ! -d "$IMAGES" ]; then 
-	dolog "Create $IMAGES path"
 	mkdir -p "$IMAGES"
 fi
 #BUILD
 if [ ! -d "$BUILD" ]; then 
-	dolog "Create $BUILD path"
 	mkdir -p "$BUILD"
 fi
 
 #BUILD
 if [ ! -d "$STORE" ]; then 
-	dolog "Create $STORE path"
 	mkdir -p "$STORE"
 fi
 }
@@ -1070,7 +1032,6 @@ if [ $? -eq 1 ]; then
 #load prj/conf.egg to download the packet
 #conf.h REMOTE link packet name md5sum
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action REMOTE"
 		MODE=$(xml_value $1 "/egg/project/remote/method")
 		equs "$MODE"  
 		if [ $? -eq 1 ]; then 
@@ -1183,7 +1144,6 @@ check_work_dir
 #sort project in repo to bin search
 for key in $ALL_PACKETS; do MAP[$key]="$key"; done  
 # sync repo file to build path 
-dolog "Force resync work repo"
 rsync -ry $OREPO $REPO
 if [ $? -ne 0 ]; then
 	error_c "Cannot  sync work repository"
@@ -1220,7 +1180,6 @@ if [ "$OPT_ARGV" != "" ]; then
 		-D|--debug)
 		export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 		set -x
-		dolog "Set Debug ON"
 		;;
 		-F|--force)
 		FORCE=99

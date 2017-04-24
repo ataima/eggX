@@ -21,19 +21,12 @@ REPLACE=" -e \E[0m"
 
 
 
-#$1.... string to log
-function dolog(){
-	if [ -f "$LOGFILE" ] && [ "$1" != "" ]; then 
-			echo "$1" "$2" "$3" "$4" >> "$LOGFILE"
-	fi
-}
 
 
 #$1 color
 #$2   string
 function print_c(){
 echo -e $(echo $1) "$2" $(echo $3) "$4"$(echo $5) "$6" $(echo $REPLACE)
-dolog "$2" "$4" "$6"
 }
 
 
@@ -176,7 +169,7 @@ return $RES
 #return num node match
 function xml_get_env(){
 local MAINFILE="$REPO/conf.egg"
-declare -A XNAME="root logfile repo sources images store repobackup build editor \
+declare -A XNAME="root  repo sources images store repobackup build editor \
 				 start_path"
 local II=""
 for II in $XNAME; do

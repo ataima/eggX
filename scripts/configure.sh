@@ -9,7 +9,6 @@ OREPO=$OROOT/repo/.
 
 # eggX working path default before read general conf.egg
 ROOT="$HOME/ebuild"
-LOGFILE="$ROOT/log_$(date +%d-%m-%y).txt"
 REPO="$ROOT/repo"
 SOURCES="$ROOT/sources"
 IMAGES="$ROOT/images"
@@ -95,7 +94,6 @@ local TPATH=""
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action CONFIGURE"	
 		xml_count $1 "/egg/project/build"
 		NUM=$?
 		if [ $NUM -eq 1 ]; then
@@ -153,7 +151,6 @@ local NAME=""
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action PATH manage"	
 		xml_count $1 "/egg/project/build"
 		NUM=$?
 		if [ $NUM -eq 1 ]; then
@@ -218,7 +215,6 @@ local NAME=""
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action PATH manage"	
 		xml_count $1 "/egg/project/build"
 		NUM=$?
 		if [ $NUM -eq 1 ]; then
@@ -366,7 +362,6 @@ local MODE=""
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action pre_conf"	
 		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
@@ -431,7 +426,6 @@ local VALUE=""
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action post_conf"	
 		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
@@ -494,7 +488,6 @@ local VALUE=""
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action extra_conf"	
 		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
@@ -576,7 +569,6 @@ if [ $? -eq 1 ]; then
 					echo "declare -i start_time">> "$SH_BUILD"
 					echo "declare -i stop_time">> "$SH_BUILD"
 					echo "declare -i total_time">> "$SH_BUILD"	
-					dolog "Read conf.egg from project $1 : action generate build rules"	
 					#set -x ; trap read debug		
 					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$UU\"]/rule"
 					NUM_R=$?
@@ -733,7 +725,6 @@ local MODE=""
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action pre_build"	
 		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
@@ -801,20 +792,19 @@ local VALUE=""
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action post_build"	
 		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then
-			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/post"
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/post[@id=\"$i\"]/value")	
+				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post build id=$i Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make/rule[@id=\"$6\"]/post[@id=\"$i\"]/mode")	
+				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post build id=$i mode Phase $2" "project : $1"
@@ -836,7 +826,7 @@ if [ $? -eq 1 ]; then
 						echo "fi" >> $3
 					;;		
 					*)
-					error_c "Unknow  post build id=$i mode Phase $2" "project : $1"
+					error_c "Unknow  post build id=$i mode:$MODE Phase $2" "project : $1"
 					;;
 				esac				
 				i=$((i+1))
@@ -893,7 +883,6 @@ local NUM=0
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
-		dolog "Read conf.egg from project $1 : action CONFIGURE"	
 		xml_count $1 "/egg/project/build"
 		NUM=$?
 		if [ $NUM -eq 1 ]; then
@@ -1032,7 +1021,6 @@ local VAR=""
 local NAMES="step_name cc cxx cflags cppflags cxxflags ldflags libs cpath c_include_path cplus_include_path"
 if [ -f $REPO/conf.egg ]; then
 	#set -x ; trap read debug
-	dolog "Read MAIN conf.egg : action set default "
 	NUM=$(xmlstarlet sel -t  -v "count(/egg/defaults/step[@id=\"$1\"])" -n $REPO/conf.egg)	
 	if [ $NUM -eq 1 ]; then
 		for VV in $NAMES; do
@@ -1116,7 +1104,6 @@ if [ "$OPT_ARGV" != "" ]; then
 		-D|--debug)
 		export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 		set -x
-		dolog "Set Debug ON"
 		;;
 		*)
 		usage
@@ -1133,7 +1120,6 @@ fi
 #sort project in repo to bin search
 for key in $ALL_PACKETS; do MAP[$key]="$key"; done  
 # sync repo file to build path 
-dolog "Force resync work repo"
 rsync -ry $OREPO $REPO
 xml_get_env
 if [ $? -ne 0 ]; then

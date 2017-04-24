@@ -2,7 +2,6 @@
 <egg>   
 	<conf>
 		<root>$HOME/ebuild</root>
-		<logfile>$ROOT/log_$(date +%d-%m-%y).txt</logfile>
 		<repo>$ROOT/repo</repo>
 		<sources>$ROOT/sources</sources>
 		<images>$ROOT/images</images>

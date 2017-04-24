@@ -90,6 +90,16 @@
 						<thread>1</thread>						
 					</rule>										
 				</make>
+				<make id="2">
+					<priority>7</priority>
+					<rule id="0">									
+						<name>all</name> 
+					</rule>
+					<rule id="1">
+						<name>install</name> 
+						<thread>1</thread>						
+					</rule>										
+				</make>
 			</step>
 		</build>	
 	</project>
