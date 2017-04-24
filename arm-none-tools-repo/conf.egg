@@ -24,6 +24,8 @@
 			<cpath></cpath>
 			<c_include_path></c_include_path>
 			<cplus_include_path></cplus_include_path>
+			<arch>x86_64</arch>
+			<cross>arm-none-eabi</cross>
 		</step>
 	</defaults>
 </egg>

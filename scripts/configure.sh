@@ -21,7 +21,8 @@ MYPATH=""
 CPATH=""
 C_INCLUDE_PATH=""
 CPLUS_INCLUDE_PATH=""
-
+ARCH=""
+CROSS=""
 
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
@@ -84,8 +85,6 @@ MYPATH="$2"
 function insert_packet(){
 local PRI=""
 local NAME=""
-local ARCH=""
-local CROSS=""
 local SILENT=""
 local INDEX=""
 local NUM=0
@@ -269,8 +268,6 @@ fi
 #$2 step id
 #$3 fileout
 #$4 build name
-#$5 arch
-#$6 cross
 function generate_setenv(){
 	local SRC=""
 	if [ -e $SOURCES/$1/$1-*/configure ]; then
@@ -300,8 +297,8 @@ function generate_setenv(){
 	echo "export SOURCE=$SRC" >> "$3"
 	echo "export BUILD=$BUILD/$4/$1_$2/build" >> "$3"
 	echo "export DEPLOY=$IMAGES/$4" >> "$3"
-	echo "export ARCH=$5">> "$3"
-	echo "export CROSS=$6">> "$3"
+	echo "export ARCH=$ARCH">> "$3"
+	echo "export CROSS=$CROSS">> "$3"
 	echo "export CFLAGS=\"$CFLAGS\"" >> "$3"
 	echo "export CPPFLAGS=\"$CPPFLAGS\"" >> "$3"
 	echo "export CXXFLAGS=\"$CXXFLAGS\"" >> "$3"
@@ -319,8 +316,6 @@ function generate_setenv(){
 #$3 title to echo...
 #$4 file to write 
 #$5 BUILD NAME
-#$6 ARCH
-#$7 CROSS
 function prepare_script_generic(){
 local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
 LINE=$((LINE-1))
@@ -527,10 +522,8 @@ echo "fi" >> $3
 #$2 step id
 #$3 path build
 #$4 build name
-#$5 arch
-#$6 cross
-#$7 silent
-#$8 thread //max 
+#$5 silent
+#$6 thread //max 
 #<make>
 #<rule id=0>
 #<name>all</name> 
@@ -565,7 +558,7 @@ if [ $? -eq 1 ]; then
 					rm -f "$SH_BUILD" 
 					touch "$SH_BUILD"
 					chmod +rwx "$SH_BUILD"
-					prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" "$5" "$6"
+					prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" 
 					echo "declare -i start_time">> "$SH_BUILD"
 					echo "declare -i stop_time">> "$SH_BUILD"
 					echo "declare -i total_time">> "$SH_BUILD"	
@@ -580,18 +573,17 @@ if [ $? -eq 1 ]; then
 							if [ $? -eq 1 ]; then 
 								error_c "Missing  make rule name id=$i Phase $2" "project : $1"
 							fi
-
 							THREAD=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$UU\"]/rule[@id=\"$II\"]/thread")
 							equs "$THREAD"  
 							if [ $? -eq 0 ]; then 
-								if  [  $THREAD -gt $8 ] ; then 
-									THREAD="$8"
+								if  [  $THREAD -gt $6 ] ; then 
+									THREAD="$6"
 								fi
 							else
-								THREAD="$8"	
+								THREAD="$6"	
 							fi						
 							add_pre_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$II" "$UU"
-							add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "$7" "$THREAD" "$8" "$NAME"
+							add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "$5" "$THREAD" "$6" "$NAME"
 							add_post_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$II" "$UU"
 							II=$((II+1))
 						done 
@@ -614,10 +606,8 @@ fi
 #$2 step id
 #$3 path build
 #$4 build name
-#$5 arch
-#$6 cross
-#$7 silent
-#$8 thread
+#$5 silent
+#$6 thread
 
 function generate_clean_rule(){
 local SH_CLEAN="$3/clean.sh"
@@ -625,9 +615,9 @@ rm -f "$SH_CLEAN"
 touch "$SH_CLEAN" 
 chmod +rwx "$SH_CLEAN" 
 # clean 
-prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" "$5" "$6"
+prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" 
 echo "if [ -f \$BUILD/Makefile ]; then " >> "$SH_CLEAN"
-if [ "$7" == "yes" ]; then 
+if [ "$5" == "yes" ]; then 
 	echo "	make -C \$BUILD clean > $SH_CLEAN 2>&1 " >> "$SH_CLEAN"
 else
 	echo "	make -C \$BUILD  clean ">> "$SH_CLEAN"
@@ -651,19 +641,15 @@ end_script_generic "$1" "$2" "done clean build " "$SH_CLEAN"
 #$2 step id
 #$3 path build
 #$4 build name
-#$5 arch
-#$6 cross
-#$7 silent
-#$8 thread
-
-
+#$5 silent
+#$6 thread
 function generate_distclean_rule(){
 local SH_DISTCLEAN="$3/distclean.sh"
 rm -f "$SH_DISTCLEAN"  
 touch "$SH_DISTCLEAN" 
 chmod +rwx "$SH_DISTCLEAN" 
 #distclean 
-prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" "$5" "$6"
+prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" 
 echo "cd \$PWD " >> "$SH_DISTCLEAN"
 echo "rm -rf \$BUILD " >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
@@ -677,17 +663,15 @@ end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
 #$2 step id
 #$3 path build
 #$4 build name
-#$5 arch
-#$6 cross
-#$7 silent
-#$8 thread
+#$5 silent
+#$6 thread
 function generate_rebuild_rule(){
 local SH_REBUILD="$3/rebuild.sh"
 rm -f  "$SH_REBUILD" 
 touch "$SH_REBUILD"
 chmod +rwx "$SH_REBUILD"
 #rebuild
-prepare_script_generic "$1" "$2" "Start Rebuild " "$SH_REBUILD" "$4" "$5" "$6"
+prepare_script_generic "$1" "$2" "Start Rebuild " "$SH_REBUILD" "$4" 
 echo "cd .." >> "$SH_REBUILD"
 echo "$SH_CLEAN" >> "$SH_REBUILD"
 echo "$SH_DISTCLEAN" >> "$SH_REBUILD"
@@ -699,12 +683,10 @@ end_script_generic "$1" "$2" "done  rebuild " "$SH_REBUILD"
 #$2 step id
 #$3 path build
 #$4 build name
-#$5 arch
-#$6 cross
-#$7 silent
-#$8 thread
+#$5 silent
+#$6 thread
 function add_build_script(){
-generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5" "$6" 
+generate_setenv "$1" "$2" "$3/setenv.sh" "$4" 
 generate_clean_rule $@
 generate_distclean_rule $@ 
 generate_build_rules $@
@@ -875,8 +857,6 @@ echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$3"
 #$2 build phase number 0,1,2.....
 function create_configure_cmd(){
 local NAME=""
-local ARCH=""
-local CROSS=""
 local SILENT=""
 local NUM=0
 #set -x ; trap read debug
@@ -893,17 +873,7 @@ if [ $? -eq 1 ]; then
 				equs "$NAME"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  build name Phase $2" "project : $1"
-				fi 
-				ARCH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/arch")		
-				equs "$ARCH"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  build architetture Phase $2" "project : $1"
-				fi		
-				CROSS=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/cross")
-				equs "$CROSS"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  build cross platform Phase $2" "project : $1"
-				fi	
+				fi 				
 				SILENT=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/silent")
 				#optional
 				if [ $SILENT ]; then
@@ -943,7 +913,7 @@ if [ ! -e "$DEST" ] ; then mkdir -p "$DEST"; fi
 touch "$C_FILE"
 sync
 chmod +x "$C_FILE" 
-prepare_script_generic "$1"  "$2" "START CONFIGURE" "$C_FILE" "$NAME" "$ARCH" "$CROSS"
+prepare_script_generic "$1"  "$2" "START CONFIGURE" "$C_FILE" "$NAME" 
 add_pre_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
 EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
@@ -995,7 +965,7 @@ fi
 add_post_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 #build
-add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$ARCH" "$CROSS" "$SILENT" "$THREADS" 
+add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$SILENT" "$THREADS" 
 print_ita "STEP : $2:$3" "$1"  "configured done !"
 }
 
@@ -1018,7 +988,9 @@ function read_default_for_step(){
 local VV=""
 local VALUE=""
 local VAR=""
-local NAMES="step_name cc cxx cflags cppflags cxxflags ldflags libs cpath c_include_path cplus_include_path"
+local NAMES="step_name cc cxx cflags cppflags cxxflags \
+			ldflags libs cpath c_include_path cplus_include_path \
+			arch cross"
 if [ -f $REPO/conf.egg ]; then
 	#set -x ; trap read debug
 	NUM=$(xmlstarlet sel -t  -v "count(/egg/defaults/step[@id=\"$1\"])" -n $REPO/conf.egg)	
