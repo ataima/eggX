@@ -18,7 +18,12 @@
 				<arch>x86_64</arch>
 				<cross>arm-linux-gnueabi</cross>
 				<silent>yes</silent>
-				<threads>8</threads>			
+				<threads>8</threads>	
+				<path>
+					<pre>
+						<add id="0">$DEPLOY/bin</add>
+					</pre>	
+				</path>				
 				<make id="0">
 					<priority>2</priority>
 					<rule id="0">

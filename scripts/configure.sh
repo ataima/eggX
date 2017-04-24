@@ -149,6 +149,7 @@ local NUM=0
 local MAX=0
 local ID=0
 local NAME=""
+#set -x ;trap read debug
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then

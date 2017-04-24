@@ -277,6 +277,7 @@ isNumber $1
 if [ $? -ne 0 ]; then
    error_c "$1 : Input step isn't a number !!"
 fi
+ID=$1
 if [ ! "$2" ]; then
 	error_c "Input missing project  !!"
 fi
@@ -285,7 +286,7 @@ for V in $@; do
 	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
 done
 local PWD=$(pwd)
-prepare_seq_priority $NUM
+prepare_seq_priority $ID
 for V in $PRJ_NAMES; do
 	for I in $@; do
 		for T in $SORTREQ; do
@@ -296,7 +297,7 @@ for V in $PRJ_NAMES; do
 		done
 		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
 		PRI=$(echo $SEQ | awk '{print $1}')
-		NAME=$(echo $SEQ | awk '{print $2}')"_$1"
+		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
 		PRJ=$(echo $SEQ | awk '{print $3}')
 		if [ -d "$BUILD/$V/$NAME" ]; then
 			print_build_msg "$PRI" "$NAME" "$PRJ"
@@ -329,6 +330,7 @@ isNumber $1
 if [ $? -ne 0 ] ; then
    error_c "$1 : Input step isn't a number !!"
 fi
+ID=$1
 if [ ! "$2" ]; then
 	error_c "Input missing project  !!"
 fi
@@ -337,7 +339,7 @@ for V in $@; do
 	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
 done
 local PWD=$(pwd)
-prepare_seq_priority $NUM
+prepare_seq_priority $ID
 for V in $PRJ_NAMES; do
 	for I in $@; do
 		for T in $SORTREQ; do
@@ -348,7 +350,7 @@ for V in $PRJ_NAMES; do
 		done
 		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
 		PRI=$(echo $SEQ | awk '{print $1}')
-		NAME=$(echo $SEQ | awk '{print $2}')"_$1"
+		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
 		PRJ=$(echo $SEQ | awk '{print $3}')
 		if [ -d "$BUILD/$V/$NAME" ]; then
 			print_build_msg "$PRI" "$NAME" "$PRJ"
@@ -367,6 +369,7 @@ done
 #$@ from argv build.sh
 # 0 gcc linux input step + project/s
 function clean_single(){
+#set -x ; trap read debug
 #trovo nomi build per ogni progetto
 local ID=0
 local PRJ_NAMES=""
@@ -378,6 +381,7 @@ isNumber $1
 if [ $? -ne 0 ]; then
    error_c "$1 : Input step isn't a number !!"
 fi
+ID=$1
 if [ ! "$2" ]; then
 	error_c "Input missing project  !!"
 fi
@@ -386,7 +390,8 @@ for V in $@; do
 	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
 done
 local PWD=$(pwd)
-prepare_seq_priority $NUM
+prepare_seq_priority $ID
+
 for V in $PRJ_NAMES; do
 	for I in $@; do
 		for T in $SORTREQ; do
@@ -397,7 +402,7 @@ for V in $PRJ_NAMES; do
 		done
 		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
 		PRI=$(echo $SEQ | awk '{print $1}')
-		NAME=$(echo $SEQ | awk '{print $2}')"_$1"
+		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
 		PRJ=$(echo $SEQ | awk '{print $3}')
 		if [ -d "$BUILD/$V/$NAME" ]; then		
 			print_clean_msg "$PRI" "$NAME" "$PRJ"

@@ -16,7 +16,9 @@
 				<silent>yes</silent>
 				<threads>8</threads>	
 				<path>
-					<add>$DEPLOY/bin</add>
+					<pre>
+						<add id="0">$DEPLOY/bin</add>
+					</pre>	
 				</path>
 				<configure>		
 					<pre id="0">
@@ -45,11 +47,11 @@
 						<name>csu/subdir_lib</name> 
 						<post id="0">
 							<mode>code</mode>		
-							<value>install $BUILD/csu/crt1.o $BUILD/csu/crti.o $BUILD/csu/crtn.o $DEPLOYS/$CROSS/lib</value>
+							<value>install $BUILD/csu/crt1.o $BUILD/csu/crti.o $BUILD/csu/crtn.o $DEPLOY/$CROSS/lib</value>
 						</post>
 						<post id="1">
 							<mode>code</mode>		
-							<value>$CROSS-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $DEPLOYS/$CROSS/lib/libc.so</value>
+							<value>$CROSS-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $DEPLOY/$CROSS/lib/libc.so</value>
 						</post>
 						<post id="2">
 							<mode>code</mode>		

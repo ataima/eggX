@@ -16,7 +16,9 @@
 				<silent>yes</silent>
 				<threads>8</threads>
 				<path>
-					<add>$DEPLOY/bin</add>
+					<pre>
+						<add id="0">$DEPLOY/bin</add>
+					</pre>	
 				</path>
 				<configure>
 					<extra id="0">--prefix=$DEPLOY</extra>
