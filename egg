@@ -110,16 +110,7 @@ SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 
 #set numero massimo di step a disposizone
 function get_max_step(){
-declare -i NUM=0
-declare -i MAX=0
-for V in $ALL_PACKETS; do
-	xml_count $V "/egg/project/build/step"
-	NUM=$?
-	if [ $MAX  -lt $NUM ]; then 
-		MAX=$NUM
-	fi
-done
-MAX_STEP=$MAX
+MAX_STEP=$(xmlstarlet sel -t  -v "count(/egg/defaults/step)" -n $REPO/conf.egg)
 }
 
 # $1 project
@@ -136,9 +127,8 @@ declare -i IND=0
 		while [  $IND -lt $MAX_STEP ]; do
 		NAME=$(xml_value $1 "/egg/project/build/step[@id='$IND']/name")		
 		equs "$NAME"  
-		if [ $? -eq 1 ]; then 
-			error_c "Missing  build name Phase $2" "project : $1"
-		else
+		if [ $? -eq 0 ]
+		then 
 			TT=$(echo $PRJ_NAME | grep $NAME)
 			if [ "$TT" == "" ]; then 
 				PRJ_NAME="$PRJ_NAME""  ""$NAME"
@@ -306,6 +296,8 @@ if [ ! "$2" ]; then
 	error_c "Input missing project  !!"
 fi
 shift
+# set -x ; trap read debug
+
 for V in $@; do
 	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
 done
@@ -339,6 +331,7 @@ for V in $PRJ_NAMES; do
 		fi
 	done 
 done
+
 }
 
 #$@ from argv build.sh
@@ -535,8 +528,7 @@ print_del_ita
 #$ARGV TODO
 function config_all_step(){
 declare -i NUM=0
-isNumber $1
-if [ $? -ne 0 ]; then
+if [ $# -eq 0 ]; then
 	while [ $NUM -lt $MAX_STEP ]; do 
 		$SCRIPT_DIR/configure.sh  $NUM $@
 		if [ $? -ne 0 ]; then 
@@ -545,11 +537,16 @@ if [ $? -ne 0 ]; then
 		NUM=$((NUM+1))
 	done
 else
-	NUM=$1
-	shift
-	$SCRIPT_DIR/configure.sh $NUM $@
-	if [ $? -ne 0 ]; then 
-		exit 1
+	isNumber $1
+	if [ $? -eq 0 ]; then	
+		NUM=$1
+		shift
+		$SCRIPT_DIR/configure.sh $NUM $@
+		if [ $? -ne 0 ]; then 
+			exit 1
+		fi
+	else
+		error_c " Missing step number " "usage ./egg configure 0<-- step "
 	fi
 fi
 sync
@@ -620,7 +617,7 @@ if [ $? -ne 0 ]; then
 	$EDITOR "$OREPO/$1/conf.egg" > /dev/null  &
 else
 		if [ "$1" == "self" ]; then
-				$EDITOR "eggx" > /dev/null  &
+				$EDITOR "egg" > /dev/null  &
 		else
 			case $1 in
 				self.conf)

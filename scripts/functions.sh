@@ -74,6 +74,17 @@ print_c "$GREEN_LIGHT" "   -  $2" "$BLUE_LIGHT" "$3"
 print_del_ita
 }
 
+#$1   s...S10
+function info_c(){
+print_del_ita
+local II
+for II in $@ 
+	do
+	print_c "$WHITE" $II 
+	done
+print_del_ita
+}
+
 #COPYTODEFAULTSCRIPT DO NOT REMOVE MARK TO COPY FUNCTION.Sh IN default_script
 
 # $1  string 
@@ -187,7 +198,6 @@ local RES='^[0-9]+$'
 if ! [[ $1 =~ $RES ]] ; then
    return 1
 fi
-return 0
 }
 
 #$1 fulle filename

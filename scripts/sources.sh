@@ -80,7 +80,7 @@ tmp=$(getFileSize  "$1.$4" )
 if [  "$tmp" != "0"  ]; then
 	KEYS=$(ls $RKEYS/* )
 	for i in $KEYS; do
-		gpg --verify --keyring "$i" "$1.$4" >> /dev/null 2>&1
+		gpg --verify --keyring "$i" "$1.$4" 
 		RES=$?
 		if [ $RES -eq 2 ]; then 
 			continue
@@ -188,7 +188,7 @@ return $RES
 #$4 custom sign file name 
 function check_sign(){
 local RES=0
-local ASIGN="md5 sha1 sig sign asc"
+local ASIGN="sig md5 sha1 sign asc"
 local i=""
 for i in $ASIGN; do
  case $i in
@@ -244,7 +244,7 @@ if [ -e "$1.sig" ] || [ -e "$1.sign" ] || [ -e "$1.asc" ]; then
 	if [ -e "$1.sign" ]; then FILE="$1.sign"; fi
 	if [ -e "$1.asc" ]; then FILE="$1.asc"; fi
 	for i in $KEYS; do
-		gpg --verify --keyring "$i" "$FILE" >> /dev/null 2>&1
+		gpg --verify --keyring "$i" "$FILE" 
 		RES=$?
 		if [ $RES -eq 2 ]; then 
 			continue

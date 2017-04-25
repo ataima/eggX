@@ -15,6 +15,32 @@
 			<info>First step to create a gcc native at laste version to build all packets</info>
 			<cc></cc>
 			<cxx></cxx>
+			<as></as>
+			<ld></ld>
+			<nm></nm>
+			<ar></ar>
+			<strip></strip>
+			<cflags>-O3</cflags>
+			<cppflags>-O3</cppflags>
+			<cxxflags>-O3</cxxflags>
+			<ldflags></ldflags>
+			<libs></libs>
+			<cpath></cpath>
+			<c_include_path></c_include_path>
+			<cplus_include_path></cplus_include_path>
+			<arch>x86_64</arch>
+			<cross>x86_64-pc-linux-gnu</cross>
+		</step>
+		<step id="1">
+			<step_name>egg_sysroot</step_name>
+			<info>build with new  compiler some basics utilities</info>
+			<cc></cc>
+			<cxx></cxx>
+			<as></as>
+			<ld></ld>
+			<nm></nm>
+			<ar></ar>
+			<strip></strip>
 			<cflags>-O3</cflags>
 			<cppflags>-O3</cppflags>
 			<cxxflags>-O3</cxxflags>

@@ -23,7 +23,13 @@ C_INCLUDE_PATH=""
 CPLUS_INCLUDE_PATH=""
 ARCH=""
 CROSS=""
-
+CC=""
+CXX=""
+AS=""
+LD=""
+NM=""
+AR=""
+STRIP=""
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
 
@@ -297,6 +303,7 @@ function generate_setenv(){
 	echo "export BUILDS=$BUILD/$4">> "$3"
 	echo "export SOURCE=$SRC" >> "$3"
 	echo "export BUILD=$BUILD/$4/$1_$2/build" >> "$3"
+	echo "export IMAGES=$IMAGES" >> "$3"
 	echo "export DEPLOY=$IMAGES/$4" >> "$3"	
 	echo "export ARCH=$ARCH">> "$3"
 	echo "export CROSS=$CROSS">> "$3"
@@ -307,7 +314,14 @@ function generate_setenv(){
 	echo "export LIBS=\"$LIBS\"" >> "$3"
 	echo "export CPATH=\"$CPATH\"" >> "$3"
 	echo "export C_INCLUDE_PATH=\"$C_INCLUDE_PATH\"" >> "$3"
-	echo "export CPLUS_INCLUDE_PATH=\"$CPLUS_INCLUDE_PATH\"" >> "$3"	
+	echo "export CPLUS_INCLUDE_PATH=\"$CPLUS_INCLUDE_PATH\"" >> "$3"
+	echo "export CC=$CC" >> "$3"
+	echo "export CXX=$CXX" >> "$3"
+	echo "export AS=$AS" >> "$3"
+	echo "export LD=$LD" >> "$3"
+	echo "export NM=$NM" >> "$3"
+	echo "export AR=$AR" >> "$3"
+	echo "export STRIP=$STRIP" >> "$3"
 	echo "export PATH=$MYPATH" >> "$3"	
 
 }
@@ -989,7 +1003,7 @@ function read_default_for_step(){
 local VV=""
 local VALUE=""
 local VAR=""
-local NAMES="step_name info cc cxx cflags cppflags cxxflags \
+local NAMES="step_name info cc cxx as ld nm ar strip cflags cppflags cxxflags \
 			ldflags libs cpath c_include_path cplus_include_path \
 			arch cross"
 if [ -f $REPO/conf.egg ]; then
@@ -999,11 +1013,16 @@ if [ -f $REPO/conf.egg ]; then
 		for VV in $NAMES; do
 			VAR=$(echo $VV |   tr '[:lower:]' '[:upper:]')
 			VALUE=$(xmlstarlet sel -t  -v "egg/defaults/step[@id=\"$1\"]/$VV" -n $REPO/conf.egg)
-			if [ "$VALUE" ]; then 				
-				print_ita "Set " "$VAR" "$VALUE"
-				eval $VAR='$VALUE'
+			if [ "$VALUE" ]; then 	
+				if [ "$VAR" == "INFO" ]
+				then
+					info_c "VALUE"
+				else				
+					print_ita "Set " "$VAR" "$VALUE"
+					eval $VAR='$VALUE'
+				fi	
 			else
-				print_ita "Unset " "$VAR" $CC
+				print_ita "Unset " "$VAR" "..."
 				unset "$VAR"	
 			fi
 		done
