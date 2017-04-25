@@ -259,7 +259,33 @@ while [ $ID -lt $MAX_STEP ] ; do
 done
 }
 
-
+#none
+function distclean_all(){
+local ID=0 
+local V=""
+local PRI=""
+local NAME=""
+local PRJ=""
+while [ $ID -lt $MAX_STEP ] ; do
+	prepare_seq_priority $ID
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		PRI=$(echo $V | awk '{print $1}')
+		NAME=$(echo $V | awk '{print $2}')"_$ID"
+		PRJ=$(echo $V | awk '{print $3}')
+		if [ -d "$BUILD/$PRJ/$NAME" ]; then
+			print_clean_msg "$PRI" "$NAME" "$PRJ"
+			cd "$BUILD/$PRJ/$NAME"
+			"$BUILD/$PRJ/$NAME/distclean.sh"
+			if [ $? -ne 0 ] ; then
+				exit -1;
+			fi
+			sync
+		fi
+	done
+	ID=$((ID+1))
+done
+}
 
 
 #$@ from argv build.sh
@@ -412,7 +438,53 @@ for V in $PRJ_NAMES; do
 done
 }
 
+#$@ from argv build.sh
+# 0 gcc linux input step + project/s
+function distclean_single(){
+#set -x ; trap read debug
+#trovo nomi build per ogni progetto
+local ID=0
+local PRJ_NAMES=""
+local PRI=""
+local NAME=""
+local PRJ=""
+local SEQ=""
+isNumber $1
+if [ $? -ne 0 ]; then
+   error_c "$1 : Input step isn't a number !!"
+fi
+ID=$1
+if [ ! "$2" ]; then
+	error_c "Input missing project  !!"
+fi
+shift
+for V in $@; do
+	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
+done
+local PWD=$(pwd)
+prepare_seq_priority $ID
 
+for V in $PRJ_NAMES; do
+	for I in $@; do
+		for T in $SORTREQ; do
+			SEQ=$(echo $T | grep $V | grep $I )
+				if [ "$SEQ" != "" ]; then 
+					break;
+				fi
+		done
+		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
+		PRI=$(echo $SEQ | awk '{print $1}')
+		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
+		PRJ=$(echo $SEQ | awk '{print $3}')
+		if [ -d "$BUILD/$V/$NAME" ]; then		
+			print_clean_msg "$PRI" "$NAME" "$PRJ"
+			cd "$BUILD/$V/$NAME"
+			"$BUILD/$V/$NAME/distclean.sh"
+			sync
+		fi
+	done 
+done
+}
 
 #$@
 function build_all_packet(){
@@ -447,6 +519,16 @@ sync
 print_del_ita
 }
 
+#$@
+function distclean_all_packet(){
+if [ "$1" == "" ]; then
+	distclean_all
+else
+	distclean_single $@
+fi
+sync
+print_del_ita
+}
 
 
 
@@ -571,6 +653,17 @@ print_ita "git" "https://github.com" "ataima"
 exit 0
 }
 
+
+#$ARGV
+function redoall(){
+$SCRIPT_DIR/sources.sh
+	if [ $? -ne 0 ]; then 
+		exit 1
+	fi
+	config_all_step
+	build_all_packet
+}
+
 function usage(){
 	print_c "$BLUE_LIGHT" "usage : ./build.sh <-D> command  <args to pass subcommand>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
@@ -581,9 +674,41 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : clear all build and deploy  and redo source + configure+do"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "shell <step xx> <project nn>: open a shell with setenv for step xx of project nn"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "clean <option step xx> <option project nn>: clean all, clean all step, clean all step:project"	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "distclean <option step xx> <option project nn>: remove build dir for all, all step,  step:project"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "edit <project nn>: edit a conf.egg file of project nn"	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "reset : remove working path: $ROOT/build, $ROOT/image, $ROOT/repo, $ROOT/source "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "info : show program info..."
 	exit 1
+}
+
+function reset_all(){
+	local VV=""
+	warning_c "WARNING : this operation is unrecoverable" "Do You want continue? <y,n>"
+	read -r ;
+	VV=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
+	if [ "$VV" == "Y" ]
+	then
+		local LL="$ROOT/build  $ROOT/source  $ROOT/images $ROOT/repo"
+		local TT=""
+		for TT in $LL
+			do			
+				if  [  -d $TT ]
+				then					
+					local SIZE=$(du -sh $TT | awk '{print $1}')
+					print_ita " REMOVE : "  "$TT" "$SIZE"
+					rm -rf "$TT"
+				else
+					print_ita " WARNING : "  "$TT" "not exist"		
+				fi	
+			done
+		if [ -d "$ROOT/store" ]	
+		then
+			print_ita " .... "  "$ROOT/store" "$(du -sh $ROOT/store)"		
+		else
+			print_ita " WARNING : "  "$ROOT/store" "not exist"	
+			rm -rf $ROOT	
+		fi	
+	fi
 }
 
 
@@ -604,7 +729,8 @@ local VIM=0
 local TRY=0
 local INFO=0
 local CLEAN=0
-
+local DISTCLEAN=0
+local RESET=0
 
 if [ $# -ne 0 ]; then
 for i in $@; do
@@ -638,9 +764,19 @@ case $i in
 	MAKE=1
 	shift
 	break
+	;;
+	reset)
+	RESET=1
+	shift
+	break
 	;;	
 	clean)
 	CLEAN=1
+	shift
+	break
+	;;	
+	distclean)
+	DISTCLEAN=1
 	shift
 	break
 	;;	
@@ -695,12 +831,7 @@ fi
 get_max_step
 
 if [ $REDOALL -ne 0 ]; then 
-	$SCRIPT_DIR/sources.sh
-	if [ $? -ne 0 ]; then 
-		exit 1
-	fi
-	config_all_step
-	build_all_packet
+	redoall "$@"
 else
 	if [ $SOURCE -ne 0 ]; then	
 		$SCRIPT_DIR/sources.sh "$@"
@@ -723,7 +854,15 @@ else
 							if [ $CLEAN -ne 0 ]; then	
 								clean_all_packet "$@"
 							else
-								default_do								
+								if [ $DISTCLEAN -ne 0 ]; then	
+									distclean_all_packet "$@"
+								else
+									if [ $RESET -ne 0 ]; then	
+										reset_all"$@"
+									else
+										default_do								
+									fi								
+								fi								
 							fi
 						fi
 					fi

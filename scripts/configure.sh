@@ -291,12 +291,13 @@ function generate_setenv(){
 	echo " unset \$i" >> "$3"
 	echo "done" >> "$3"
 	echo "#done unset all" >> "$3"
+	echo "export NATIVE=$(/usr/bin/gcc -dumpmachine)" >> "$3"
 	echo "export PROJECT=$1" >> "$3"
 	echo "export SOURCES=$SOURCES" >> "$3"
 	echo "export BUILDS=$BUILD/$4">> "$3"
 	echo "export SOURCE=$SRC" >> "$3"
 	echo "export BUILD=$BUILD/$4/$1_$2/build" >> "$3"
-	echo "export DEPLOY=$IMAGES/$4" >> "$3"
+	echo "export DEPLOY=$IMAGES/$4" >> "$3"	
 	echo "export ARCH=$ARCH">> "$3"
 	echo "export CROSS=$CROSS">> "$3"
 	echo "export CFLAGS=\"$CFLAGS\"" >> "$3"
@@ -308,7 +309,7 @@ function generate_setenv(){
 	echo "export C_INCLUDE_PATH=\"$C_INCLUDE_PATH\"" >> "$3"
 	echo "export CPLUS_INCLUDE_PATH=\"$CPLUS_INCLUDE_PATH\"" >> "$3"	
 	echo "export PATH=$MYPATH" >> "$3"	
-	echo "export NATIVE=$(/usr/bin/gcc -dumpmachine)" >> "$3"
+
 }
 
 #$1 projects
@@ -391,7 +392,7 @@ if [ $? -eq 1 ]; then
 						echo "fi" >> $3
 					;;		
 					*)
-					error_c "Unknow  pre build id=$i mode Phase $2" "project : $1"
+					error_c "Unknow  pre build id=$i mode:$MODE Phase $2" "project : $1"
 					;;
 				esac				
 				i=$((i+1))
@@ -651,7 +652,7 @@ chmod +rwx "$SH_DISTCLEAN"
 #distclean 
 prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" 
 echo "cd \$PWD " >> "$SH_DISTCLEAN"
-echo "rm -rf \$BUILD " >> "$SH_DISTCLEAN"
+echo "rm -rf \$BUILD\* " >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
 end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
@@ -741,7 +742,7 @@ if [ $? -eq 1 ]; then
 						echo "fi" >> $3						
 					;;		
 					*)
-					error_c "Unknow  pre build id=$i mode Phase $2" "project : $1"
+					error_c "Unknow  pre build id=$i mode:$MODE Phase $2" "project : $1"
 					;;
 				esac				
 				i=$((i+1))
@@ -988,7 +989,7 @@ function read_default_for_step(){
 local VV=""
 local VALUE=""
 local VAR=""
-local NAMES="step_name cc cxx cflags cppflags cxxflags \
+local NAMES="step_name info cc cxx cflags cppflags cxxflags \
 			ldflags libs cpath c_include_path cplus_include_path \
 			arch cross"
 if [ -f $REPO/conf.egg ]; then

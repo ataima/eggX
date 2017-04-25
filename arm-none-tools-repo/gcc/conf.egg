@@ -76,7 +76,7 @@
 						<thread>1</thread>						
 						<post  id="0">
 							<mode>code</mode>		
-							<value>$DEPLOY/bin/arm-none-eabi-gcc  -v</value>
+							<value>$CROSS-gcc  -v</value>
 						</post >
 					</rule>										
 				</make>
