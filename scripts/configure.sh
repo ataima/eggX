@@ -297,33 +297,103 @@ function generate_setenv(){
 	echo " unset \$i" >> "$3"
 	echo "done" >> "$3"
 	echo "#done unset all" >> "$3"
+	echo "#current platform : from gcc dumpmachine" >> "$3"	
 	echo "export NATIVE=$(/usr/bin/gcc -dumpmachine)" >> "$3"
+	echo "#current project" >> "$3"	
 	echo "export PROJECT=$1" >> "$3"
+	echo "#current sources for projects" >> "$3"	
 	echo "export SOURCES=$SOURCES" >> "$3"
+	echo "#current build path for projects" >> "$3"	
 	echo "export BUILDS=$BUILD/$4">> "$3"
+	echo "#current source for this project" >> "$3"	
 	echo "export SOURCE=$SRC" >> "$3"
+	echo "#current build path usually 'build' for project" >> "$3"	
 	echo "export BUILD=$BUILD/$4/$1_$2/build" >> "$3"
+	echo "#file containt the status of build fro this projects : 0,1,2">> "$3"
+	echo "export STATUS=$BUILD/$4/$1_$2/status" >> "$3"	
+	echo "#current out of all builds for eggx environment">> "$3"
 	echo "export IMAGES=$IMAGES" >> "$3"
+	echo "#current out this project">> "$3"
 	echo "export DEPLOY=$IMAGES/$4" >> "$3"	
+	echo "#current ARCH this project">> "$3"
 	echo "export ARCH=$ARCH">> "$3"
+	echo "#current CROSS this project">> "$3"
 	echo "export CROSS=$CROSS">> "$3"
+	echo "#current CFLAGS this project">> "$3"
 	echo "export CFLAGS=\"$CFLAGS\"" >> "$3"
+	echo "#current CPPFLAGS this project">> "$3"
 	echo "export CPPFLAGS=\"$CPPFLAGS\"" >> "$3"
+	echo "#current CXXFLAGS this project">> "$3"
 	echo "export CXXFLAGS=\"$CXXFLAGS\"" >> "$3"
+	echo "#current LDFLAGS this project">> "$3"
 	echo "export LDFLAGS=\"$LDFLAGS\"" >> "$3"
+	echo "#current LIBS this project">> "$3"
 	echo "export LIBS=\"$LIBS\"" >> "$3"
+	echo "#current CPPFLAGS this project">> "$3"
 	echo "export CPATH=\"$CPATH\"" >> "$3"
+	echo "#current C_INCLUDE_PATH this project">> "$3"
 	echo "export C_INCLUDE_PATH=\"$C_INCLUDE_PATH\"" >> "$3"
+	echo "#current CPLUS_INCLUDE_PATH this project">> "$3"
 	echo "export CPLUS_INCLUDE_PATH=\"$CPLUS_INCLUDE_PATH\"" >> "$3"
+	echo "#current CC this project">> "$3"
 	echo "export CC=$CC" >> "$3"
+	echo "#current CXX this project">> "$3"
 	echo "export CXX=$CXX" >> "$3"
+	echo "#current AS this project">> "$3"
 	echo "export AS=$AS" >> "$3"
+	echo "#current LD this project">> "$3"
 	echo "export LD=$LD" >> "$3"
+	echo "#current NM this project">> "$3"
 	echo "export NM=$NM" >> "$3"
+	echo "#current AR this project">> "$3"
 	echo "export AR=$AR" >> "$3"
+	echo "#current STRIP this project">> "$3"
 	echo "export STRIP=$STRIP" >> "$3"
+	echo "#current PATH this project">> "$3"
 	echo "export PATH=$MYPATH" >> "$3"	
+}
 
+#$1 project
+#$2 step
+#$3 build path
+#$4 value 0,1,2,
+function setbuildstatus(){
+local FILEIN="$3/status"
+case $4 in
+	0|1|2)
+	echo $4 > $FILEIN
+	;;
+	*)
+	error_c "Unknow state to build : $4" "project : $1"
+	;;
+esac
+}
+
+#$1 project
+#$2 step
+#$3 build path
+# STATUS 0=INIT AFTER DOWNLOAD BEFORE do configure command
+# STATUS 1=CONFIGURED After executed configure command
+#STATUS  2=STABLE after build phase (make...install ...all stages) 
+#on build is available  setbuildstatus 0,1,2 from xml file : ex on last  make/rule idxx/ 
+#	<post  id="0">
+#		<mode>code</mode>		
+#		<value>setbuildstatus 2</value>
+#	</post >
+function getbuildstatus(){
+local RES=0
+local FILEIN="$3/status" 
+local VV=""
+VV=$(getFileSize "$FILEIN")
+if [ $VV -eq 0 ]
+then 
+	#not exist , invalid ?..
+	setbuildstatus "$3" 0
+	VV="0"
+else
+	VV=$(cat "$FILEIN")
+fi
+return $VV
 }
 
 #$1 projects
@@ -331,11 +401,47 @@ function generate_setenv(){
 #$3 title to echo...
 #$4 file to write 
 #$5 BUILD NAME
+#$6 status to check value else exit :if $6=1000 don't check
+#$7 msg in stable mode
 function prepare_script_generic(){
 local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
 LINE=$((LINE-1))
 head $SCRIPT_DIR/functions.sh -n $LINE >> "$4"
 echo "source $BUILD/$5/$1_$2/setenv.sh">> "$4"
+echo "">> "$4"
+echo "">> "$4"
+echo "function getbuildstatus(){">> "$4"
+echo "local VV=\$(cat \$STATUS)">> "$4"
+echo "return \$VV">> "$4"
+echo "}">> "$4"
+echo "">> "$4"
+echo "">> "$4"
+echo "function setbuildstatus(){">> "$4"
+echo "case \$1 in ">>"$4"
+echo "	0|1|2)">>"$4"
+echo "	echo \$1 > \$STATUS">>"$4"
+echo "	;;">>"$4"
+echo "	*)">>"$4"
+echo "	error_c \"Unknow state to build : \$1\" \"project : $1\"" >>"$4"
+echo "	;;">>"$4"
+echo "esac">>"$4"
+echo "}">> "$4"
+echo "">> "$4"
+echo "">> "$4"
+if [ $6 -ne 1000 ]
+then
+	echo "getbuildstatus" >> "$4"
+	echo "RES=\$?">> "$4"
+	echo "if [ \$RES -eq 2 ]; then " >> "$4"
+	echo "	print_ita \"Status\" \"stable\" \"skip $7 \"" >> "$4"
+	echo "	exit 0" >> "$4"
+	echo "fi" >> "$4"
+	echo "if [ \$RES -ne $6 ]; then " >> "$4"
+	echo "	error_c \"Build status error: current \$RES - request $6\" \"project  - $1\"" >> "$4"
+	echo "fi" >> "$4"
+	echo "">> "$4"
+	echo "">> "$4"
+fi
 echo "PWD=\$(pwd)">> "$4"
 echo "cd \$BUILD" >> "$4"
 echo "" >> "$4"
@@ -486,6 +592,10 @@ else
 	error_c "Missing project in $REPO " "project : $1"
 fi
 echo " "  >> $3
+echo " "  >> $3
+echo "setbuildstatus 1">>"$3"
+echo " "  >> $3
+echo " "  >> $3
 }
 
 #$1 project
@@ -550,6 +660,7 @@ echo "fi" >> $3
 #
 function generate_build_rules(){
 #build
+local SH_BUILD=""
 declare -i II=0
 declare -i UU=0
 local NAME
@@ -573,7 +684,7 @@ if [ $? -eq 1 ]; then
 					rm -f "$SH_BUILD" 
 					touch "$SH_BUILD"
 					chmod +rwx "$SH_BUILD"
-					prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" 
+					prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" 1 "build"
 					echo "declare -i start_time">> "$SH_BUILD"
 					echo "declare -i stop_time">> "$SH_BUILD"
 					echo "declare -i total_time">> "$SH_BUILD"	
@@ -614,6 +725,11 @@ if [ $? -eq 1 ]; then
 else
 	error_c "Missing project in $REPO " "project : $1"
 fi
+echo " "  >> "$SH_BUILD"
+echo " "  >> "$SH_BUILD"
+echo "setbuildstatus 2">> "$SH_BUILD"
+echo " "  >> "$SH_BUILD"
+echo " "  >> "$SH_BUILD"
 #------------------------------------------------------------------------------------------------------------------
 }
 
@@ -630,7 +746,7 @@ rm -f "$SH_CLEAN"
 touch "$SH_CLEAN" 
 chmod +rwx "$SH_CLEAN" 
 # clean 
-prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" 
+prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" 1 "clean"
 echo "if [ -f \$BUILD/Makefile ]; then " >> "$SH_CLEAN"
 if [ "$5" == "yes" ]; then 
 	echo "	make -C \$BUILD clean > $SH_CLEAN 2>&1 " >> "$SH_CLEAN"
@@ -664,11 +780,12 @@ rm -f "$SH_DISTCLEAN"
 touch "$SH_DISTCLEAN" 
 chmod +rwx "$SH_DISTCLEAN" 
 #distclean 
-prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" 
+prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" 1000
 echo "cd \$PWD " >> "$SH_DISTCLEAN"
 echo "rm -rf \$BUILD\* " >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
+echo " setbuildstatus 0">> "$SH_DISTCLEAN"
 end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
 }
 
@@ -681,17 +798,42 @@ end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
 #$5 silent
 #$6 thread
 function generate_rebuild_rule(){
+local NUM_R=0
+local NUM_M=0
+local UU=0
+local PRI=0;
 local SH_REBUILD="$3/rebuild.sh"
 rm -f  "$SH_REBUILD" 
 touch "$SH_REBUILD"
 chmod +rwx "$SH_REBUILD"
 #rebuild
-prepare_script_generic "$1" "$2" "Start Rebuild " "$SH_REBUILD" "$4" 
-echo "cd .." >> "$SH_REBUILD"
-echo "$SH_CLEAN" >> "$SH_REBUILD"
-echo "$SH_DISTCLEAN" >> "$SH_REBUILD"
+prepare_script_generic "$1" "$2" "Start Rebuild " "$SH_REBUILD" "$4" 1000
+echo "cd \$PWD">> "$SH_REBUILD"
+echo "if [ \$? -ne 0 ]; then exit \$?; fi">> "$SH_REBUILD"
+echo "$3/distclean.sh" >> "$SH_REBUILD"
+echo "if [ \$? -ne 0 ]; then exit \$?; fi">> "$SH_REBUILD"
 echo "$3/bootstrap.sh" >> "$SH_REBUILD"
-echo "$SH_BUILD" >> "$SH_REBUILD"
+echo "if [ \$? -ne 0 ]; then exit \$?; fi">> "$SH_REBUILD"
+check_project $1
+if [ $? -eq 1 ]; then
+	if [ -f $REPO/$1/conf.egg ]; then
+		xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
+		NUM_R=$?
+		if [ $NUM_R -ne 0 ]; then
+			xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make"
+			NUM_M=$?
+			if [ $NUM_M -ne 0 ]; then
+				UU=0
+				while [  $UU -lt $NUM_M  ]; do
+					PRI=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$UU\"]/priority")
+					echo "$3/build_$PRI.sh">> "$SH_REBUILD"
+					echo "if [ \$? -ne 0 ]; then exit \$?; fi">> "$SH_REBUILD"
+					UU=$((UU+1))
+				done
+			fi
+		fi
+	fi
+fi	
 end_script_generic "$1" "$2" "done  rebuild " "$SH_REBUILD"
 }
 #$1 project
@@ -928,7 +1070,12 @@ if [ ! -e "$DEST" ] ; then mkdir -p "$DEST"; fi
 touch "$C_FILE"
 sync
 chmod +x "$C_FILE" 
-prepare_script_generic "$1"  "$2" "START CONFIGURE" "$C_FILE" "$NAME" 
+setbuildstatus "$1"  "$2" "$C_BUILD" 0
+prepare_script_generic "$1"  "$2" "START CONFIGURE" "$C_FILE" "$NAME"  0 "configure"
+echo "declare -i start_time">> "$C_FILE"
+echo "declare -i stop_time">> "$C_FILE"
+echo "declare -i total_time">> "$C_FILE"
+echo "start_time=\$(date +%s)">> "$C_FILE"
 add_pre_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
 EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
@@ -978,6 +1125,9 @@ if [ "$EXTSI" != "YES" ]; then
 	echo "set +x ">> $C_FILE
 fi
 add_post_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
+echo "stop_time=\$(date +%s)">> "$C_FILE" 
+echo "total_time=\$((stop_time-start_time))">> "$C_FILE" 
+echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$C_FILE" 
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 #build
 add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$SILENT" "$THREADS" 

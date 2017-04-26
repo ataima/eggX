@@ -153,6 +153,14 @@ print_ita  "BUILD : $1"  "$2"  "$3"
 #$1 pririty
 #$2 name
 #$3 project
+function print_conf_msg(){
+print_ita  "CONF  : $1"  "$2"  "$3"
+} 
+
+#print build start 
+#$1 pririty
+#$2 name
+#$3 project
 function print_clean_msg(){
 print_ita  "CLEAN : $1"  "$2"  "$3"
 }
@@ -173,12 +181,13 @@ while [ $ID -lt $MAX_STEP ] ; do
 		NAME=$(echo $V | awk '{print $2}')"_$ID"
 		PRJ=$(echo $V | awk '{print $3}')
 		if [ -d "$BUILD/$PRJ/$NAME" ]; then
-			print_build_msg "$PRI" "$NAME" "$PRJ"
+			print_conf_msg "$PRI" "$NAME" "$PRJ"
 			cd "$BUILD/$PRJ/$NAME"
 			"$BUILD/$PRJ/$NAME/bootstrap.sh"
 			if [ $? -ne 0 ] ; then
 				exit -1;
 			fi
+			print_build_msg "$PRI" "$NAME" "$PRJ"
 			"$BUILD/$PRJ/$NAME/build_$PRI.sh"
 			if [ $? -ne 0 ] ; then
 				exit -1;
