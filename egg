@@ -195,8 +195,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 			sync
 		else
 #if there then create output patch packet
-		packetize_all
-		print_ita "$ID  .." ".." ".."	
+		packetize_all	
 		fi	
 	done
 	ID=$((ID+1))
@@ -232,13 +231,33 @@ while [ $ID -lt $MAX_STEP ] ; do
 done
 if [ $RESULT -eq 0 ]; then 	
 	local PWD=$(pwd)
+	start_time=$(date +%s)
+	print_ita "PKT" "$PRJ" "..." 
 	cd "$IMAGES/$PRJ"
+	if [  -f  $IMAGES/$PRJ.tar.bz2  ]; then  
+		rm $IMAGES/$PRJ.tar.bz2 
+	fi
 	tar -cjSf $IMAGES/$PRJ.tar.bz2   .
-	cd ..
-	print_ita "PKT" "$PRJ" "..." $(getFileSize "$PRJ.tar.bz2" )
-	cd "$PWD"	
+	md5sum $IMAGES/$PRJ.tar.bz2 > $IMAGES/$PRJ.tar.bz2.md5
+	cd $PWD
+	ID=0;
+	while [ $ID -lt $MAX_STEP ] ; do
+		prepare_seq_priority $ID
+		for V in $SORTREQ; do
+			V=$(echo $V  | sed -e 's/%/   /g')
+			PRI=$(echo $V | awk '{print $1}')
+			NAME=$(echo $V | awk '{print $2}')"_$ID"
+			PRJ=$(echo $V | awk '{print $3}')
+			rm -rf $BUILD/$PRJ/$NAME/build
+			mkdir -p $BUILD/$PRJ/$NAME/build
+		done
+		ID=$((ID+1))
+	done
+	stop_time=$(date +%s)
+	total_time=$((stop_time-start_time))
+	print_ita "$PRJ.tar.bz2"  "$(getFileSize $IMAGES/$PRJ.tar.bz2 ) Bytes"  "$total_time sec"
 else
-	error_c "$PRJ contain packeges non in builded status" " project $NAME" 
+	error_c "$PRJ contain packeges not in ready to packetize " " project $NAME" 
 fi
 print_del_ita
 }
