@@ -1166,7 +1166,7 @@ if [ -f $REPO/conf.egg ]; then
 			if [ "$VALUE" ]; then 	
 				if [ "$VAR" == "INFO" ]
 				then
-					info_c "VALUE"
+					info_c "$VALUE"
 				else				
 					print_ita "Set " "$VAR" "$VALUE"
 					eval $VAR='$VALUE'

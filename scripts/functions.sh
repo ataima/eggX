@@ -77,11 +77,7 @@ print_del_ita
 #$1   s...S10
 function info_c(){
 print_del_ita
-local II
-for II in $@ 
-	do
-	print_c "$WHITE" $II 
-	done
+print_c "$WHITE" "$@" 
 print_del_ita
 }
 
