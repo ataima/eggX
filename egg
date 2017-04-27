@@ -194,11 +194,53 @@ while [ $ID -lt $MAX_STEP ] ; do
 			fi
 			sync
 		else
+#if there then create output patch packet
+		packetize_all
 		print_ita "$ID  .." ".." ".."	
 		fi	
 	done
 	ID=$((ID+1))
 done
+}
+
+
+#none
+function packetize_all(){
+local ID=0 
+local V=""
+local PRI=""
+local NAME=""
+local PRJ=""
+local STATUS=0
+local RESULT=0
+while [ $ID -lt $MAX_STEP ] ; do
+	prepare_seq_priority $ID
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		PRI=$(echo $V | awk '{print $1}')
+		NAME=$(echo $V | awk '{print $2}')"_$ID"
+		PRJ=$(echo $V | awk '{print $3}')
+		if [[ $(getFileSize "$BUILD/$PRJ/$NAME/status") != "0" ]]; then
+			STATUS=$(cat "$BUILD/$PRJ/$NAME/status")
+			if [ $STATUS -ne 2 ]; then
+				RESULT=1
+				break
+			fi
+		fi
+	done
+	ID=$((ID+1))
+done
+if [ $RESULT -eq 0 ]; then 	
+	local PWD=$(pwd)
+	cd "$IMAGES/$PRJ"
+	tar -cjSf $IMAGES/$PRJ.tar.bz2   .
+	cd ..
+	print_ita "PKT" "$PRJ" "..." $(getFileSize "$PRJ.tar.bz2" )
+	cd "$PWD"	
+else
+	error_c "$PRJ contain packeges non in builded status" " project $NAME" 
+fi
+print_del_ita
 }
 
 #none
@@ -223,7 +265,6 @@ while [ $ID -lt $MAX_STEP ] ; do
 			if [ $? -ne 0 ] ; then
 				exit -1;
 			fi
-			sync
 		fi
 	done
 	ID=$((ID+1))
@@ -251,7 +292,6 @@ while [ $ID -lt $MAX_STEP ] ; do
 			if [ $? -ne 0 ] ; then
 				exit -1;
 			fi
-			sync
 		fi
 	done
 	ID=$((ID+1))
@@ -279,16 +319,17 @@ while [ $ID -lt $MAX_STEP ] ; do
 			if [ $? -ne 0 ] ; then
 				exit -1;
 			fi
-			sync
 		fi
 	done
 	ID=$((ID+1))
 done
 }
 
-
+#$1 function to execute
+#$2 ID step build
+#$3 ... SN projects
 #$@ from argv build.sh
-function build_single(){
+function exec_single(){
 #trovo nomi build per ogni progetto
 local ID=0
 local PRJ_NAMES=""
@@ -296,14 +337,20 @@ local PRI=""
 local NAME=""
 local PRJ=""
 local SEQ=""
-isNumber $1
-if [ $? -ne 0 ]; then
-   error_c "$1 : Input step isn't a number !!"
+local FUNCTION=""
+if [ ! "$1" ]; then
+	error_c "Input missing function to execute  !!"
 fi
-ID=$1
-if [ ! "$2" ]; then
+FUNCTION="$1  "
+isNumber $2
+if [ $? -ne 0 ]; then
+   error_c "$2 : Input step isn't a number !!"
+fi
+ID=$2
+if [ ! "$3" ]; then
 	error_c "Input missing project  !!"
 fi
+shift
 shift
 # set -x ; trap read debug
 
@@ -325,168 +372,94 @@ for V in $PRJ_NAMES; do
 		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
 		PRJ=$(echo $SEQ | awk '{print $3}')
 		if [ -d "$BUILD/$V/$NAME" ]; then
-			print_build_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$V/$NAME"
-			"$BUILD/$V/$NAME/clean.sh"
-			"$BUILD/$V/$NAME/bootstrap.sh"
-			if [ $? -ne 0 ] ; then
-				exit -1;
-			fi
-			"$BUILD/$V/$NAME/build_$PRI.sh"
-			if [ $? -ne 0 ] ; then
-				exit -1;
-			fi
-			sync
+			$FUNCTION   "$PRI" "$NAME" "$PRJ" "$BUILD/$V/$NAME"
 		fi
 	done 
 done
+}
 
+function exec_build(){
+local PRI=$1
+local NAME=$2
+local PRJ=$3
+local PATH=$4
+print_build_msg "$PRI" "$NAME" "$PRJ"
+cd "$PATH"
+"$PATH/clean.sh"
+"$PATH/bootstrap.sh"
+if [ $? -ne 0 ] ; then
+	exit -1;
+fi
+"$PATH/build_$PRI.sh"
+if [ $? -ne 0 ] ; then
+	exit -1;
+fi
+}
+
+#$@ from argv build.sh
+function build_single(){
+local ARGV="$@"
+exec_single "exec_build" $ARGV
+}
+
+function exec_compile(){
+local PRI=$1
+local NAME=$2
+local PRJ=$3
+local PATH=$4
+print_build_msg "$PRI" "$NAME" "$PRJ"
+cd "$PATH"
+"$PATH/build_$PRI.sh"
+if [ $? -ne 0 ] ; then
+	exit -1;
+fi
 }
 
 #$@ from argv build.sh
 function compile_single(){
-#trovo nomi build per ogni progetto
-local ID=0
-local PRJ_NAMES=""
-local PRI=""
-local NAME=""
-local PRJ=""
-local SEQ=""
-isNumber $1
+local ARGV="$@"
+exec_single "exec_compile" $ARGV
+}
+
+
+function exec_clean(){
+local PRI=$1
+local NAME=$2
+local PRJ=$3
+local PATH=$4
+print_clean_msg "$PRI" "$NAME" "$PRJ"
+cd "$PATH"
+"$PATH/clean.sh"
 if [ $? -ne 0 ] ; then
-   error_c "$1 : Input step isn't a number !!"
+	exit -1;
 fi
-ID=$1
-if [ ! "$2" ]; then
-	error_c "Input missing project  !!"
-fi
-shift
-for V in $@; do
-	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
-done
-local PWD=$(pwd)
-prepare_seq_priority $ID
-for V in $PRJ_NAMES; do
-	for I in $@; do
-		for T in $SORTREQ; do
-			SEQ=$(echo $T | grep $V | grep $I )
-				if [ "$SEQ" != "" ]; then 
-					break;
-				fi
-		done
-		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
-		PRI=$(echo $SEQ | awk '{print $1}')
-		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
-		PRJ=$(echo $SEQ | awk '{print $3}')
-		if [ -d "$BUILD/$V/$NAME" ]; then
-			print_build_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$V/$NAME"
-			"$BUILD/$V/$NAME/build_$PRI.sh"
-			if [ $? -ne 0 ] ; then
-				exit -1;
-			fi
-			sync
-		fi
-	done 
-done
 }
 
-
 #$@ from argv build.sh
-# 0 gcc linux input step + project/s
 function clean_single(){
-#set -x ; trap read debug
-#trovo nomi build per ogni progetto
-local ID=0
-local PRJ_NAMES=""
-local PRI=""
-local NAME=""
-local PRJ=""
-local SEQ=""
-isNumber $1
-if [ $? -ne 0 ]; then
-   error_c "$1 : Input step isn't a number !!"
-fi
-ID=$1
-if [ ! "$2" ]; then
-	error_c "Input missing project  !!"
-fi
-shift
-for V in $@; do
-	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
-done
-local PWD=$(pwd)
-prepare_seq_priority $ID
+local ARGV="$@"
+exec_single "exec_clean" $ARGV
+}
 
-for V in $PRJ_NAMES; do
-	for I in $@; do
-		for T in $SORTREQ; do
-			SEQ=$(echo $T | grep $V | grep $I )
-				if [ "$SEQ" != "" ]; then 
-					break;
-				fi
-		done
-		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
-		PRI=$(echo $SEQ | awk '{print $1}')
-		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
-		PRJ=$(echo $SEQ | awk '{print $3}')
-		if [ -d "$BUILD/$V/$NAME" ]; then		
-			print_clean_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$V/$NAME"
-			"$BUILD/$V/$NAME/clean.sh"
-			sync
-		fi
-	done 
-done
+function exec_distclean(){
+local PRI=$1
+local NAME=$2
+local PRJ=$3
+local PATH=$4
+print_clean_msg "$PRI" "$NAME" "$PRJ"
+cd "$PATH"
+"$PATH/distclean.sh"
+if [ $? -ne 0 ] ; then
+	exit -1;
+fi
 }
 
 #$@ from argv build.sh
-# 0 gcc linux input step + project/s
 function distclean_single(){
-#set -x ; trap read debug
-#trovo nomi build per ogni progetto
-local ID=0
-local PRJ_NAMES=""
-local PRI=""
-local NAME=""
-local PRJ=""
-local SEQ=""
-isNumber $1
-if [ $? -ne 0 ]; then
-   error_c "$1 : Input step isn't a number !!"
-fi
-ID=$1
-if [ ! "$2" ]; then
-	error_c "Input missing project  !!"
-fi
-shift
-for V in $@; do
-	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
-done
-local PWD=$(pwd)
-prepare_seq_priority $ID
-
-for V in $PRJ_NAMES; do
-	for I in $@; do
-		for T in $SORTREQ; do
-			SEQ=$(echo $T | grep $V | grep $I )
-				if [ "$SEQ" != "" ]; then 
-					break;
-				fi
-		done
-		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
-		PRI=$(echo $SEQ | awk '{print $1}')
-		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
-		PRJ=$(echo $SEQ | awk '{print $3}')
-		if [ -d "$BUILD/$V/$NAME" ]; then		
-			print_clean_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$V/$NAME"
-			"$BUILD/$V/$NAME/distclean.sh"
-			sync
-		fi
-	done 
-done
+local ARGV="$@"
+exec_single "exec_distclean" $ARGV
 }
+
 
 #$@
 function build_all_packet(){
@@ -495,7 +468,6 @@ if [ "$1" == "" ]; then
 else
 	build_single $@
 fi
-sync
 print_del_ita
 }
 
@@ -506,7 +478,6 @@ if [ "$1" == "" ]; then
 else
 	compile_single $@
 fi
-sync
 print_del_ita
 }
 
@@ -517,7 +488,6 @@ if [ "$1" == "" ]; then
 else
 	clean_single $@
 fi
-sync
 print_del_ita
 }
 
@@ -528,7 +498,6 @@ if [ "$1" == "" ]; then
 else
 	distclean_single $@
 fi
-sync
 print_del_ita
 }
 
@@ -558,7 +527,6 @@ else
 		error_c " Missing step number " "usage ./egg configure 0<-- step "
 	fi
 fi
-sync
 print_del_ita
 }
 
@@ -684,6 +652,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "edit <project nn>: edit a conf.egg file of project nn"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "reset : remove working path: $ROOT/build, $ROOT/image, $ROOT/repo, $ROOT/source "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "info : show program info..."
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "packetize : create a tar of the output "
 	exit 1
 }
 
@@ -788,6 +757,10 @@ case $i in
 	torun=show_info		
 	break
 	;;	
+	packetize)
+	torun=packetize_all		
+	break
+	;;	
 	*)
 	usage
 	error_c "Command line" " unknow option $i"
@@ -819,7 +792,6 @@ fi
 
 
 get_max_step
-
 "$torun" "$@"
 }
 
