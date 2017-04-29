@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh  
 
 if [ "$OROOT" == "" ] ; then
 	OROOT="$HOME/eggX"
@@ -297,8 +297,7 @@ function generate_setenv(){
 	echo " unset \$i" >> "$3"
 	echo "done" >> "$3"
 	echo "#done unset all" >> "$3"
-	echo "#current platform : from gcc dumpmachine" >> "$3"	
-	echo "export NATIVE=$(/usr/bin/gcc -dumpmachine)" >> "$3"
+
 	echo "#current project" >> "$3"	
 	echo "export PROJECT=$1" >> "$3"
 	echo "#current sources for projects" >> "$3"	
@@ -350,7 +349,9 @@ function generate_setenv(){
 	echo "#current STRIP this project">> "$3"
 	echo "export STRIP=$STRIP" >> "$3"
 	echo "#current PATH this project">> "$3"
-	echo "export PATH=$MYPATH" >> "$3"	
+	echo "export PATH=$MYPATH" >> "$3"		
+	echo "#current platform : from current path and gcc dumpmachine" >> "$3"	
+	echo "export NATIVE=\$(gcc -dumpmachine)" >> "$3"
 }
 
 #$1 project
@@ -407,8 +408,7 @@ function prepare_script_generic(){
 local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
 LINE=$((LINE-1))
 head $SCRIPT_DIR/functions.sh -n $LINE >> "$4"
-echo "source $BUILD/$5/$1_$2/setenv.sh">> "$4"
-echo "">> "$4"
+#echo "set -x">> "$4"
 echo "">> "$4"
 echo "function getbuildstatus(){">> "$4"
 echo "local VV=\$(cat \$STATUS)">> "$4"
@@ -432,6 +432,7 @@ echo "esac">>"$4"
 echo "}">> "$4"
 echo "">> "$4"
 echo "">> "$4"
+echo "source $BUILD/$5/$1_$2/setenv.sh">> "$4"
 if [ $6 -ne 1000 ]
 then
 	echo "getbuildstatus" >> "$4"
@@ -441,11 +442,12 @@ then
 	echo "	exit 0" >> "$4"
 	echo "fi" >> "$4"
 	echo "if [ \$RES -ne $6 ]; then " >> "$4"
-	echo "	error_c \"Build status error: current \$RES - request $6\" \"project  - $1\"" >> "$4"
+	echo "	error_c \"Build status error: current \$RES - request $6\" \"project : $1\"" >> "$4"
 	echo "fi" >> "$4"
 	echo "">> "$4"
 	echo "">> "$4"
 fi
+
 echo "PWD=\$(pwd)">> "$4"
 echo "cd \$BUILD" >> "$4"
 echo "" >> "$4"
@@ -647,6 +649,50 @@ echo "    error_c \"Configure return error: \$RES \" \"  - project : \$PROJECT s
 echo "fi" >> $3 
 }
 
+
+
+
+
+
+#$1 project
+#$2 step id
+#$3 path build
+#$4 build name
+#$5 silent
+#$6 thread //max
+#$7 make index 
+#s8 build file
+function add_rules_build(){
+local NUM_R=0
+local II=0
+xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule"
+	NUM_R=$?
+	if [ $NUM_R -ne 0 ]; then
+		II=0
+		while  [  $II -lt $NUM_R  ];  do
+			NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$II\"]/name")	
+			equs "$NAME"  
+			if [ $? -eq 1 ]; then 
+				error_c "Missing  make rule name id=$i Phase $2" "project : $1"
+			fi
+			THREAD=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$II\"]/thread")
+			equs "$THREAD"  
+			if [ $? -eq 0 ]; then 
+				if  [  $THREAD -gt $6 ] ; then 
+					THREAD="$6"
+				fi
+			else
+				THREAD="$6"	
+			fi						
+			add_pre_build "$1" "$2" "$8" "$3" "$4" "$II" "$7"
+			add_entry_in_main_build_script "$1" "$3"  "$8" "$5" "$THREAD" "$6" "$NAME"
+			add_post_build "$1" "$2" "$8" "$3" "$4" "$II" "$7"
+			II=$((II+1))
+		done 
+	fi
+}
+
+
 #$1 project
 #$2 step id
 #$3 path build
@@ -692,36 +738,9 @@ if [ $? -eq 1 ]; then
 					echo "declare -i start_time">> "$SH_BUILD"
 					echo "declare -i stop_time">> "$SH_BUILD"
 					echo "declare -i total_time">> "$SH_BUILD"
-					add_depend_build "$1" "$2" "$UU" "$SH_BUILD"
-					add_rules_build "$1" "$2" "$UU" "$SH_BUILD"
-					#set -x ; trap read debug		
-					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$UU\"]/rule"
-					NUM_R=$?
-					if [ $NUM_R -ne 0 ]; then
-						II=0
-						while  [  $II -lt $NUM_R  ];  do
-							NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$UU\"]/rule[@id=\"$II\"]/name")	
-							equs "$NAME $i"  
-							if [ $? -eq 1 ]; then 
-								error_c "Missing  make rule name id=$i Phase $2" "project : $1"
-							fi
-							THREAD=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$UU\"]/rule[@id=\"$II\"]/thread")
-							equs "$THREAD"  
-							if [ $? -eq 0 ]; then 
-								if  [  $THREAD -gt $6 ] ; then 
-									THREAD="$6"
-								fi
-							else
-								THREAD="$6"	
-							fi						
-							add_pre_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$II" "$UU"
-							add_entry_in_main_build_script "$1" "$3"  "$SH_BUILD" "$5" "$THREAD" "$6" "$NAME"
-							add_post_build "$1" "$2" "$SH_BUILD" "$3" "$4" "$II" "$UU"
-							II=$((II+1))
-						done 
-					fi	
-					UU=$((UU+1))
-					end_script_generic "$1" "$2" "done  build " "$SH_BUILD"
+					add_rules_build "$1" "$2" "$3" "$4" "$5" "$6" "$UU" "$SH_BUILD"					
+					end_script_generic "$1" "$2" "done  build " "$SH_BUILD"					
+					UU=$((UU+1))					
 				done	
 			fi
 		fi
@@ -849,7 +868,7 @@ end_script_generic "$1" "$2" "done  rebuild " "$SH_REBUILD"
 #$5 silent
 #$6 thread
 function add_build_script(){
-generate_setenv "$1" "$2" "$3/setenv.sh" "$4" 
+generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5"
 generate_clean_rule $@
 generate_distclean_rule $@ 
 generate_build_rules $@
@@ -1008,7 +1027,7 @@ else
 	echo "make -C \$BUILD  -j$5 $7 ">> "$3"
 fi
 echo "if [ \$? -ne 0 ]; then">> "$3"
-echo "    error_c \"Error on build \" \"  - project $1\"" >>"$3"
+echo "    error_c \"Error on build \" \"project : $1\"" >>"$3"
 echo "fi"  >> "$3"
 echo "stop_time=\$(date +%s)">> "$3" 
 echo "total_time=\$((stop_time-start_time))">> "$3" 
@@ -1119,7 +1138,7 @@ else
 						echo  "#no configure is needed .... ">> $C_FILE
 					else
 						#to add Makefile check
-						error_c "Configure script or Makefile missing" "  - project $1"
+						error_c "Configure script or Makefile missing" "project : $1"
 					fi
 				fi
 			fi

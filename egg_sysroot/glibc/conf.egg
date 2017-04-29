@@ -58,10 +58,7 @@
 							<value>touch $DEPLOY/$CROSS/include/gnu/stubs.h</value>
 						</post>
 					</rule>					
-					<rule id="2">						
-						<name></name> 						
-					</rule>
-					<rule id="3">
+					<rule id="2">
 						<name>install</name> 
 						<thread>1</thread>	
 					</rule>										

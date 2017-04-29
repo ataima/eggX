@@ -22,7 +22,7 @@ REPLACE=" -e \E[0m"
 
 
 
-
+#PUBLIC FUNCTION EXPORTED TO ALL GENERATED SCRIPTS 
 #$1 color
 #$2   string
 function print_c(){
@@ -57,7 +57,15 @@ print_s_ita "$1" "$2" "$3"
 function error_c(){
 print_del_ita
 print_c "$RED_LIGHT" "ERROR : " "$BLUE_LIGHT" " - $1" 
-print_c "$YELLOW" "   -  $2" "$BLUE_LIGHT" "$3"
+if [ "$2" ]; then
+	print_c "$WHITE" "	>"  "$YELLOW" " - $2" 
+	if [ "$3" ]; then
+		print_c "$WHITE" "	>"  "$YELLOW" " - $4" 
+		if [ "$4" ]; then
+			print_c "$WHITE" "	>"  "$YELLOW" " - $4" 
+		fi
+	fi
+fi
 print_del_ita
 exit 1
 }
@@ -81,7 +89,79 @@ print_c "$WHITE" "$@"
 print_del_ita
 }
 
+
+#$1 full filename
+function check_exist(){
+if  [ -e "$1" ] && [ -f "$1" ] ; then 
+	return 0
+fi
+return 1
+}
+############################## FUNCTION TO USE IN conf.egg to CHECK ....
+#$1 file to execute 
+#$2 string to compare
+function check_version(){
+if [ $# -ne 2 ]; then 
+	error_c "Missing parameter on call check_version" "$1 $(basename "$0")"
+fi
+local VV=$(which $1)
+if [ ! "$VV" ]; then
+	error_c "which $1 fail, PATH : $PATH" "$1 $(basename "$0")"
+fi
+local VERSION=`$1 --version `
+if [ $? -ne 0 ]; then 
+	error_c "Request $1 --version Fail!" "$1 $(basename "$0")"
+fi
+if [ ! "$(echo $VERSION | grep $2)" ]; then
+	error_c "Request $1 : $2 !=$VERSION" "$1 $(basename "$0")"
+fi
+return 0
+}
+
+
+#$1 projects name  
+#$2 step phase
+#$3 build value 0 to configure 1 to build 2 is stable ( configured + builded +installed )
+function check_build_status(){
+local RES=0
+if [ $# -ne 3 ]; then 
+	error_c "Missing parameter on call checck_build_status" "$1_$2 $(basename "$0")"
+fi
+check_exist "$BUILDS/$1_$2/status"
+if [ $? -eq 1 ]; then
+	error_c "File $BUILDS/$1_$2/status not exist!" "$1_$2 $(basename "$0")"
+fi
+local ST=$(cat $BUILDS/$1_$2/status)
+if [ $ST -ne $3 ]; then
+	error_c "Request $1_$2 Status : $3 != $ST " "$1_$2 $(basename "$0")"
+fi
+return 0
+}
+
+
+#$1 projects name  
+#$2 step phase
+function check_depend(){
+check_build_status $1 $2 2
+}
+
+#$1 file name
+function check_file_exist(){
+if [ $# -ne 1 ]; then 
+	error_c "Missing parameter on call build_status" " $(basename "$0")"
+fi
+check_exist $1
+if [ $? -ne 0 ]; then 
+	error_c "File $1 not exist!" " $(basename "$0")"
+fi
+return 0
+}
+
+
+
 #COPYTODEFAULTSCRIPT DO NOT REMOVE MARK TO COPY FUNCTION.Sh IN default_script
+
+#PRIVATE FUNCTION 
 
 # $1  string 
 # $2  string

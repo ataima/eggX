@@ -258,7 +258,7 @@ if [ $RESULT -eq 0 ]; then
 	total_time=$((stop_time-start_time))
 	print_ita "$PRJ.tar.bz2"  "$(getFileSize $IMAGES/$PRJ.tar.bz2 ) Bytes"  "$total_time sec"
 else
-	error_c "$PRJ contain packeges not in ready to packetize " " project $NAME" 
+	error_c "$PRJ contain packeges not in ready to packetize " "project : $NAME" 
 fi
 print_del_ita
 }
@@ -567,18 +567,24 @@ if [ ! "$2" ]; then
 fi
 if [ $NUM -lt $MAX_STEP ]; then
 	prepare_seq_priority $NUM
+	if [ ! $SORTREQ ]; then
+		error_c "Step $1 for project $2 not configured!" "project : $2"
+	fi
 	for i in $SORTREQ; do
 		V=$(echo $i  | sed -e 's/%/   /g')
+		echo "-->$V"
 		NAME=$( echo $V | awk '{print $2}' )
 		if [ "$NAME" == "$2" ]; then			
 			PRJ=$( echo $V | awk '{print $3}' )
 			break;
 		fi
 	done
+	if [ $PRJ ]; then
 	V=$(pwd)
 	cd "$BUILD/$PRJ/$2_$1"
 	bash --init-file $BUILD/$PRJ/$2_$1/setenv.sh
 	cd $V	
+	fi
 else
 	error_c "Input step too BIG !!"
 fi
