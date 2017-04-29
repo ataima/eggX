@@ -691,7 +691,9 @@ if [ $? -eq 1 ]; then
 					prepare_script_generic "$1" "$2" "Start build " "$SH_BUILD" "$4" 1 "build"
 					echo "declare -i start_time">> "$SH_BUILD"
 					echo "declare -i stop_time">> "$SH_BUILD"
-					echo "declare -i total_time">> "$SH_BUILD"	
+					echo "declare -i total_time">> "$SH_BUILD"
+					add_depend_build "$1" "$2" "$UU" "$SH_BUILD"
+					add_rules_build "$1" "$2" "$UU" "$SH_BUILD"
 					#set -x ; trap read debug		
 					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$UU\"]/rule"
 					NUM_R=$?
@@ -789,7 +791,6 @@ echo "cd \$PWD " >> "$SH_DISTCLEAN"
 echo "rm -rf \$BUILD\* " >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
-echo "chmod 666 \$STATUS">>"$4"
 echo "setbuildstatus 0">> "$SH_DISTCLEAN"
 end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
 }

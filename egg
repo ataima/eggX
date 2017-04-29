@@ -249,6 +249,7 @@ if [ $RESULT -eq 0 ]; then
 			NAME=$(echo $V | awk '{print $2}')"_$ID"
 			PRJ=$(echo $V | awk '{print $3}')
 			rm -rf $BUILD/$PRJ/$NAME/build
+			rm -rf $BUILD/$PRJ/$NAME/*.log
 			mkdir -p $BUILD/$PRJ/$NAME/build
 		done
 		ID=$((ID+1))
