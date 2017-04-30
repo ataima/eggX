@@ -567,12 +567,11 @@ if [ ! "$2" ]; then
 fi
 if [ $NUM -lt $MAX_STEP ]; then
 	prepare_seq_priority $NUM
-	if [ ! $SORTREQ ]; then
+	if [ "$SORTREQ" == "" ]; then
 		error_c "Step $1 for project $2 not configured!" "project : $2"
 	fi
 	for i in $SORTREQ; do
 		V=$(echo $i  | sed -e 's/%/   /g')
-		echo "-->$V"
 		NAME=$( echo $V | awk '{print $2}' )
 		if [ "$NAME" == "$2" ]; then			
 			PRJ=$( echo $V | awk '{print $3}' )
@@ -821,5 +820,13 @@ get_max_step
 "$torun" "$@"
 }
 
+function legal(){
+print_c "$WHITE" "Copyright (C) 2017 Angelo Coppi. <angelogkcop@hotmail.com>"
+print_c "$GREEN" "This is free software; see the LICENSE file for copying conditions."
+print_c "$GREEN" "There is NO warranty; not even for MERCHANTABILITY or FITNESS "
+print_c "$GREEN" "FOR A PARTICULAR PURPOSE."
+}
 
+
+legal
 main "$@"

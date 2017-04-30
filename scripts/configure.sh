@@ -671,10 +671,11 @@ xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule"
 		II=0
 		while  [  $II -lt $NUM_R  ];  do
 			NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$II\"]/name")	
-			equs "$NAME"  
-			if [ $? -eq 1 ]; then 
-				error_c "Missing  make rule name id=$i Phase $2" "project : $1"
-			fi
+			#NAME can be empty for do make ...
+			#equs "$NAME"  
+			#if [ $? -eq 1 ]; then 
+			#	error_c "Missing  make rule name id=$i Phase $2" "project : $1"
+			#fi
 			THREAD=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$II\"]/thread")
 			equs "$THREAD"  
 			if [ $? -eq 0 ]; then 
@@ -1165,6 +1166,7 @@ print_ita "STEP : $2:$3" "$1"  "configured done !"
 #$2 build phase number 0,1,2.....
 #$3 make priority
 function configure_packet(){
+echo "--> $@"
 manage_path_pre  $1  $2
 create_configure_cmd "$1" "$2" "$3"
 manage_path_post $1  $2

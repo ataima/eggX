@@ -12,7 +12,7 @@
 	<defaults>
 		<step id="0">
 			<step_name>egg_sysroot</step_name>
-			<info>First step to create a gcc native at laste version to build all packets</info>
+			<info>First step to create a gcc native at last version to build all packets</info>
 			<cc></cc>
 			<cxx></cxx>
 			<as></as>
