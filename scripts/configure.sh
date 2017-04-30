@@ -397,6 +397,16 @@ fi
 return $VV
 }
 
+#$1 file to create rewrite
+function prepare_script_head(){
+local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
+LINE=$((LINE-1))
+head $SCRIPT_DIR/functions.sh -n $LINE > "$1"
+echo "">> "$1"
+echo "">> "$1"
+}
+
+
 #$1 projects
 #$2 Step
 #$3 title to echo...
@@ -405,11 +415,7 @@ return $VV
 #$6 status to check value else exit :if $6=1000 don't check
 #$7 msg in stable mode
 function prepare_script_generic(){
-local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $SCRIPT_DIR/functions.sh | sed -e 's/ /\n/g' | head -n 1)
-LINE=$((LINE-1))
-head $SCRIPT_DIR/functions.sh -n $LINE >> "$4"
-#echo "set -x">> "$4"
-echo "">> "$4"
+prepare_script_head "$4"
 echo "function getbuildstatus(){">> "$4"
 echo "local VV=\$(cat \$STATUS)">> "$4"
 echo "return \$VV">> "$4"
@@ -1160,16 +1166,110 @@ add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$SILENT" "$THREADS"
 print_ita "STEP : $2:$3" "$1"  "configured done !"
 }
 
-
+#$1 project
+#$2 build phase number 0,1,2.....
+#$3 make priority
+#$4 build name
+function create_main_scripts(){
+local FILES="bootstrap clean distclean build_$3 rebuild setenv"
+local RES=0
+local VV=""
+local FMAIN="$BUILD/$4/step_$2.sh"
+RES=$(getFileSize "$FMAIN")
+if [ $RES -eq 0 ]; then 
+	touch "$FMAIN"
+fi
+for VV in $FILES; do
+	echo "# execute $VV.sh for project $1 in folder $BUILD/$4/$1_$3">>"$FMAIN"
+	echo "function $VV""___$1 (){">>"$FMAIN"
+	echo "   $BUILD/$4/$1_$3/$VV.sh ">>"$FMAIN"
+	echo "}">>"$FMAIN"
+	echo "">>"$FMAIN"
+	echo "">>"$FMAIN"
+done
+}
 
 #$1 project
 #$2 build phase number 0,1,2.....
 #$3 make priority
+#$4 build name
+function create_main_entry(){
+local FMAIN="$BUILD/$4/step_$2.sh"
+RES=$(getFileSize "$FMAIN")
+if [ $RES -ne 0 ]; then 
+echo "#END_FUNCTION_STEP">>"$FMAIN"
+echo "">>"$FMAIN"
+echo "">>"$FMAIN"
+echo "#search from argv function to call">>"$FMAIN"
+echo "#bootstrap bash 1 call bootstrap_bash_1">>"$FMAIN"
+echo "function main (){">>"$FMAIN"
+echo "local BUILDS=\"\"">>"$FMAIN"
+echo "local VV=\"\"">>"$FMAIN"
+echo "local LINE=\"\"">>"$FMAIN"
+echo "local PRJ=\"\"">>"$FMAIN"
+echo "local SCRIPT=\"\"">>"$FMAIN"
+echo "if [ \"\$1\" == \"listall\" ]; then">>"$FMAIN"
+echo "   RES=0 ">>"$FMAIN"
+echo "	 while IFS='' read -r LINE || [[ -n \"\$LINE\" ]]; do">>"$FMAIN"
+echo "   if [ \$RES -eq 0 ]; then">>"$FMAIN"
+echo "       VV=\$(echo \$LINE | grep START_FUNCTION_STEP)">>"$FMAIN"
+echo "       if [ \"\$VV\" == \"\" ]; then">>"$FMAIN"
+echo "          continue ">>"$FMAIN"
+echo "       fi ">>"$FMAIN"
+echo "       RES=1 ">>"$FMAIN"
+echo "   fi ">>"$FMAIN"
+echo "   VV=\$(echo \$LINE | grep END_FUNCTION_STEP)">>"$FMAIN"
+echo "   if [ \"\$VV\" != \"\" ]; then">>"$FMAIN"
+echo "      break ">>"$FMAIN"
+echo "   fi ">>"$FMAIN"
+echo "   VV=\$(echo \$LINE | grep function)">>"$FMAIN"
+echo "   if [ \"\$VV\" != \"\" ]; then < \$0">>"$FMAIN"
+echo "   	VV=\$(echo \$VV | sed -e 's/function//g' | sed -e 's/(//g'| sed -e 's/)//g'| sed -e 's/{//g' | sed -e 's/___/  /g')">>"$FMAIN"
+echo "   	SCRIPT=\$(echo \$VV | awk '{print \$1}')">>"$FMAIN"
+echo "   	PRJ=\$(echo \$VV | awk '{print \$2}')">>"$FMAIN"
+echo "		print_c \"\$YELLOW\" \"function : \" \"\$GREEN_LIGHT\" \"\$SCRIPT\" \"\$WHITE\" \"\$PRJ\" ">>"$FMAIN"
+echo "   fi ">>"$FMAIN"
+echo "   done < \$0">>"$FMAIN"
+echo "   exit 0">>"$FMAIN"
+echo "fi">>"$FMAIN"
+echo "if [ \$# -ne 2 ]; then">>"$FMAIN"
+echo "    echo usage : ./step_xx.sh scripts project phase">>"$FMAIN"
+echo "    exit 1">>"$FMAIN"
+echo "fi">>"$FMAIN"
+echo "if [ \"\$1\" == \"build\" ]; then">>"$FMAIN"
+echo "    BUILDS=\$(ls $BUILD/$4/$1_$2/build_*.sh)">>"$FMAIN"
+echo "    for VV in \$BUILDS; do">>"$FMAIN"
+echo "    \$VV">>"$FMAIN"
+echo "    if [ \$? -ne 0 ]; then ">>"$FMAIN"
+echo "    	exit 1">>"$FMAIN"
+echo "    fi">>"$FMAIN"
+echo "    done">>"$FMAIN"
+echo "else">>"$FMAIN"
+echo "	 if [ \"\$1\" == \"setenv\" ]; then">>"$FMAIN"
+echo "	    cat $BUILD/$4/$1_$2/\$1.sh">>"$FMAIN"
+echo "	 else">>"$FMAIN"
+echo "      $BUILD/$4/$1_$2/\$1.sh">>"$FMAIN"
+echo "	 fi">>"$FMAIN"
+echo "fi">>"$FMAIN"
+echo "}">>"$FMAIN"
+echo "">>"$FMAIN"
+echo "">>"$FMAIN"
+echo "# main \$@ : req prj step">>"$FMAIN"
+echo "main \$@">>"$FMAIN"
+fi
+
+chmod +x "$FMAIN"
+}
+
+#$1 project
+#$2 build phase number 0,1,2.....
+#$3 make priority
+#$4 build name
 function configure_packet(){
-echo "--> $@"
 manage_path_pre  $1  $2
 create_configure_cmd "$1" "$2" "$3"
 manage_path_post $1  $2
+create_main_scripts $@
 sync
 }
 
@@ -1240,16 +1340,27 @@ fi
 for V in $PRJS; do
 	insert_packet "$V" "$ID"
 done
-read_default_for_step "$ID" "$NAME"
+read_default_for_step "$ID" 
 SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 MYPATH=$START_PATH
-for V in $SORTREQ; do
+V=${SORTREQ[0]}
+echo "--> $V"
+if [ "$V" ]; then
 	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
 	PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')
-	if [ "$PRJS" ] ; then 
-		configure_packet  "$PRJS" "$ID" "$PRI"
-	fi
-done
+	NAME=$(echo -n $V | sed 's/%/ /g' | awk '{print $3}')
+	prepare_script_head "$BUILD/$NAME/step_$ID.sh"	
+	echo "#START_FUNCTION_STEP">>"$BUILD/$NAME/step_$ID.sh"
+	for V in $SORTREQ; do
+		PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
+		PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')
+		NAME=$(echo -n $V | sed 's/%/ /g' | awk '{print $3}')
+		if [ "$PRJS" ] ; then 
+			configure_packet  "$PRJS" "$ID" "$PRI" "$NAME"
+		fi
+	done
+	create_main_entry "$PRJS" "$ID" "$PRI" "$NAME"
+fi	
 }
 
 

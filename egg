@@ -554,38 +554,63 @@ print_del_ita
 
 #$ARGV 
 # ex 0 gcc -> try step of project gcc
-function try_packet(){
+function shell_packet(){
 local PRJ=""
 local V=""
+local i=""
 local NUM=$1
 isNumber $1
 if [ $? -ne 0 ]; then
    error_c "$1 : Input step isn't a number !!"
 fi
 if [ ! "$2" ]; then
-	error_c "Input missing project  !!"
-fi
-if [ $NUM -lt $MAX_STEP ]; then
-	prepare_seq_priority $NUM
-	if [ "$SORTREQ" == "" ]; then
-		error_c "Step $1 for project $2 not configured!" "project : $2"
-	fi
-	for i in $SORTREQ; do
-		V=$(echo $i  | sed -e 's/%/   /g')
-		NAME=$( echo $V | awk '{print $2}' )
-		if [ "$NAME" == "$2" ]; then			
-			PRJ=$( echo $V | awk '{print $3}' )
-			break;
+	if [ $NUM -lt $MAX_STEP ]; then
+		prepare_seq_priority $NUM
+		if [ "$SORTREQ" == "" ]; then
+			error_c "Step $1 for project $2 not configured!" "project : $2"
 		fi
-	done
-	if [ $PRJ ]; then
-	V=$(pwd)
-	cd "$BUILD/$PRJ/$2_$1"
-	bash --init-file $BUILD/$PRJ/$2_$1/setenv.sh
-	cd $V	
-	fi
+		PRJ=${SORTREQ[0]}
+		V=$(echo $PRJ  | sed -e 's/%/   /g')
+		NAME=$( echo $V | awk '{print $3}' )
+		if [ "$NAME" == "" ]; then			
+				error_c "Step $1 unknown name!" "project : $2"
+		fi
+		print_c "$GREEN_LIGHT" "execute cd : $BUILD/$NAME"
+		print_c "$GREEN_LIGHT" "do exit to return..."
+		cp $HOME/.bashrc /tmp/egg_shellrc
+		echo "cd $BUILD/$NAME" >> /tmp/egg_shellrc
+		bash --noprofile --rcfile /tmp/egg_shellrc
+	else
+		error_c "Input step too BIG !!"
+	fi	
 else
-	error_c "Input step too BIG !!"
+	if [ $NUM -lt $MAX_STEP ]; then
+		prepare_seq_priority $NUM
+		if [ "$SORTREQ" == "" ]; then
+			error_c "Step $1 for project $2 not configured!" "project : $2"
+		fi
+		for PRJ in $SORTREQ; do
+			V=$(echo $PRJ  | sed -e 's/%/   /g')
+			NAME=$( echo $V | awk '{print $2}' )
+			if [ "$NAME" == "$2" ]; then			
+				PRJ=$( echo $V | awk '{print $3}' )
+				break;
+			fi
+		done
+		if [ $PRJ ]; then
+		#V=$(pwd)
+		print_c "$GREEN_LIGHT" "execute cd : $BUILD/$PRJ/$2_$1"
+		print_c "$GREEN_LIGHT" "do exit to return..."
+		print_c "$GREEN_LIGHT" "do source ./setenv.sh to enter in build environment"
+		cp $HOME/.bashrc /tmp/egg_shellrc
+		echo "cd $BUILD/$PRJ/$2_$1" >> /tmp/egg_shellrc
+		bash --noprofile --rcfile /tmp/egg_shellrc 
+		#cd $V	
+		set +x
+		fi
+	else
+		error_c "Input step too BIG !!"
+	fi
 fi
 }
 
@@ -734,7 +759,7 @@ case $i in
 	break
 	;;
 	shell)
-	torun=try_packet
+	torun=shell_packet
 	shift
 	break
 	;;	
