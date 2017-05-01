@@ -685,6 +685,26 @@ $SCRIPT_DIR/sources.sh
 	build_all_packet
 }
 
+
+function list_all(){
+local ID=0 
+local V=""
+local PRI=""
+local NAME=""
+local PRJ=""
+while [ $ID -lt $MAX_STEP ] ; do
+	prepare_seq_priority $ID
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		PRI=$(echo $V | awk '{print $1}')
+		NAME=$(echo $V | awk '{print $2}')"_$ID"
+		PRJ=$(echo $V | awk '{print $3}')
+		print_ita "STEP : $ID" "PRI : $PRI" "$NAME"
+	done
+	ID=$((ID+1))
+done
+}
+
 #$1 file with list of repos
 function multi_repo(){
 local PWDM=""
@@ -780,6 +800,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "info : show program info..."
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "packetize : create a tar of the output "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "multi <file.egg list of repos >: sequence building of project in list "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "listall : list current repo "
 	exit 1
 }
 
@@ -891,6 +912,10 @@ case $i in
 	;;	
 	packetize)
 	torun=packetize_all		
+	break
+	;;	
+	listall)
+	torun=list_all		
 	break
 	;;	
 	*)
