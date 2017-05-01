@@ -30,6 +30,7 @@ LD=""
 NM=""
 AR=""
 STRIP=""
+HW_ARCH=""
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
 
@@ -122,7 +123,6 @@ if [ $? -eq 1 ]; then
 						fi 
 						#optional				
 						INDEX="$PRI%$1%$NAME"
-						#echo "-->$INDEX"
 						BSEQ[$INDEX]="$INDEX"
 						ID=$((ID+1))
 					done	
@@ -271,24 +271,52 @@ fi
 
 
 #$1 project
+function getSourcePath(){
+local RES=""
+if [ -e $SOURCES/$1/configure ]; then
+	RES=$SOURCES/$1	
+else
+	if [ -e $SOURCES/$1/$1-*/configure ]; then		
+		RES=$(ls -d $SOURCES/$1/$1-* )		
+	else
+		if [ -e $SOURCES/$1/configure.ac ]; then
+			RES=$SOURCES/$1	 
+		else
+			if [ -e $SOURCES/$1/$1-*/configure.ac ]; then				
+				RES=$(ls -d $SOURCES/$1/$1-*)				
+			else
+				if [ -e $SOURCES/$1/Makefile ]; then
+					RES=$SOURCES/$1	 
+				else
+					if [ -e $SOURCES/$1/$1-*/Makefile ]; then
+						RES=$(ls -d $SOURCES/$1/$1-*)						
+					else
+						if [ -e $SOURCES/$1/Configure ]; then
+						#perl
+							RES=$SOURCES/$1 
+						else
+							if [ -e $SOURCES/$1/$1-*/Configure ]; then
+							#perl
+								RES=$(ls -d $SOURCES/$1/$1-*)									
+							fi
+						fi				
+					fi
+				fi
+			fi
+		fi
+	fi
+fi	
+echo $RES
+}
+
+
+
+#$1 project
 #$2 step id
 #$3 fileout
 #$4 build name
 function generate_setenv(){
-	local SRC=""
-	if [ -e $SOURCES/$1/$1-*/configure ]; then
-		SRC=$(ls -d $SOURCES/$1/$1-*)
-	else
-		if [ -e $SOURCES/$1/configure.ac ]; then
-			SRC=$SOURCES/$1
-		else
-			if [ -e $SOURCES/$1/$1-*/configure.ac ]; then
-				SRC=$(ls -d $SOURCES/$1/$1-*)
-			else
-				SRC=$SOURCES/$1
-			fi
-		fi
-	fi
+	local SRC=$(getSourcePath $1)	
 	echo "#!/bin/sh" > "$3"
 	echo "#unset all except $HOME ..." >> "$3"
 	ENV=$(env | sed 's/=.*//' | tr '\n' ' ' | sed -e 's/HOME//g')
@@ -314,6 +342,8 @@ function generate_setenv(){
 	echo "export IMAGES=$IMAGES" >> "$3"
 	echo "#current out this project">> "$3"
 	echo "export DEPLOY=$IMAGES/$4" >> "$3"	
+	echo "#current Hardware ARCH this machine">> "$3"
+	echo "export HW_ARCH=$HW_ARCH">> "$3"
 	echo "#current ARCH this project">> "$3"
 	echo "export ARCH=$ARCH">> "$3"
 	echo "#current CROSS this project">> "$3"
@@ -1096,6 +1126,7 @@ fi
 local C_BUILD="$BUILD/$NAME/$1_$2"
 local C_FILE="$C_BUILD/bootstrap.sh"
 local DEST="$IMAGES/$NAME"
+local SRC=$(getSourcePath $1)
 rm  -rf "$C_BUILD"
 mkdir -p "$C_BUILD"
 if [ ! -e "$DEST" ] ; then mkdir -p "$DEST"; fi
@@ -1113,45 +1144,33 @@ EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
 	echo "set -x ">> $C_FILE
 fi
-if [ -e $SOURCES/$1/configure ]; then
+if [ -e $SRC/configure ]; then
 	mkdir -p "$C_BUILD/build"
-	echo -n "$SOURCES/$1/configure ">> $C_FILE
+	echo -n "$SRC/configure ">> $C_FILE
 	add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 else
-	if [ -e $SOURCES/$1/$1-*/configure ]; then
+	if [ -e $SRC/configure.ac ]; then
+		# add <pre> autoconf...
 		mkdir -p "$C_BUILD/build"
-		AA=$(ls $SOURCES/$1/$1-*/configure )
-		echo -n "$AA  ">> $C_FILE
+		echo -n "$SRC/configure  ">> $C_FILE
 		add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 	else
-		if [ -e $SOURCES/$1/configure.ac ]; then
-			mkdir -p "$C_BUILD/build"
-			echo -n "$SOURCES/$1/configure  ">> $C_FILE
-			add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
+		if [ -e $SRC/Makefile ]; then
+			ln -s  "$SRC" "$C_BUILD/build"
+			echo  "#no configure is needed .... ">> $C_FILE
 		else
-			if [ -e $SOURCES/$1/$1-*/configure.ac ]; then
+			if [ -e $SRC/Configure ]; then
+			#perl
 				mkdir -p "$C_BUILD/build"
-				AA=$(ls $SOURCES/$1/$1-*/configure)
-				echo -n "$AA  ">> $C_FILE
+				echo -n "$SRC/Configure ">> $C_FILE
 				add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 			else
-				if [ -e $SOURCES/$1/Makefile ]; then
-					ln -s  "$SOURCES/$1" "$C_BUILD/build"
-					echo  "#no configure is needed .... ">> $C_FILE
-				else
-					if [ -e $SOURCES/$1/$1-*/Makefile ]; then
-						AA=$(ls -d $SOURCES/$1/$1-*)
-						ln -s  "$AA" "$C_BUILD/build"
-						echo  "#no configure is needed .... ">> $C_FILE
-					else
-						#to add Makefile check
-						error_c "Configure script or Makefile missing" "project : $1"
-					fi
-				fi
-			fi
-		fi
-	fi
+				error_c "Configure script or Makefile missing" "project : $1"
+			fi							
+		fi		
+	fi	
 fi	
+##
 EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
 	echo "set +x ">> $C_FILE
@@ -1344,7 +1363,6 @@ read_default_for_step "$ID"
 SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 MYPATH=$START_PATH
 V=${SORTREQ[0]}
-echo "--> $V"
 if [ "$V" ]; then
 	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
 	PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')
@@ -1401,6 +1419,7 @@ fi
 for key in $ALL_PACKETS; do MAP[$key]="$key"; done  
 # sync repo file to build path 
 rsync -ry $OREPO $REPO
+
 xml_get_env
 if [ $? -ne 0 ]; then
 	error_c "Cannot  sync work repository"

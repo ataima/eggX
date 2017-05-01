@@ -17,7 +17,7 @@ EDITOR="vim"
 CPATH=""
 C_INCLUDE_PATH=""
 CPLUS_INCLUDE_PATH=""
-
+HW_ARCH=""
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
 
@@ -193,13 +193,11 @@ while [ $ID -lt $MAX_STEP ] ; do
 				exit -1;
 			fi
 			sync
-		else
-#if there then create output patch packet
-		packetize_all	
 		fi	
 	done
 	ID=$((ID+1))
 done
+packetize_all
 }
 
 
@@ -233,10 +231,12 @@ if [ $RESULT -eq 0 ]; then
 	local PWD=$(pwd)
 	start_time=$(date +%s)
 	print_ita "PKT" "$PRJ" "..." 
-	cd "$IMAGES/$PRJ"
-	if [  -f  $IMAGES/$PRJ.tar.bz2  ]; then  
-		rm $IMAGES/$PRJ.tar.bz2 
+	V=$(getFileSize $IMAGES/$PRJ.tar.bz2)
+	if [  $V -ne 0  ]; then  
+		rm -f $IMAGES/$PRJ.tar.bz2 
+		rm -f $IMAGES/$PRJ.tar.bz2.md5
 	fi
+	cd "$IMAGES/$PRJ"
 	tar -cjSf $IMAGES/$PRJ.tar.bz2   .
 	md5sum $IMAGES/$PRJ.tar.bz2 > $IMAGES/$PRJ.tar.bz2.md5
 	cd $PWD
@@ -289,6 +289,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 	done
 	ID=$((ID+1))
 done
+packetize_all
 }
 
 #none
@@ -688,6 +689,59 @@ $SCRIPT_DIR/sources.sh
 	build_all_packet
 }
 
+#$1 file with list of repos
+function multi_repo(){
+local RES=""
+local NUM=0
+local ID=0
+local FILE=""
+local PATHS=""
+#set -x; trap read debug
+if [ $# -ne 1 ]; then
+	error_c "multi command  accept only one arg" "input file xml with repos list"
+fi 
+RES=$(getFileSize $1)
+if [ $RES -eq 0 ]; then 
+	error_c "multi command  " "input file is empty"
+fi
+xml_multi_repo_count "$1" "/multi/repo" 
+NUM=$?
+while [  $ID -lt $NUM ]; do
+	FILE=$(xml_multi_repo_value "$1" "/multi/repo[@id=\"$ID\"]")
+	if [ "$FILE" != "" ]; then
+		RES=$(ls -d "$FILE")
+		if [ "$RES" != "" ]; then 
+			RES=$(getFileSize $FILE/conf.egg)
+			if [ $RES -ne 0 ]; then
+			# ok conf.egg exist
+				PATHS=$(ls -d $FILE/*)
+				local VV
+				for VV in $PATHS; do
+					if [ -d $VV ]; then 
+						RES=$(getFileSize $VV/conf.egg)
+						if [ $RES -eq 0 ]; then
+							error_c "multi command  " "File : $VV/conf.egg empty or not exist"
+						fi
+					fi
+				done
+			else
+				error_c "multi command  " "File : $FILE/conf.egg empty or not exist"
+			fi
+		else
+			error_c "multi command  " "File : $1 repo id=$ID not is a directory"
+		fi
+	else
+		error_c "multi command  " "File : $1 repo id=$ID value missing"
+	fi
+	#ok repo valid
+	OREPO=$FILE
+	main redoall
+	ID=$((ID+1))	
+done	
+}
+
+
+
 function usage(){
 	print_c "$BLUE_LIGHT" "usage : ./build.sh <-D> command  <args to pass subcommand>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
@@ -703,6 +757,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "reset : remove working path: $ROOT/build, $ROOT/image, $ROOT/repo, $ROOT/source "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "info : show program info..."
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "packetize : create a tar of the output "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "multi <file.egg list of repos >: sequence building of project in list "
 	exit 1
 }
 
@@ -787,7 +842,12 @@ case $i in
 	torun=clean_all_packet
 	shift
 	break
-	;;	
+	;;
+	multi)
+	torun=multi_repo
+	shift
+	break
+	;;		
 	distclean)
 	torun=distclean_all_packet
 	shift
@@ -822,15 +882,18 @@ fi
 
 
 
+
 #set log to download
 if [ ! -d $ROOT ]; then 
 	mkdir -p $ROOT
 fi
 
-
 # sync repo file to build path 
 rsync -ry $OREPO $REPO
+
 xml_get_env 
+
+
 
 
 #sort project in repo to bin search

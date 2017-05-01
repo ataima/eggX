@@ -250,11 +250,29 @@ fi
 return $RES
 }
 
+#$1 file 
+#$2 xml node
+#return num node match
+function xml_multi_repo_count(){
+declare -i RES=0
+RES=$(xmlstarlet sel -t  -v "count($2)" -n $1)
+return $RES
+}
+
+#$1 file 
+#$2 xml node
+#return num node match
+function xml_multi_repo_value(){
+local VALUE=""
+VALUE=$(xmlstarlet sel -t  -v "$2" -n $1)
+echo $VALUE
+}
 
 #$1 project
 #$2 xml node
 #return num node match
 function xml_get_env(){
+HW_ARCH=$(arch)
 local MAINFILE="$REPO/conf.egg"
 declare -A XNAME="root  repo sources images store repobackup build editor \
 				 start_path"
