@@ -1,0 +1,11 @@
+<multi>
+	<repo id="0">
+		sysroot_repo
+	</repo>
+	<repo id="1">
+		arm-none-tools-repo
+	</repo>
+	<repo id="2">
+		arm-linux-tools-repo
+	</repo>
+</multi>
