@@ -101,8 +101,10 @@ if [  "$tmp" != "0"  ]; then
 	else
 		print_c "$RED_LIGHT" "   - SIG check  FAIL :$2" "$YELLOW" $3	
 			rm -f  "$1.$4"
-			check_pgp $@
-#			rm -f "$1"
+			RES=$?
+			if [ $RES -ne 1 ]; then
+				RES=8
+			fi 
 	fi
 else
 	rm -f  "$1.$4"
@@ -262,7 +264,11 @@ if [ -e "$1.sig" ] || [ -e "$1.sign" ] || [ -e "$1.asc" ]; then
 		print_ita "Key sign"  "$3" "...OK!"	
 	else
 		print_c "$RED_LIGHT" "   - SIG check  FAIL :$2" "$YELLOW" $3	
-			rm -f  "$1.$4"
+			rm -f  "$1.$4"						
+			RES=$?
+			if [ $RES -ne 1 ]; then
+				RES=8
+			fi 
 	fi
 else
 	if [ -e "$1.md5" ]; then

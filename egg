@@ -22,13 +22,9 @@ HW_ARCH=""
 source "$SCRIPT_DIR/functions.sh"
 
 
-
-declare -A MAP    
-
-declare -A BSEQ    
+   
 declare -A SORTREQ
 
-ALL_PACKETS=$(ls $OROOT/repo  | sed 's/conf.egg//g')
 
 declare -i MAX_STEP=0
 
@@ -691,9 +687,10 @@ $SCRIPT_DIR/sources.sh
 
 #$1 file with list of repos
 function multi_repo(){
+local PWDM=""
 local RES=""
-local NUM=0
-local ID=0
+local NUMM=0
+local IDM=0
 local FILE=""
 local PATHS=""
 #set -x; trap read debug
@@ -705,9 +702,9 @@ if [ $RES -eq 0 ]; then
 	error_c "multi command  " "input file is empty"
 fi
 xml_multi_repo_count "$1" "/multi/repo" 
-NUM=$?
-while [  $ID -lt $NUM ]; do
-	FILE=$(xml_multi_repo_value "$1" "/multi/repo[@id=\"$ID\"]")
+NUMM=$?
+while [  $IDM -lt $NUMM ]; do
+	FILE=$(xml_multi_repo_value "$1" "/multi/repo[@id=\"$IDM\"]")
 	if [ "$FILE" != "" ]; then
 		RES=$(ls -d "$FILE")
 		if [ "$RES" != "" ]; then 
@@ -728,16 +725,41 @@ while [  $ID -lt $NUM ]; do
 				error_c "multi command  " "File : $FILE/conf.egg empty or not exist"
 			fi
 		else
-			error_c "multi command  " "File : $1 repo id=$ID not is a directory"
+			error_c "multi command  " "File : $1 repo id=$IDM not is a directory"
 		fi
 	else
-		error_c "multi command  " "File : $1 repo id=$ID value missing"
+		error_c "multi command  " "File : $1 repo id=$IDM value missing"
 	fi
 	#ok repo valid
-	OREPO=$FILE
-	main redoall
-	ID=$((ID+1))	
+	print_ita "REPO : ID=$IDM" "$FILE" "OK"
+	IDM=$((IDM+1))	
 done	
+print_c "$YELLOW"  "Continue ? [s,n]"
+read -r
+RES=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
+if [ "$RES" == "S" ]; then 
+	IDM=0
+	PWDM=$(pwd)
+	while [  $IDM -lt $NUMM ]; do
+		cd "$PWDM"
+		rm -rf $SOURCES
+		sync
+		rm -rf $REPO
+		sync
+		rm -rf $BUILD
+		sync
+		FILE=$(xml_multi_repo_value "$1" "/multi/repo[@id=\"$IDM\"]")
+		rm -f $OROOT/repo
+		sync
+		ln -s $FILE $OROOT/repo
+		sync
+		main redoall		
+		if [ $? -ne 0 ] ; then 
+		exit 1
+		fi		
+		IDM=$((IDM+1))	
+	done
+fi
 }
 
 
@@ -897,6 +919,11 @@ xml_get_env
 
 
 #sort project in repo to bin search
+ALL_PACKETS=$(ls $OROOT/repo  | sed 's/conf.egg//g')
+
+unset MAP
+declare -A MAP    
+
 for key in $ALL_PACKETS; do MAP[$key]="$key"; done  
 
 if [ $? -ne 0 ]; then

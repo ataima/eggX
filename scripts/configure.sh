@@ -36,12 +36,10 @@ source "$SCRIPT_DIR/functions.sh"
 
 
 
-declare -A MAP    
-
-declare -A BSEQ    
+ 
 declare -A SORTREQ
 
-ALL_PACKETS=$(ls $OROOT/repo  | sed 's/conf.egg//g')
+
 
 # test if exist project <name> from packets list...
 # $1 packet name
@@ -1355,7 +1353,8 @@ if [ "$#" -eq  0 ]; then
 else
 	PRJS=$@
 fi
-
+unset BSEQ
+declare -A BSEQ
 for V in $PRJS; do
 	insert_packet "$V" "$ID"
 done
@@ -1367,6 +1366,9 @@ if [ "$V" ]; then
 	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
 	PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')
 	NAME=$(echo -n $V | sed 's/%/ /g' | awk '{print $3}')
+	if [ ! -e "$BUILD/$NAME" ]; then
+		mkdir -p "$BUILD/$NAME"
+	fi
 	prepare_script_head "$BUILD/$NAME/step_$ID.sh"	
 	echo "#START_FUNCTION_STEP">>"$BUILD/$NAME/step_$ID.sh"
 	for V in $SORTREQ; do
@@ -1416,6 +1418,9 @@ if [ "$ARGV" == "" ]; then
 fi
 
 #sort project in repo to bin search
+ALL_PACKETS=$(ls $OROOT/repo  | sed 's/conf.egg//g')
+unset MAP
+declare -A MAP     
 for key in $ALL_PACKETS; do MAP[$key]="$key"; done  
 # sync repo file to build path 
 rsync -ry $OREPO $REPO
