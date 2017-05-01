@@ -21,7 +21,7 @@ HW_ARCH=""
 # include io functions
 source "$SCRIPT_DIR/functions.sh"
 
-
+declare -i NOPKT=0
    
 declare -A SORTREQ
 
@@ -206,6 +206,9 @@ local NAME=""
 local PRJ=""
 local STATUS=0
 local RESULT=0
+if [ $NOPKT -eq 1 ];then 
+	return 0
+fi
 while [ $ID -lt $MAX_STEP ] ; do
 	prepare_seq_priority $ID
 	for V in $SORTREQ; do
@@ -685,7 +688,7 @@ $SCRIPT_DIR/sources.sh
 	build_all_packet
 }
 
-
+# $1 optional 
 function list_all(){
 local ID=0 
 local V=""
@@ -704,6 +707,16 @@ while [ $ID -lt $MAX_STEP ] ; do
 	ID=$((ID+1))
 done
 }
+
+
+#$1 new repo to set repo
+function set_repo(){
+rm -f $OROOT/repo
+ln -s $1 $OROOT/repo
+sync
+main listall
+}
+
 
 #$1 file with list of repos
 function multi_repo(){
@@ -843,12 +856,17 @@ function default_do(){
 #$1 build id number
 function main(){
 local torun=default_do
+NOPKT=0
 if [ $# -ne 0 ]; then
 for i in $@; do
 case $i in 
 	-D|--debug)
 	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 	set -x
+	shift
+	;;	
+	-NOPKT| --nopacketize)
+	NOPKT=1
 	shift
 	;;	
 	source)
@@ -918,6 +936,11 @@ case $i in
 	torun=list_all		
 	break
 	;;	
+	setrepo)
+	torun=set_repo		
+	shift
+	break
+	;;
 	*)
 	usage
 	error_c "Command line" " unknow option $i"

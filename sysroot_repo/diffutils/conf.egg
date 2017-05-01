@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
 	<project>
-		<name>sed</name>
+		<name>diffutils</name>
 		<download>check</download>		
 		<remote>
 			<method>wget</method>
-			<url>ftp://ftp.gnu.org/gnu/sed</url>
-			<file>sed-4.4.tar.xz</file>		
+			<url>ftp://ftp.gnu.org/gnu/diffutils</url>
+			<file>diffutils-3.5.tar.xz</file>		
 		</remote>	
 		<build>
 			<step id="1">				
@@ -14,7 +14,7 @@
 				<silent>yes</silent>
 				<threads>8</threads>
 				<path>
-					<pre>
+					<pre >
 						<add id="0">$IMAGES/egg_sysroot/bin</add>
 						<add id="1">$IMAGES/egg_sysroot/$CROSS/bin</add>						
 					</pre>	
@@ -24,7 +24,7 @@
 					<extra id="1">--target=$CROSS</extra>
 				</configure>
 				<make id="0">
-					<priority>9</priority>
+					<priority>10</priority>
 					<rule id="0">
 						<name>all</name> 
 					</rule>

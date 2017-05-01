@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
 	<project>
-		<name>sed</name>
+		<name>ncurses</name>
 		<download>check</download>		
 		<remote>
 			<method>wget</method>
-			<url>ftp://ftp.gnu.org/gnu/sed</url>
-			<file>sed-4.4.tar.xz</file>		
+			<url>ftp://ftp.gnu.org/gnu/ncurses/</url>
+			<file>ncurses-6.0.tar.gz</file>		
 		</remote>	
 		<build>
 			<step id="1">				
@@ -14,17 +14,21 @@
 				<silent>yes</silent>
 				<threads>8</threads>
 				<path>
-					<pre>
+					<pre >
 						<add id="0">$IMAGES/egg_sysroot/bin</add>
 						<add id="1">$IMAGES/egg_sysroot/$CROSS/bin</add>						
 					</pre>	
 				</path>
 				<configure>
+					<pre id="0">
+						<mode>code</mode>
+						<value>export CPPFLAGS="-P"</value>
+					</pre>					
 					<extra id="0">--prefix=$DEPLOY</extra>
 					<extra id="1">--target=$CROSS</extra>
 				</configure>
 				<make id="0">
-					<priority>9</priority>
+					<priority>11</priority>
 					<rule id="0">
 						<name>all</name> 
 					</rule>
