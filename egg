@@ -711,10 +711,16 @@ done
 
 #$1 new repo to set repo
 function set_repo(){
-rm -f $OROOT/repo
-ln -s $1 $OROOT/repo
-sync
-main listall
+local RES=""
+RES=$(ls -d $1)
+if [ "$RES" ]; then 
+	rm -f $OROOT/repo
+	ln -s $1 $OROOT/repo
+	sync
+	main listall
+else
+	error_c "setrepo : direcory $1 " "not exist!"
+fi	
 }
 
 

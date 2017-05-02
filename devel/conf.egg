@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<egg>   
+	<conf>
+		<root>$HOME/ebuild</root>
+		<repo>$ROOT/repo</repo>
+		<sources>$ROOT/sources</sources>
+		<images>$ROOT/images</images>
+		<build>$ROOT/build</build>
+		<editor>scite</editor>
+		<start_path>$IMAGES/egg_sysroot/bin:$IMAGES/egg_sysroot/$CROSS/bin</start_path>
+	</conf>	
+	<defaults>
+		<step id="0">
+			<step_name>egg_sysroot</step_name>
+			<info>First step to create a gcc native at last version to build all packets.</info>
+			<cc></cc>
+			<cxx></cxx>
+			<as></as>
+			<ld></ld>
+			<nm></nm>
+			<ar></ar>
+			<strip></strip>
+			<cflags>-O3</cflags>
+			<cppflags>-O3</cppflags>
+			<cxxflags>-O3</cxxflags>
+			<ldflags></ldflags>
+			<libs></libs>
+			<cpath></cpath>
+			<c_include_path></c_include_path>
+			<cplus_include_path></cplus_include_path>
+			<arch>$HW_ARCH</arch>
+			<cross>$HW_ARCH-pc-linux-gnu</cross>
+		</step>
+		<step id="1">
+			<step_name>egg_sysroot</step_name>
+			<info>build with new  compiler some basics utilities</info>
+			<cc></cc>
+			<cxx></cxx>
+			<as></as>
+			<ld></ld>
+			<nm></nm>
+			<ar></ar>
+			<strip></strip>
+			<cflags>-O3</cflags>
+			<cppflags>-O3</cppflags>
+			<cxxflags>-O3</cxxflags>
+			<ldflags></ldflags>
+			<libs></libs>
+			<cpath></cpath>
+			<c_include_path></c_include_path>
+			<cplus_include_path></cplus_include_path>
+			<arch>$HW_ARCH</arch>
+			<cross>$HW_ARCH-pc-linux-gnu</cross>
+		</step>
+	</defaults>
+</egg>
