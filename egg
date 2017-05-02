@@ -820,6 +820,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "packetize : create a tar of the output "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "multi <file.egg list of repos >: sequence building of project in list "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "listall : list current repo "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "setrepo <path with new repo> : set a new repo and listall "
 	exit 1
 }
 

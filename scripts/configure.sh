@@ -443,6 +443,8 @@ echo "">> "$1"
 #$6 status to check value else exit :if $6=1000 don't check
 #$7 msg in stable mode
 function prepare_script_generic(){
+local VV=0
+VV=$6
 prepare_script_head "$4"
 echo "function getbuildstatus(){">> "$4"
 echo "local VV=\$(cat \$STATUS)">> "$4"
@@ -467,7 +469,7 @@ echo "}">> "$4"
 echo "">> "$4"
 echo "">> "$4"
 echo "source $BUILD/$5/$1_$2/setenv.sh">> "$4"
-if [ $6 -ne 1000 ]
+if [ $VV -ne 1000 ]
 then
 	echo "getbuildstatus" >> "$4"
 	echo "RES=\$?">> "$4"
@@ -475,7 +477,14 @@ then
 	echo "	print_ita \"Status\" \"stable\" \"skip $7 \"" >> "$4"
 	echo "	exit 0" >> "$4"
 	echo "fi" >> "$4"
-	echo "if [ \$RES -ne $6 ]; then " >> "$4"
+	if [ $VV -eq 2000 ];  then
+	       #configure skip if already configured(1) , ok at init (0) error on stable(2)
+		VV=$((VV-2000))
+		echo "if [ \$RES -eq 1 ]; then " >> "$4"
+		echo "	exit 0" >> "$4"
+		echo "fi" >> "$4"
+	fi
+	echo "if [ \$RES -ne $VV ]; then " >> "$4"
 	echo "	error_c \"Build status error: current \$RES - request $6\" \"project : $1\"" >> "$4"
 	echo "fi" >> "$4"
 	echo "">> "$4"
@@ -1132,7 +1141,7 @@ touch "$C_FILE"
 sync
 chmod +x "$C_FILE" 
 setbuildstatus "$1"  "$2" "$C_BUILD" 0
-prepare_script_generic "$1"  "$2" "START CONFIGURE" "$C_FILE" "$NAME"  0 "configure"
+prepare_script_generic "$1"  "$2" "START CONFIGURE" "$C_FILE" "$NAME"  2000 "configure"
 echo "declare -i start_time">> "$C_FILE"
 echo "declare -i stop_time">> "$C_FILE"
 echo "declare -i total_time">> "$C_FILE"
