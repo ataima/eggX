@@ -773,6 +773,7 @@ while [  $IDM -lt $NUMM ]; do
 	print_ita "REPO : ID=$IDM" "$FILE" "OK"
 	IDM=$((IDM+1))	
 done	
+warning_c "Multi repo build can start" "For complete build is required many time " "and at the end, only the packets of repo are available" "but all build tree are empty"
 print_c "$YELLOW"  "Continue ? [s,n]"
 read -r
 RES=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
@@ -798,6 +799,16 @@ if [ "$RES" == "S" ]; then
 		fi		
 		IDM=$((IDM+1))	
 	done
+	cd "$PWDM"
+	rm -rf $SOURCES
+	sync
+	rm -rf $REPO
+	sync
+	rm -rf $BUILD
+	sync
+	return 0
+else
+	return 1
 fi
 }
 
@@ -872,8 +883,9 @@ case $i in
 	set -x
 	shift
 	;;	
-	-NOPKT| --nopacketize)
+	-Q|--nopacketize)
 	NOPKT=1
+	warning_c "quick mode , no packetize output..."
 	shift
 	;;	
 	source)
