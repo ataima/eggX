@@ -164,6 +164,8 @@ print_ita  "CLEAN : $1"  "$2"  "$3"
 
 #none
 function build_all(){
+local HAVE_BUILD=0
+local STATUS=0
 local ID=0 
 local V=""
 local PRI=""
@@ -183,17 +185,24 @@ while [ $ID -lt $MAX_STEP ] ; do
 			if [ $? -ne 0 ] ; then
 				exit -1;
 			fi
+			STATUS=$(cat $BUILD/$PRJ/$NAME/status)
+			if [ $STATUS -ne 2 ]; then
+				HAVE_BUILD=1
+			fi
 			print_build_msg "$PRI" "$NAME" "$PRJ"
 			"$BUILD/$PRJ/$NAME/build_$PRI.sh"
 			if [ $? -ne 0 ] ; then
 				exit -1;
 			fi
+			
 			sync
 		fi	
 	done
 	ID=$((ID+1))
 done
-packetize_all
+if [ $HAVE_BUILD -ne 0 ]; then 
+	packetize_all
+fi	
 }
 
 
@@ -264,6 +273,8 @@ print_del_ita
 
 #none
 function compile_all(){
+local HAVE_BUILD=0
+local STATUS=0
 local ID=0 
 local V=""
 local PRI=""
@@ -280,6 +291,10 @@ while [ $ID -lt $MAX_STEP ] ; do
 		if [ -d "$BUILD/$PRJ/$NAME" ]; then
 			print_build_msg "$PRI" "$NAME" "$PRJ"
 			cd "$BUILD/$PRJ/$NAME"
+			STATUS=$(cat $BUILD/$PRJ/$NAME/status)
+			if [ $STATUS -ne 2 ]; then
+				HAVE_BUILD=1
+			fi
 			"$BUILD/$PRJ/$NAME/build_$PRI.sh"
 			if [ $? -ne 0 ] ; then
 				exit -1;
@@ -288,7 +303,9 @@ while [ $ID -lt $MAX_STEP ] ; do
 	done
 	ID=$((ID+1))
 done
-packetize_all
+if [ $HAVE_BUILD -ne 0 ]; then 
+	packetize_all
+fi	
 }
 
 #none
