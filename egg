@@ -717,8 +717,7 @@ xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule"
 			THREAD=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$II\"]/thread")
 			if [ "$THREAD" == "" ]; then 
 				THREAD="$6"				
-			else
-			echo "----> $THREAD  $6"
+			else			
 				if  [  $THREAD -gt $6 ] ; then 
 					THREAD="$6"
 				fi	
@@ -1353,13 +1352,13 @@ if [ "$#" -eq  0 ]; then
 else
 	PRJS=$@
 fi
+
 unset BSEQ
 declare -A BSEQ
 read_default_for_step "$ID"
 for V in $PRJS; do
 	insert_packet "$V" "$ID"
 done
-echo "---> $STEP_NAME"
 SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 MYPATH=$START_PATH
 V=${SORTREQ[0]}
@@ -1853,21 +1852,21 @@ print_del_ita
 
 #$ARGV TODO
 function config_all_step(){
-declare -i NUM=0
+declare -i CONF_NUM=0
 if [ $# -eq 0 ]; then
-	while [ $NUM -lt $MAX_STEP ]; do 
-		configure_all_packet  $NUM $@
+	while [ $CONF_NUM -lt $MAX_STEP ]; do 
+		configure_all_packet  $CONF_NUM $@
 		if [ $? -ne 0 ]; then 
 			exit 1
 		fi
-		NUM=$((NUM+1))
+		CONF_NUM=$((CONF_NUM+1))
 	done
 else
 	isNumber $1
 	if [ $? -eq 0 ]; then	
-		NUM=$1
+		CONF_NUM=$1
 		shift
-		configure_all_packet $NUM $@
+		configure_all_packet $CONF_NUM $@
 		if [ $? -ne 0 ]; then 
 			exit 1
 		fi
