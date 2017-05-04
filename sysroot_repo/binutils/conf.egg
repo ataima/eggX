@@ -10,7 +10,6 @@
 		</remote>	
 		<build>
 			<step id="0">				
-				<name>egg_sysroot</name>
 				<silent>yes</silent>
 				<threads>8</threads>
 				<path>

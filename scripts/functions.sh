@@ -58,14 +58,17 @@ function error_c(){
 print_del_ita
 print_c "$RED_LIGHT" "ERROR : " "$BLUE_LIGHT" " - $1" 
 if [ "$2" ]; then
-	print_c "$WHITE" "	 >"  "$YELLOW" " - $2" 
+	print_c "$WHITE" "	 >" "$YELLOW" " - $2" 
 	if [ "$3" ]; then
-		print_c "$WHITE" "	 >"  "$YELLOW" " - $3" 
+		print_c "$WHITE" "	 >" "$YELLOW" " - $3" 
 		if [ "$4" ]; then
-			print_c "$WHITE" "	 >"  "$YELLOW" " - $4" 
+			print_c "$WHITE" "	 >" "$YELLOW" " - $4" 
 		fi
 	fi
 fi
+print_c "$YELLOW" "PATH :" $(pwd)
+print_c "$YELLOW" "FILE :" "$0"
+print_c "$YELLOW" "LINE :" "${BASH_LINENO[0]}"
 print_del_ita
 exit 1
 }
@@ -77,7 +80,7 @@ exit 1
 #$3   string
 function warning_c(){
 print_del_ita
-print_c "$GREEN_LIGHT" "WARNING : " "$BLUE_LIGHT" " - $1" 
+print_c "$GREEN_LIGHT" "WARNING : " "$BLUE_LIGHT" "- $1" 
 if [ "$2" ]; then
 	print_c "$WHITE" "	 >"  "$YELLOW" " - $2" 
 	if [ "$3" ]; then

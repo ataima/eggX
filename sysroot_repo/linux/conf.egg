@@ -13,8 +13,7 @@
 			</key>
 		</remote>	
 		<build>
-			<step id="0">
-				<name>egg_sysroot</name>
+			<step id="0">				
 				<silent>yes</silent>
 				<threads>8</threads>	
 				<path>

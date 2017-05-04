@@ -72,13 +72,8 @@ if [ $? -eq 1 ]; then
 						equs "$PRI"  
 						if [ $? -eq 1 ]; then 
 							error_c "Missing  build make id=$ID priority Phase $2" "project : $1"
-						fi
-						NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")		
-						equs "$NAME"  
-						if [ $? -eq 1 ]; then 
-							error_c "Missing  build name Phase $2" "project : $1"
-						fi 
-						INDEX="$PRI%$1%$NAME"
+						fi						
+						INDEX="$PRI%$1%$STEP_NAME"
 						BSEQ[$INDEX]="$INDEX"	
 					ID=$((ID+1))	
 					done	
@@ -93,11 +88,53 @@ else
 fi
 }
 
+#$1 build phase number 0,1,2.....
+function read_default_for_step(){
+local VV=""
+local VALUE=""
+local VAR=""
+local NAMES="step_name info cc cxx as ld nm ar strip cflags cppflags cxxflags \
+			ldflags libs cpath c_include_path cplus_include_path \
+			arch cross"
+if [ -f $REPO/conf.egg ]; then
+	#set -x ; trap read debug
+	NUM=$(xmlstarlet sel -t  -v "count(/egg/defaults/step[@id=\"$1\"])" -n $REPO/conf.egg)	
+	if [ $NUM -eq 1 ]; then
+		for VV in $NAMES; do
+			VAR=$(echo $VV |   tr '[:lower:]' '[:upper:]')
+			VALUE=$(xmlstarlet sel -t  -v "egg/defaults/step[@id=\"$1\"]/$VV" -n $REPO/conf.egg)
+			if [ "$VALUE" ]; then 	
+				if [ "$VAR" == "INFO" ]
+				then
+					info_c "$VALUE"
+				else				
+					print_ita "Set   ($1) " "$VAR" "$VALUE"
+					eval $VAR='$VALUE'
+					export "$VAR"
+				fi	
+			else
+				print_ita "Unset ($1) " "$VAR" "..."
+				unset "$VAR"	
+			fi
+		done
+	else
+		if [ $NUM -eq 0 ]; then
+			warning_c "missing defaults conf for step $1"
+		else
+			error_c "errata conf in main conf.egg" "Step id=$1 duplicate" 
+		fi
+	fi
+else
+	error_c "Missing conf.egg file " "on repo"
+fi
+}
+
 #$1 ID BUILD STEP
 function prepare_seq_priority(){
 local V=""
 unset BSEQ
 declare -A BSEQ
+read_default_for_step "$1"
 for V in $ALL_PACKETS; do
 	insert_packet $V $1
 done	
@@ -109,32 +146,7 @@ function get_max_step(){
 MAX_STEP=$(xmlstarlet sel -t  -v "count(/egg/defaults/step)" -n $REPO/conf.egg)
 }
 
-# $1 project
-# $2 string array prj names
-function check_prj_name(){
-local NAME=""
-local TT=""
-local PRJ_NAME=$2
-declare -i IND=0
-	xml_count $1 "/egg/project/build"
-	IND=$?
-	if [ $IND -eq 1 ]; then
-		IND=0
-		while [  $IND -lt $MAX_STEP ]; do
-		NAME=$(xml_value $1 "/egg/project/build/step[@id='$IND']/name")		
-		equs "$NAME"  
-		if [ $? -eq 0 ]
-		then 
-			TT=$(echo $PRJ_NAME | grep $NAME)
-			if [ "$TT" == "" ]; then 
-				PRJ_NAME="$PRJ_NAME""  ""$NAME"
-			fi
-		fi 	
-		IND=$((IND+1))		
-		done
-	fi
-echo $PRJ_NAME
-}
+
 
 
 #print build start 
@@ -391,9 +403,8 @@ shift
 shift
 # set -x ; trap read debug
 
-for V in $@; do
-	PRJ_NAMES=$(check_prj_name "$V" "$PRJ_NAMES")
-done
+PRJ_NAMES=$@
+
 local PWD=$(pwd)
 prepare_seq_priority $ID
 for V in $PRJ_NAMES; do
@@ -832,8 +843,9 @@ fi
 
 
 function usage(){
-	print_c "$BLUE_LIGHT" "usage : ./build.sh <-D> command  <args to pass subcommand>"
-	print_c  "$YELLOW" "OPTIONS" "$GREEN" "-D or --debug : set debug mode" 
+	print_c "$BLUE_LIGHT" "usage : ./build.sh <option> command  <args to pass subcommand>"
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -D or --debug : set debug mode" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -Q or --nopacketize : dont craete output tar" 
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : download all sources from repo projects"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure all repo projects or specified projects in argv"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure+build    all repo projects or specified projects in argv"

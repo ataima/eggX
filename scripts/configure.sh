@@ -89,7 +89,6 @@ MYPATH="$2"
 #$2 build phase number 0,1,2.....
 function insert_packet(){
 local PRI=""
-local NAME=""
 local SILENT=""
 local INDEX=""
 local NUM=0
@@ -113,23 +112,18 @@ if [ $? -eq 1 ]; then
 						equs "$PRI"  
 						if [ $? -eq 1 ]; then 
 							error_c "Missing  build make id=$ID priority Phase $2" "project : $1"
-						fi
-						NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")		
-						equs "$NAME"  
-						if [ $? -eq 1 ]; then 
-							error_c "Missing  build name Phase $2" "project : $1"
-						fi 
+						fi						
 						#optional				
-						INDEX="$PRI%$1%$NAME"
+						INDEX="$PRI%$1%$STEP_NAME"
 						BSEQ[$INDEX]="$INDEX"
 						ID=$((ID+1))
 					done	
 				fi
 			else
-				warning_c " no build step $2  !" "project : $1"
+				warning_c "no build step $2  !" "project : $1"
 			fi
 		else
-			warning_c " no build  !" "project : $1"
+			warning_c "no build  !" "project : $1"
 		fi
 	else
 		error_c "Missing conf.egg file " "project : $1"
@@ -149,7 +143,6 @@ local TPATH=""
 local NUM=0
 local MAX=0
 local ID=0
-local NAME=""
 #set -x ;trap read debug
 check_project $1
 if [ $? -eq 1 ]; then
@@ -160,11 +153,6 @@ if [ $? -eq 1 ]; then
 			xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then	
-				NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")	
-				equs "$NAME"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  build name Phase $2 manage path pre" "project : $1"
-				fi 			
 				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path/pre"
 				NUM=$?
 				if [ $NUM -ne 0 ]; then 	
@@ -179,15 +167,15 @@ if [ $? -eq 1 ]; then
 					while [ $ID -lt $MAX ]; do
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/remove[@id=\"$ID\"]")
 						if [ "$TPATH" != "" ]; then
-							remove_path $NAME $TPATH
+							remove_path $STEP_NAME $TPATH
 						fi
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/add[@id=\"$ID\"]")
 						if [ "$TPATH" != "" ]; then
-							add_path $NAME $TPATH
+							add_path $STEP_NAME $TPATH
 						fi
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/set")
 						if [ "$TPATH" != "" ]; then
-							set_path $NAME $TPATH
+							set_path $STEP_NAME $TPATH
 							break
 						fi
 						ID=$((ID+1))
@@ -214,7 +202,6 @@ local TPATH=""
 local NUM=0
 local MAX=0
 local ID=0
-local NAME=""
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
@@ -224,11 +211,6 @@ if [ $? -eq 1 ]; then
 			xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then	
-				NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")		
-				equs "$NAME"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  build name Phase $2 manage path post" "project : $1"
-				fi 						
 				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path/post"
 				NUM=$?
 				if [ $NUM -ne 0 ]; then 	
@@ -243,15 +225,15 @@ if [ $? -eq 1 ]; then
 					while [ $ID -lt $MAX ]; do
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/post/remove[@id=\"$ID\"]")
 						if [  "$TPATH"  !=  ""  ]; then
-							remove_path $NAME $TPATH
+							remove_path $STEP_NAME $TPATH
 						fi
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/post/add[@id=\"$ID\"]")
 						if [  "$TPATH"  !=  ""  ]; then
-							add_path $NAME $TPATH
+							add_path $STEP_NAME $TPATH
 						fi
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/post/set")
 						if [ "$TPATH" != "" ]; then
-							set_path $NAME $TPATH
+							set_path $STEP_NAME $TPATH
 							break
 						fi
 						ID=$((ID+1))
@@ -326,12 +308,16 @@ function generate_setenv(){
 
 	echo "#current project" >> "$3"	
 	echo "export PROJECT=$1" >> "$3"
+	echo "#current project name" >> "$3"
+	echo "export PROJ_NAME=$1_$2" >> "$3"
 	echo "#current sources for projects" >> "$3"	
 	echo "export SOURCES=$SOURCES" >> "$3"
 	echo "#current build path for projects" >> "$3"	
 	echo "export BUILDS=$BUILD/$4">> "$3"
 	echo "#current source for this project" >> "$3"	
 	echo "export SOURCE=$SRC" >> "$3"
+	echo "#current build path for this project" >> "$3"
+	echo "export BUILD_PATH=$BUILD/$4/$1_$2" >> "$3"
 	echo "#current build path usually 'build' for project" >> "$3"	
 	echo "export BUILD=$BUILD/$4/$1_$2/build" >> "$3"
 	echo "#file containt the status of build fro this projects : 0,1,2">> "$3"
@@ -720,13 +706,12 @@ xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule"
 			#	error_c "Missing  make rule name id=$i Phase $2" "project : $1"
 			#fi
 			THREAD=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$II\"]/thread")
-			equs "$THREAD"  
-			if [ $? -eq 0 ]; then 
+			if [ "$THREAD" == "" ]; then 
+				THREAD="$6"				
+			else
 				if  [  $THREAD -gt $6 ] ; then 
 					THREAD="$6"
-				fi
-			else
-				THREAD="$6"	
+				fi	
 			fi						
 			add_pre_build "$1" "$2" "$8" "$3" "$4" "$II" "$7"
 			add_entry_in_main_build_script "$1" "$3"  "$8" "$5" "$THREAD" "$6" "$NAME"
@@ -851,7 +836,9 @@ chmod +rwx "$SH_DISTCLEAN"
 #distclean 
 prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" 1000
 echo "cd \$PWD " >> "$SH_DISTCLEAN"
-echo "rm -rf \$BUILD\* " >> "$SH_DISTCLEAN"
+echo "chmod +w \$BUILD_PATH/status">> "$SH_DISTCLEAN"
+echo "rm -f \$BUILD_PATH/status">> "$SH_DISTCLEAN"
+echo "rm -rf \$BUILD/* " >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
 echo "setbuildstatus 0">> "$SH_DISTCLEAN"
@@ -1082,7 +1069,6 @@ echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$3"
 #$1 project
 #$2 build phase number 0,1,2.....
 function create_configure_cmd(){
-local NAME=""
 local SILENT=""
 local NUM=0
 #set -x ; trap read debug
@@ -1094,12 +1080,7 @@ if [ $? -eq 1 ]; then
 		if [ $NUM -eq 1 ]; then
 			xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 			NUM=$?
-			if [ $NUM -ne 0 ]; then
-				NAME=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/name")		
-				equs "$NAME"  
-				if [ $? -eq 1 ]; then 
-					error_c "Missing  build name Phase $2" "project : $1"
-				fi 				
+			if [ $NUM -ne 0 ]; then					
 				SILENT=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/silent")
 				#optional
 				if [ $SILENT ]; then
@@ -1130,9 +1111,9 @@ if [ $? -eq 1 ]; then
 else
 	error_c "Missing project in $REPO " "project : $1"
 fi
-local C_BUILD="$BUILD/$NAME/$1_$2"
+local C_BUILD="$BUILD/$STEP_NAME/$1_$2"
 local C_FILE="$C_BUILD/bootstrap.sh"
-local DEST="$IMAGES/$NAME"
+local DEST="$IMAGES/$STEP_NAME"
 local SRC=$(getSourcePath $1)
 rm  -rf "$C_BUILD"
 mkdir -p "$C_BUILD"
@@ -1141,12 +1122,12 @@ touch "$C_FILE"
 sync
 chmod +x "$C_FILE" 
 setbuildstatus "$1"  "$2" "$C_BUILD" 0
-prepare_script_generic "$1"  "$2" "START CONFIGURE" "$C_FILE" "$NAME"  2000 "configure"
+prepare_script_generic "$1"  "$2" "START CONFIGURE" "$C_FILE" "$STEP_NAME"  2000 "configure"
 echo "declare -i start_time">> "$C_FILE"
 echo "declare -i stop_time">> "$C_FILE"
 echo "declare -i total_time">> "$C_FILE"
 echo "start_time=\$(date +%s)">> "$C_FILE"
-add_pre_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
+add_pre_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$STEP_NAME"
 EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
 	echo "set -x ">> $C_FILE
@@ -1182,13 +1163,13 @@ EXTSI=$(echo $SILENT  | tr '[:lower:]' '[:upper:]')
 if [ "$EXTSI" != "YES" ]; then
 	echo "set +x ">> $C_FILE
 fi
-add_post_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$NAME"
+add_post_conf "$1" "$2" "$C_FILE" "$C_BUILD"  "$STEP_NAME"
 echo "stop_time=\$(date +%s)">> "$C_FILE" 
 echo "total_time=\$((stop_time-start_time))">> "$C_FILE" 
 echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$C_FILE" 
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 #build
-add_build_script "$1" "$2"  "$C_BUILD"  "$NAME" "$SILENT" "$THREADS" 
+add_build_script "$1" "$2"  "$C_BUILD"  "$STEP_NAME" "$SILENT" "$THREADS" 
 print_ita "STEP : $2:$3" "$1"  "configured done !"
 }
 
@@ -1301,7 +1282,6 @@ sync
 
 
 #$1 build phase number 0,1,2.....
-#$2 name build phase
 function read_default_for_step(){
 local VV=""
 local VALUE=""
@@ -1321,11 +1301,12 @@ if [ -f $REPO/conf.egg ]; then
 				then
 					info_c "$VALUE"
 				else				
-					print_ita "Set " "$VAR" "$VALUE"
+					print_ita "Set   ($1) " "$VAR" "$VALUE"
 					eval $VAR='$VALUE'
+					export "$VAR"
 				fi	
 			else
-				print_ita "Unset " "$VAR" "..."
+				print_ita "Unset ($1) " "$VAR" "..."
 				unset "$VAR"	
 			fi
 		done
@@ -1364,31 +1345,29 @@ else
 fi
 unset BSEQ
 declare -A BSEQ
+read_default_for_step "$ID"
 for V in $PRJS; do
 	insert_packet "$V" "$ID"
 done
-read_default_for_step "$ID" 
 SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 MYPATH=$START_PATH
 V=${SORTREQ[0]}
 if [ "$V" ]; then
 	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
-	PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')
-	NAME=$(echo -n $V | sed 's/%/ /g' | awk '{print $3}')
-	if [ ! -e "$BUILD/$NAME" ]; then
-		mkdir -p "$BUILD/$NAME"
+	PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')	
+	if [ ! -e "$BUILD/$STEP_NAME" ]; then
+		mkdir -p "$BUILD/$STEP_NAME"
 	fi
-	prepare_script_head "$BUILD/$NAME/step_$ID.sh"	
-	echo "#START_FUNCTION_STEP">>"$BUILD/$NAME/step_$ID.sh"
+	prepare_script_head "$BUILD/$STEP_NAME/step_$ID.sh"	
+	echo "#START_FUNCTION_STEP">>"$BUILD/$STEP_NAME/step_$ID.sh"
 	for V in $SORTREQ; do
 		PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
-		PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')
-		NAME=$(echo -n $V | sed 's/%/ /g' | awk '{print $3}')
+		PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')		
 		if [ "$PRJS" ] ; then 
-			configure_packet  "$PRJS" "$ID" "$PRI" "$NAME"
+			configure_packet  "$PRJS" "$ID" "$PRI" "$STEP_NAME"
 		fi
 	done
-	create_main_entry "$PRJS" "$ID" "$PRI" "$NAME"
+	create_main_entry "$PRJS" "$ID" "$PRI" "$STEP_NAME"
 fi	
 }
 
