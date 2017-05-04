@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>file</name>
+		<download>check</download>		
+		<remote>
+			<method>wget</method>
+			<url>ftp://ftp.astron.com/pub/file</url>
+			<file>file-5.30.tar.gz</file>		
+		</remote>	
+		<build>
+			<step id="1">				
+				<name>egg_sysroot</name>
+				<silent>yes</silent>
+				<threads>8</threads>
+				<path>
+					<pre>
+						<add id="0">$IMAGES/egg_sysroot/bin</add>
+						<add id="1">$IMAGES/egg_sysroot/$CROSS/bin</add>						
+					</pre>	
+				</path>
+				<configure>
+					<extra id="0">--prefix=$DEPLOY</extra>
+					<extra id="1">--target=$CROSS</extra>
+				</configure>
+				<make id="0">
+					<priority>15</priority>
+					<rule id="0">
+						<name>all</name> 
+					</rule>
+					<rule id="1">
+						<name>install</name> 
+						<thread>1</thread>						
+					</rule>
+				</make>
+			</step>
+		</build>
+	</project>
+</egg>
