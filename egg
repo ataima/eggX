@@ -1331,7 +1331,7 @@ else
 fi
 }
 
-
+#$1 number id
 #$@ argv optional
 function configure_all_packet(){
 #set -x; trap read debug
@@ -1353,13 +1353,16 @@ else
 	PRJS=$@
 fi
 
-unset BSEQ
-declare -A BSEQ
-read_default_for_step "$ID"
-for V in $PRJS; do
-	insert_packet "$V" "$ID"
-done
-SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
+#unset BSEQ
+#declare -A BSEQ
+#read_default_for_step "$ID"
+#for V in $PRJS; do
+#	insert_packet "$V" "$ID"
+#done
+#SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
+
+prepare_seq_priority "$ID"
+
 MYPATH=$START_PATH
 V=${SORTREQ[0]}
 if [ "$V" ]; then
@@ -2033,6 +2036,60 @@ done
 }
 
 
+
+
+#$1 step nn 
+#$2 optional prj
+function freeze_step(){
+local ID=$1 
+local V=""
+local PRI=""
+local NAME=""
+local PRJ=""
+local RNAME="$2_$1"
+prepare_seq_priority $ID
+#set -x ; trap read debug
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		PRI=$(echo $V | awk '{print $1}')
+		NAME=$(echo $V | awk '{print $2}')"_$ID"
+		PRJ=$(echo $V | awk '{print $3}')
+		V=$( getFileSize $BUILD/$PRJ/$NAME/status)
+		if [ $V -ne 0 ]; then 
+			if [ $# -eq 1 ]; then
+				
+					chmod +w "$BUILD/$PRJ/$NAME/status"
+					echo 2 > "$BUILD/$PRJ/$NAME/status"
+					chmod -w "$BUILD/$PRJ/$NAME/status"
+					print_ita "STEP : $ID" "PRI : $PRI" "$NAME -> stable"
+			fi
+			if [ $# -eq 2 ] && [  "$NAME" == "SRNAME" ]; then
+					chmod +w "$BUILD/$PRJ/$NAME/status"
+					echo 2 > "$BUILD/$PRJ/$NAME/status"
+					chmod -w "$BUILD/$PRJ/$NAME/status"
+					print_ita "STEP : $ID" "PRI : $PRI" "$NAME -> stable"
+			fi
+		fi				
+	done
+}
+
+#$1 optional step
+#$2 optional projects
+function freeze_build(){
+local FNUM=0
+if [ $# -eq 0 ];  then 
+while [ $FNUM -lt $MAX_STEP ] ; do
+	freeze_step $FNUM
+	FNUM=$((FNUM+1))
+done
+	
+else
+	freeze_step $1 $2
+fi
+}
+
+
+
 #$1 new repo to set repo
 function set_repo(){
 local RES=""
@@ -2157,6 +2214,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "multi <file.egg list of repos >: sequence building of project in list "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "listall : list current repo "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "setrepo <path with new repo> : set a new repo and listall "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "freeze nn < step number> : set status stable for specifi step number : <optional project> "
 	exit 1
 }
 
@@ -2282,6 +2340,11 @@ case $i in
 	;;	
 	setrepo)
 	torun=set_repo		
+	shift
+	break
+	;;
+	freeze)
+	torun=freeze_build		
 	shift
 	break
 	;;
