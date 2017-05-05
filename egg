@@ -1308,7 +1308,7 @@ if [ -f $REPO/conf.egg ]; then
 			if [ "$VALUE" ]; then 	
 				if [ "$VAR" == "INFO" ]
 				then
-					info_c "$VALUE"
+					info_simple "$VALUE"
 				else				
 					print_ita "Set   ($1) " "$VAR" "$VALUE"
 					eval $VAR='$VALUE'
@@ -1385,51 +1385,6 @@ fi
 }
 
 
-
-
-
-
-
-#$1 build phase number 0,1,2.....
-function read_default_for_step(){
-local VV=""
-local VALUE=""
-local VAR=""
-local NAMES="step_name info cc cxx as ld nm ar strip cflags cppflags cxxflags \
-			ldflags libs cpath c_include_path cplus_include_path \
-			arch cross"
-if [ -f $REPO/conf.egg ]; then
-	#set -x ; trap read debug
-	NUM=$(xmlstarlet sel -t  -v "count(/egg/defaults/step[@id=\"$1\"])" -n $REPO/conf.egg)	
-	if [ $NUM -eq 1 ]; then
-		for VV in $NAMES; do
-			VAR=$(echo $VV |   tr '[:lower:]' '[:upper:]')
-			VALUE=$(xmlstarlet sel -t  -v "egg/defaults/step[@id=\"$1\"]/$VV" -n $REPO/conf.egg)
-			if [ "$VALUE" ]; then 	
-				if [ "$VAR" == "INFO" ]
-				then
-					info_c "$VALUE"
-				else				
-					print_ita "Set   ($1) " "$VAR" "$VALUE"
-					eval $VAR='$VALUE'
-					export "$VAR"
-				fi	
-			else
-				print_ita "Unset ($1) " "$VAR" "..."
-				unset "$VAR"	
-			fi
-		done
-	else
-		if [ $NUM -eq 0 ]; then
-			warning_c "missing defaults conf for step $1"
-		else
-			error_c "errata conf in main conf.egg" "Step id=$1 duplicate" 
-		fi
-	fi
-else
-	error_c "Missing conf.egg file " "on repo"
-fi
-}
 
 #$1 ID BUILD STEP
 function prepare_seq_priority(){
@@ -2200,21 +2155,23 @@ function usage(){
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -D or --debug : set debug mode" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -Q or --nopacketize : dont craete output tar" 
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : download all sources from repo projects"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure all repo projects or specified projects in argv"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure+build    all repo projects or specified projects in argv"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "build :   build all repo projects or specified projects in argv"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : clear all build and deploy  and redo source + configure+do"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "shell <step xx> <project nn>: open a shell with setenv for step xx of project nn"	
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "clean <option step xx> <option project nn>: clean all, clean all step, clean all step:project"	
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "distclean <option step xx> <option project nn>: remove build dir for all, all step,  step:project"	
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "edit <project nn>: edit a conf.egg file of project nn"	
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "reset : remove working path: $ROOT/build, $ROOT/image, $ROOT/repo, $ROOT/source "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure repo projects "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure and build repo projects"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "build : build repo projects "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : re - do - all "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "shell <step xx> <project nn> : open a shell of project nn"	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "clean <option step xx> <option project nn> : clean "	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "distclean <option step xx> <option project nn> : remove all builds"	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "edit <project nn>: edit conf.egg file of project nn"	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "reset : remove \$ROOT/build, \$ROOT/image, \$ROOT/repo, \$ROOT/source "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "info : show program info..."
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "packetize : create a tar of the output "
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "multi <file.egg list of repos >: sequence building of project in list "
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "listall : list current repo "
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "setrepo <path with new repo> : set a new repo and listall "
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "freeze nn < step number> : set status stable for specifi step number : <optional project> "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "multi <file.egg list of repos >: sequence building of projects"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "listall : list work repo "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "setrepo <path with new repo> : set a new work repo and listall  "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "freeze nn < step number> : set status stable "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "help <command>: more info about command and repo"
+	print_c  "$PURPLE_LIGHT" "do help <command> for more info"
 	exit 1
 }
 
@@ -2248,10 +2205,177 @@ function reset_all(){
 	fi
 }
 
-
 function default_do(){
         build_all_packet
 }
+
+
+#$1 command to explains
+function help_shell(){
+help_c "command : shell" \
+"\$1 : step number : required " \
+"\$2 : project     : optional" \
+"if only \$1 is specified open a shell on the build/step_name path" \
+"else open a shell on build/step_name/build_step_num" \
+"ex : ./egg shell 1 binutils "
+}
+
+#$1 command to explains
+function help_configure(){
+help_c "command : configure" \
+"\$1 : step number : optional " \
+"\$2... : project-s     : optional" \
+"with no param generate all bash scripts for all step and projects" \
+"if only \$1 is specified generate all bash scripts for step \$1" \
+"else generate all bash scripts for step \$1 project \$2,..\$n" \
+"ex : ./egg configure or ./egg configure 1 or" \
+"./egg configure 1 binutilis"
+}
+
+function help_edit(){
+help_c "command : edit" \
+"\$1 : name : request " \
+"if name = self edit this script" \
+"if name = self.conf edit current repo/conf.egg" \
+"if name = a name of a project in repo edit repo/name/conf.egg" \
+"if name = self.repo edit one by one all repo's conf.egg files" \
+"ex : ./egg edit binutils" \
+"the edit is defined in repo/conf.egg/<editor> fields, ex vim"
+}
+
+
+function help_build(){
+help_c "command : build" \
+"\$1 : step : optional " \
+"\$2.. : project-s : optional " \
+"with no parameter start build ( ..make nn..) of all step-projects" \
+"sequence of build depend from step and pri in conf egg" \
+" and go from step=0 and pri 1 to step MAX pri MAX " \
+"if \$1 is present build all projects of step \$1" \
+"if \$2 or more input build projects \$2...\$n of step \$1" \
+"ex ./egg build 0"
+}
+
+
+function help_reset(){
+help_c "command : reset" \
+"Clean all build and sources paths" \
+"ex ./egg reset"
+}
+
+function help_clean(){
+help_c "command : clean" \
+"\$1 : step : optional " \
+"\$2.. : project-s : optional " \
+"with no parameter start clean of all step-projects" \
+"sequence of clean depend from step and pri in conf egg" \
+" and go from step=0 and pri 1 to step MAX pri MAX " \
+"if \$1 is present clean all projects of step \$1" \
+"if \$2 or more input clean projects \$2...\$n of step \$1" \
+"ex ./egg clean 0"
+}
+
+function help_multi(){
+help_c "command : multi" \
+"\$1 : file : request " \
+"the file must content a list of repos path" \
+"execute for all repos in list reset + redoall" \
+"ex ./egg multi list.egg 0"
+}
+
+function help_distclean(){
+help_c "command : distclean" \
+"\$1 : step : optional " \
+"\$2.. : project-s : optional " \
+"with no parameter start distclean (rm build path )of all step-projects" \
+"sequence of distclean depend from step and pri in conf egg" \
+" and go from step=0 and pri 1 to step MAX pri MAX " \
+"if \$1 is present distclean all projects of step \$1" \
+"if \$2 or more input distclean projects \$2...\$n of step \$1" \
+"ex ./egg distclean 0 binutils"
+}
+
+
+function help_do(){
+help_c "command : do" \
+"\$1 : step : optional " \
+"\$2.. : project-s : optional " \
+"with no parameter start d0 (configure + build )of all step-projects" \
+"sequence of do depend from step and pri in conf egg" \
+" and go from step=0 and pri 1 to step MAX pri MAX " \
+"if \$1 is present do all projects of step \$1" \
+"if \$2 or more input do projects \$2...\$n of step \$1" \
+"ex ./egg do 0 binutils"
+}
+
+function help_redoall(){
+help_c "command : redoall" \
+"execute for all step-projects source+distclean+do  " \
+"ex ./egg redoall"
+}
+
+function help_packetize(){
+help_c "command : packetize" \
+"if all repo is 'stable' (all build successfull ended and install ok)"  \
+"the \$DEPLOY path was compressed by tar and all build " \
+"directory was cleaned" \
+"note : after a redoall/do/build in case of success " \
+"packetize is auto called " \
+"ex ./egg packetize"
+}
+
+function help_listall(){
+help_c "command : listall" \
+"list all repo step-project in build ordered sequence" \
+"ex ./egg listall"
+}
+
+function help_setrepo(){
+help_c "command : setrepo" \
+"\$1 : file : request " \
+"set file to current repo (set repo lnk in eggX folder to file)" \
+"and call listall" \
+"ex ./egg listall"
+}
+
+function help_freeze(){
+help_c "command : freeze" \
+"if untar previus file of \$DEPLOY dir and do not want rebuild" \
+"the relative repo You can do freeze and set all projects flags" \
+"to stable and freeze all build commands"   \
+"ex ./egg freeze"
+}
+
+
+function help_source(){
+help_c "command : source" \
+"source download or check the source of projects" \
+"ex ./egg source"
+}
+
+function help_command(){
+local COMMANDS="source shell configure edit build reset \
+					clean multi distclean do redoall \
+					packetize listall setrepo freeze"
+local VV=""
+local torun=""
+if [ $# -eq 0 ]; then
+	warning_c "missing argument" "help command require an argument! ex ./egg help do"
+	for VV in $COMMANDS ; do 
+			torun="help_$VV"
+			"$torun"			
+	done
+else
+	for VV in $COMMANDS ; do 
+		if [ "$VV" == "$1" ]; then 
+			torun="help_$VV"
+			"$torun"
+		fi		
+	done
+fi
+
+}
+
 
 
 #$1 build id number
@@ -2348,6 +2472,11 @@ case $i in
 	shift
 	break
 	;;
+	help)
+	torun=help_command		
+	shift
+	break
+	;;	
 	*)
 	usage
 	error_c "Command line" " unknow option $i"

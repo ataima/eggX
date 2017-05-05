@@ -94,9 +94,44 @@ print_del_ita
 }
 
 #$1   s...S10
-function info_c(){
+function info_simple(){
 print_del_ita
 print_c "$WHITE" "$@" 
+print_del_ita
+}
+
+#$1   string
+#$2   string
+#$3   string
+#$4   string
+#$5   string
+#$6   string
+#$7   string
+#$8   string
+function help_c(){
+print_del_ita
+print_c "$GREEN_LIGHT" "HELP :" "$BLUE_LIGHT" "$1"
+if [ "$2" ]; then
+        print_c "$WHITE" "     >"  "$YELLOW" "$2"
+        if [ "$3" ]; then
+                print_c "$WHITE" "     >"  "$YELLOW" "$3"
+                if [ "$4" ]; then
+                        print_c "$WHITE" "     >"  "$YELLOW" "$4"
+                        if [ "$5" ]; then
+                                print_c "$WHITE" "     >"  "$YELLOW" "$5"
+                                if [ "$6" ]; then
+                                        print_c "$WHITE" "     >"  "$YELLOW" "$6"
+                                        if [ "$7" ]; then
+						print_c "$WHITE" "     >"  "$YELLOW" "$7"
+						if [ "$8" ]; then
+							print_c "$WHITE" "     >"  "$YELLOW" "$8"
+						fi
+                                        fi
+                                fi
+                        fi
+                fi
+        fi
+fi
 print_del_ita
 }
 
