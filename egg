@@ -83,6 +83,7 @@ exit 1
 #$2   string
 #$3   string
 function warning_c(){
+if [ $NOWRN -ne 0 ]; then return 0; fi
 print_del_ita
 print_c "$GREEN_LIGHT" "WARNING : " "$BLUE_LIGHT" "- $1" 
 if [ "$2" ]; then
@@ -394,8 +395,11 @@ STRIP=""
 HW_ARCH=""
 
 
-
+#if 1 no packetize output
 declare -i NOPKT=0
+
+#if 1 no warning output
+declare -i NOWRN=0
    
 declare -A SORTREQ
 
@@ -678,7 +682,12 @@ function generate_setenv(){
 	echo " unset \$i" >> "$3"
 	echo "done" >> "$3"
 	echo "#done unset all" >> "$3"
-
+	echo "#current step" >> "$3"	
+	echo "export STEP=$2" >> "$3"
+	echo "#current step name" >> "$3"	
+	echo "export STEP_NAME=$4" >> "$3"
+	echo "#current info" >> "$3"	
+	echo "export INFO=$STEP_NAME:$4:$INFO" >> "$3"
 	echo "#current project" >> "$3"	
 	echo "export PROJECT=$1" >> "$3"
 	echo "#current project name" >> "$3"
@@ -1662,7 +1671,8 @@ local VAR=""
 local NAMES="step_name info cc cxx as ld nm ar strip cflags cppflags cxxflags \
 			ldflags libs cpath c_include_path cplus_include_path \
 			arch cross"
-if [ -f $REPO/conf.egg ]; then
+VV=$(getFileSize $REPO/conf.egg)
+if [ $VV -ne 0 ]; then
 	#set -x ; trap read debug
 	NUM=$(xmlstarlet sel -t  -v "count(/egg/defaults/step[@id=\"$1\"])" -n $REPO/conf.egg)	
 	if [ $NUM -eq 1 ]; then
@@ -1670,16 +1680,11 @@ if [ -f $REPO/conf.egg ]; then
 			VAR=$(echo $VV |   tr '[:lower:]' '[:upper:]')
 			VALUE=$(xmlstarlet sel -t  -v "egg/defaults/step[@id=\"$1\"]/$VV" -n $REPO/conf.egg)
 			if [ "$VALUE" ]; then 	
-				if [ "$VAR" == "INFO" ]
-				then
-					info_simple "$VALUE"
-				else				
-					print_ita "Set   ($1) " "$VAR" "$VALUE"
+					#print_ita "Set   ($1) " "$VAR" "$VALUE"
 					eval $VAR='$VALUE'
 					export "$VAR"
-				fi	
 			else
-				print_ita "Unset ($1) " "$VAR" "..."
+				#print_ita "Unset ($1) " "$VAR" "..."
 				unset "$VAR"	
 			fi
 		done
@@ -2331,6 +2336,23 @@ $SCRIPT_DIR/sources.sh
 	build_all_packet
 }
 
+#$1 staus 0,1,2,...?
+function getStatusString(){
+if [ $1 -eq 0 ]; then 
+	echo -n "none";
+else		
+	if [ $1 -eq 1 ]; then
+		echo -n "ready";
+	else	
+		if [ $1 -eq 2 ]; then 
+			echo -n "stable";
+			else
+			echo -n "$1: unknow";
+		fi	
+	fi
+fi
+}
+
 # $1 optional 
 function list_all(){
 local ID=0 
@@ -2338,6 +2360,7 @@ local V=""
 local PRI=""
 local NAME=""
 local PRJ=""
+local STMIN=1000
 while [ $ID -lt $MAX_STEP ] ; do
 	prepare_seq_priority $ID
 	for V in $SORTREQ; do
@@ -2345,10 +2368,15 @@ while [ $ID -lt $MAX_STEP ] ; do
 		PRI=$(echo $V | awk '{print $1}')
 		NAME=$(echo $V | awk '{print $2}')"_$ID"
 		PRJ=$(echo $V | awk '{print $3}')
-		print_ita "STEP : $ID" "PRI : $PRI" "$NAME"
+		ST=$( cat $BUILD/$PRJ/$NAME/status)
+		if [ $ST -lt $STMIN ]; then STMIN=$ST; fi
+		ST=$(getStatusString $ST)
+		print_ita "STEP : $ID" "$PRI - $ST" "$NAME"
 	done
 	ID=$((ID+1))
 done
+ST=$(getStatusString $STMIN)
+print_ita "STATUS" "$ST" "$PRJ"
 }
 
 
@@ -2543,7 +2571,7 @@ function reset_all(){
 	VV=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
 	if [ "$VV" == "Y" ]
 	then
-		local LL="$ROOT/build  $ROOT/source  $ROOT/images $ROOT/repo"
+		local LL="$ROOT/build  $ROOT/sources  $ROOT/images $ROOT/repo"
 		local TT=""
 		for TT in $LL
 			do			
@@ -2563,6 +2591,7 @@ function reset_all(){
 			print_ita " WARNING : "  "$ROOT/store" "not exist"	
 			rm -rf $ROOT	
 		fi	
+		tree $ROOT
 	fi
 }
 
@@ -2756,6 +2785,10 @@ case $i in
 	warning_c "quick mode , no packetize output..."
 	shift
 	;;	
+	-W|--nowarning)
+	NOWRN=1	
+	shift
+	;;
 	source)
 	torun=$SCRIPT_DIR/sources.sh
 	shift
