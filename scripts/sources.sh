@@ -94,8 +94,7 @@ if [  "$tmp" != "0"  ]; then
 			break
 		fi		
 	done
-	if [ $RES -eq 1 ]; then
-		print_ita "Key sign"  "$3" "...OK!"	
+	if [ $RES -eq 1 ]; then		
 		chmod 444 "$1"
 		chmod 444 "$1.$4"
 	else
@@ -613,6 +612,7 @@ echo "$TPWD"
 #$6 sign key file
 function download_packet(){
 local PW=""
+echo "---> $2"
 case  $2 in
 	"WGET")
 	wget_packet $1 $3 $4 $5 $6
@@ -1237,7 +1237,7 @@ else
 		create_patch_source "$ARGV"
 		else
 			if [  $FORCE -eq 0 ]; then
-				if [ $ARGV ]; then 
+				if [ "$ARGV" ]; then 
 					for i in $ARGV; do
 						verify_packet $i 
 						verify_patch $i 

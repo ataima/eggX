@@ -29,60 +29,61 @@ REPLACE=" -e \E[0m"
 #PUBLIC FUNCTION EXPORTED TO ALL GENERATED SCRIPTS 
 #$1 color
 #$2   string
-function print_c(){
+function print_c(){ #EX
 echo -e $(echo $1) "$2" $(echo $3) "$4"$(echo $5) "$6" $(echo $REPLACE)
-}
+} #EX
 
 
 # $1..3 argv
-function print_s_ita(){
+function print_s_ita(){ #EX
 local A1=$(printf "%-20s" "$1")
 local A2=$(printf "%-20s" "$2")
 local A3=$(printf "%-20s" "$3")
 echo  $(echo $GREEN_LIGHT) "$A1" $(echo $WHITE) "$A2" $(echo $RED_LIGHT) "$A3" $(echo $REPLACE)
-}
+} #EX
 
 
 
 
 #none
-function print_del_ita() {
+function print_del_ita(){ #EX
 print_s_ita "--------------------" "--------------------" "--------------------"
-}
+} #EX
+
 # $1..3 argv
-function print_ita(){
+function print_ita(){ #EX
 print_del_ita
 print_s_ita "$1" "$2" "$3"
-}
+} #EX
 
 #$1   string
 #$2   string
 #$3   string
-function error_c(){
+function error_c(){ #EX
 print_del_ita
 print_c "$RED_LIGHT" "ERROR : " "$BLUE_LIGHT" " - $1" 
 if [ "$2" ]; then
-	print_c "$WHITE" "	 >" "$YELLOW" " - $2" 
+	print_c "$WHITE" "	> " "$YELLOW" "- $2" 
 	if [ "$3" ]; then
-		print_c "$WHITE" "	 >" "$YELLOW" " - $3" 
+		print_c "$WHITE" "	> " "$YELLOW" "- $3" 
 		if [ "$4" ]; then
-			print_c "$WHITE" "	 >" "$YELLOW" " - $4" 
+			print_c "$WHITE" "	> " "$YELLOW" "- $4" 
 		fi
 	fi
 fi
-print_c "$YELLOW" "PATH :" $(pwd)
-print_c "$YELLOW" "FILE :" "$0"
-print_c "$YELLOW" "LINE :" "${BASH_LINENO[0]}"
+print_c "$GRAY_DARK" "PATH  :" "$GRAY_LIGHT" $(pwd)
+print_c "$GRAY_DARK" "FILE  :" "$GRAY_LIGHT" "$0"
+print_c "$GRAY_DARK" "LINE  :" "$GRAY_LIGHT" "${BASH_LINENO[0]}"
 print_del_ita
 exit 1
-}
+} #EX
 
 
 
 #$1   string
 #$2   string
 #$3   string
-function warning_c(){
+function warning_c(){ #EX
 if [ $MOREWRN -eq 0 ]; then return 0; fi
 print_del_ita
 print_c "$GREEN_LIGHT" "WARNING : " "$BLUE_LIGHT" "- $1" 
@@ -96,21 +97,21 @@ if [ "$2" ]; then
 	fi
 fi
 print_del_ita
-}
+} #EX
 
 
 
 #$1 full filename
-function check_exist(){
+function check_exist(){ #EX
 if  [ -e "$1" ] && [ -f "$1" ] ; then 
 	return 0
 fi
 return 1
-}
-############################## FUNCTION TO USE IN conf.egg to CHECK ....
+} #EX
+
 #$1 file to execute 
 #$2 string to compare
-function check_version(){
+function check_version(){ #EX
 if [ $# -ne 2 ]; then 
 	error_c "Missing parameter on call check_version" "$1 $(basename "$0")"
 fi
@@ -126,13 +127,13 @@ if [ ! "$(echo $VERSION | grep $2)" ]; then
 	error_c "Request $1 : $2 !=$VERSION" "$1 $(basename "$0")"
 fi
 return 0
-}
+} #EX
 
 
 #$1 projects name  
 #$2 step phase
 #$3 build value 0 to configure 1 to build 2 is stable ( configured + builded +installed )
-function check_build_status(){
+function check_build_status(){ #EX
 local RES=0
 if [ $# -ne 3 ]; then 
 	error_c "Missing parameter on call checck_build_status" "$1_$2 $(basename "$0")"
@@ -146,17 +147,17 @@ if [ $ST -ne $3 ]; then
 	error_c "Request $1_$2 Status : $3 != $ST " "$1_$2 $(basename "$0")"
 fi
 return 0
-}
+} #EX
 
 
 #$1 projects name  
 #$2 step phase
-function check_depend(){
+function check_depend(){ #EX
 check_build_status $1 $2 2
-}
+} #EX
 
 #$1 file name
-function check_file_exist(){
+function check_file_exist(){ #EX
 if [ $# -ne 1 ]; then 
 	error_c "Missing parameter on call build_status" " $(basename "$0")"
 fi
@@ -165,13 +166,10 @@ if [ $? -ne 0 ]; then
 	error_c "File $1 not exist!" " $(basename "$0")"
 fi
 return 0
-}
+} #EX
 
 
 
-#COPYTODEFAULTSCRIPT DO NOT REMOVE MARK TO COPY HEAD SCRIPT IN ALL GENERATED SCRIPT
-
-#PRIVATE FUNCTION 
 
 # $1  string 
 # $2  string
@@ -305,7 +303,7 @@ fi
 }
 
 #$1 fulle filename
-function getFileSize(){
+function getFileSize(){ #EX
 if  [ -e "$1" ] && [ -f "$1" ] 
 then 
 	echo   -n $(wc -c < "$1")
@@ -313,7 +311,7 @@ then
 fi
 echo -n 0
 return 0
-}
+} #EX
 
 
 
@@ -366,7 +364,6 @@ if [ "$OROOT" == "" ] ; then
 	OROOT="$HOME/eggX"
 fi
 
-SCRIPT_DIR=$OROOT/scripts
 OREPO=$OROOT/repo/.
 
 # eggX working path default before read general conf.egg
@@ -692,6 +689,8 @@ function generate_setenv(){
 	echo "export PROJECT=$1" >> "$3"
 	echo "#current project name" >> "$3"
 	echo "export PROJ_NAME=$1_$2" >> "$3"
+	echo "#current store sources" >> "$3"	
+	echo "export STORE=$STORE" >> "$3"
 	echo "#current sources for projects" >> "$3"	
 	echo "export SOURCES=$SOURCES" >> "$3"
 	echo "#current build path for projects" >> "$3"	
@@ -758,6 +757,7 @@ function setbuildstatus(){
 local FILEIN="$3/status"
 case $4 in
 	0|1|2)
+	chmod +w $FILEIN
 	echo $4 > $FILEIN
 	;;
 	*)
@@ -793,19 +793,47 @@ fi
 return $VV
 }
 
+
+function ex_getbuildstatus(){ #EX
+local VV=$(cat $STATUS)
+return $VV
+} #EX
+
+
+function ex_setbuildstatus(){ #EX
+case $1 in 
+	0|1)
+		echo $1 > $STATUS
+	;;
+	2)
+		echo $1 > $STATUS
+		chmod 444 $STATUS
+	;;
+	*)
+		error_c "Unknow state to build : $1" "project : $1"
+	;;
+esac
+} #EX
+
 #$1 file to create rewrite
 function prepare_script_head(){
-local LINE=$(sed -n '/COPYTODEFAULTSCRIPT/{=;p}' $0 | sed -e 's/ /\n/g' | head -n 1)
-LINE=$((LINE-1))
-head $0 -n $LINE > "$1"
-echo "">> "$1"
-echo "">> "$1"
+local II=""
+local FUNCEXP="print_c print_s_ita print_del_ita print_ita \
+				error_c warning_c check_exist \
+				check_version check_build_status check_depend \
+				check_file_exist ex_getbuildstatus ex_setbuildstatus \
+				getFileSize ex_input_param "
+			
+head $0 -n25 >> "$1"				 
+for II in $FUNCEXP; do
+	extract_function $II >> "$1"
+done	
 }
 
 
 #$1 projects
 #$2 Step
-#$3 title to echo...
+#$3 title to echo... TODO togliere
 #$4 file to write 
 #$5 BUILD NAME
 #$6 status to check value else exit :if $6=1000 don't check
@@ -814,32 +842,13 @@ function prepare_script_generic(){
 local VV=0
 VV=$6
 prepare_script_head "$4"
-echo "function getbuildstatus(){">> "$4"
-echo "local VV=\$(cat \$STATUS)">> "$4"
-echo "return \$VV">> "$4"
-echo "}">> "$4"
-echo "">> "$4"
-echo "">> "$4"
-echo "function setbuildstatus(){">> "$4"
-echo "case \$1 in ">>"$4"
-echo "	0|1)">>"$4"
-echo "	echo \$1 > \$STATUS">>"$4"
-echo "	;;">>"$4"
-echo "	2)">>"$4"
-echo "	echo \$1 > \$STATUS">>"$4"
-echo "	chmod 444 \$STATUS">>"$4"
-echo "	;;">>"$4"
-echo "	*)">>"$4"
-echo "	error_c \"Unknow state to build : \$1\" \"project : $1\"" >>"$4"
-echo "	;;">>"$4"
-echo "esac">>"$4"
-echo "}">> "$4"
-echo "">> "$4"
-echo "">> "$4"
 echo "source $BUILD/$5/$1_$2/setenv.sh">> "$4"
+echo "" >> "$4"
+echo "ex_input_param \$@">> "$4"
+echo "" >> "$4"
 if [ $VV -ne 1000 ]
 then
-	echo "getbuildstatus" >> "$4"
+	echo "ex_getbuildstatus" >> "$4"
 	echo "RES=\$?">> "$4"
 	echo "if [ \$RES -eq 2 ]; then " >> "$4"
 	echo "	print_ita \"Status\" \"stable\" \"skip $7 \"" >> "$4"
@@ -865,8 +874,58 @@ echo "" >> "$4"
 echo "" >> "$4"
 }
 
+#$1 function name to extract from egg function to export
+function extract_function(){
+echo ""
+echo ""
+cat $0 |  sed -n "/function $1(){ #EX/,/} #EX/p"
+echo ""
+echo ""
+}
 
 
+function ex_input_param(){ #EX
+if [ $# -ne 0 ]; then
+case $1 in 
+    -D|--debug)
+     set -x
+     shift
+     ;;
+    -S|--step)
+     set -x
+     trap read debug
+     shift
+     ;;
+esac     
+fi
+} #EX
+
+
+#$1 projects
+#$2 Step
+#$3 file to write 
+#$4 BUILD NAME
+function prepare_script_download(){
+prepare_script_head "$3"
+extract_function  test_sign_file >> "$3"
+extract_function  check_pgp >> "$3"
+extract_function  check_md5sum >> "$3"
+extract_function  check_sha1sum >> "$3"
+extract_function  check_sign >> "$3"
+extract_function  wget_packet >> "$3"
+extract_function ex_apply_patch >> "$3"	
+extract_function  git_packet >> "$3"
+extract_function  svn_packet>> "$3"
+extract_function  file_packet>> "$3"
+extract_function  apt_packet>> "$3"
+echo "" >> "$3"
+echo "ex_input_param \$@">> "$3"
+echo "" >> "$3"
+echo "PWD=\$(pwd)">> "$4"
+echo "cd \$BUILD" >> "$4"
+echo "" >> "$4"
+echo "" >> "$4"
+}
 
 
 #$1 projects
@@ -1010,7 +1069,7 @@ else
 fi
 echo " "  >> $3
 echo " "  >> $3
-echo "setbuildstatus 1">>"$3"
+echo "ex_setbuildstatus 1">>"$3"
 echo " "  >> $3
 echo " "  >> $3
 }
@@ -1056,7 +1115,7 @@ fi
 echo " "  >> $3
 echo "RES=\$?" >> $3
 echo "if [ \$RES -ne 0 ]; then" >> $3
-echo "    error_c \"Configure return error: \$RES \" \"  - project : \$PROJECT step \$STEP\"" >> $3
+echo "    error_c \"Configure return error: \$RES \" \"project : \$PROJECT step \$STEP\"" >> $3
 echo "fi" >> $3 
 }
 
@@ -1163,7 +1222,7 @@ else
 fi
 echo " "  >> "$SH_BUILD"
 echo " "  >> "$SH_BUILD"
-echo "setbuildstatus 2">> "$SH_BUILD"
+echo "ex_setbuildstatus 2">> "$SH_BUILD"
 echo " "  >> "$SH_BUILD"
 echo " "  >> "$SH_BUILD"
 #------------------------------------------------------------------------------------------------------------------
@@ -1223,7 +1282,7 @@ echo "rm -f \$BUILD_PATH/status">> "$SH_DISTCLEAN"
 echo "rm -rf \$BUILD/* " >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
-echo "setbuildstatus 0">> "$SH_DISTCLEAN"
+echo "ex_setbuildstatus 0">> "$SH_DISTCLEAN"
 end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
 }
 
@@ -1497,12 +1556,9 @@ local C_BUILD="$BUILD/$STEP_NAME/$1_$2"
 local C_FILE="$C_BUILD/bootstrap.sh"
 local DEST="$IMAGES/$STEP_NAME"
 local SRC=$(getSourcePath $1)
-rm  -rf "$C_BUILD"
-mkdir -p "$C_BUILD"
+if [ ! -e "$C_BUILD" ] ; then mkdir -p "$C_BUILD";fi
 if [ ! -e "$DEST" ] ; then mkdir -p "$DEST"; fi
-touch "$C_FILE"
-sync
-chmod +x "$C_FILE" 
+rm -f "$C_FILE"
 setbuildstatus "$1"  "$2" "$C_BUILD" 0
 prepare_script_generic "$1"  "$2" "START CONFIGURE" "$C_FILE" "$STEP_NAME"  2000 "configure"
 echo "declare -i start_time">> "$C_FILE"
@@ -1526,6 +1582,7 @@ else
 		add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 	else
 		if [ -e $SRC/Makefile ]; then
+			rm -rf $C_BUILD/build
 			ln -s  "$SRC" "$C_BUILD/build"
 			echo  "#no configure is needed .... ">> $C_FILE
 		else
@@ -1550,7 +1607,7 @@ echo "stop_time=\$(date +%s)">> "$C_FILE"
 echo "total_time=\$((stop_time-start_time))">> "$C_FILE" 
 echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$C_FILE" 
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
-#build
+chmod +x "$C_FILE" 
 add_build_script "$1" "$2"  "$C_BUILD"  "$STEP_NAME" "$SILENT" "$THREADS" 
 print_ita "STEP : $2:$3" "$1"  "configured done !"
 }
@@ -1651,6 +1708,642 @@ chmod +x "$FMAIN"
 }
 
 #$1 project
+#$2 source
+#$3 dest
+function ex_apply_patch(){ #EX
+
+patch -s  --directory="$2"  --input="$3"
+if [ $? -ne 0 ]; then
+	error_c "On apply patch " "   - $2 project $1"
+else
+	print_c "$GREEN_LIGHT" "   - Apply patch $2 OK" "$YELLOW" $1
+fi
+} #EX
+
+
+# $1 file out
+# $2 source
+# $3 patch
+#$4 project
+function write_apply_patch(){
+echo "if [ \$? -eq 99 ]; then" >>  "$1"
+echo "	ex_apply_patch $4 $2 $3" >>  "$1"
+echo "fi" >>  "$1"
+echo "" >>  "$1"
+echo "" >>  "$1"
+}
+
+
+# $1 project name
+# $2 link
+# $3 filename 
+# $4 password optional
+function svn_packet(){ #EX
+local RPWD=""
+print_c "$GREEN_LIGHT" "   - Svn update source" "$YELLOW" $1
+local PNAME="$2/$3"
+if [ "$4" !=  "" ]; then
+	RPWD="--non-interactive"
+fi
+if [ ! -d "$SOURCES/$1" ]; then 
+	mkdir  -p "$SOURCES/$1"
+	svn   -q co $PNAME  $SOURCES/$1 $RPWD
+	if [ $? -ne 0 ]; then 
+		error_c "Svn Checkout error " "   project $1"
+	fi 	
+else
+	if [ -d ".svn" ]; then 
+		local PWD=$(pwd)
+		cd "$SOURCES/$1"
+		svn   update  $RPWD
+		if [ $? -ne 0 ]; then 
+			error_c "Svn Update error " "   project $1"
+		fi 
+		cd "$PWD"
+	else
+		svn   -q co $PNAME  $SOURCES/$1  $RPWD
+		if [ $? -ne 0 ]; then 
+			error_c "Svn Checkout error " "   project $1"
+		fi 	
+	fi
+fi
+} #EX
+
+# $1 project name
+# $2 link
+# $3 filename 
+function git_packet(){ #EX
+print_c "$GREEN_LIGHT" "   - Git pull source" "$YELLOW" $1
+local PNAME="$2/$3"
+local PWD=$(pwd)
+if [ ! -d "$SOURCES/$1" ]; then 
+	mkdir  -p "$SOURCES/$1"
+	git   clone $PNAME  "$SOURCES/$1"
+	if [ $? -ne 0 ]; then 
+		error_c "Git clone error " "   project $1"
+	fi 
+else
+	cd "$SOURCES/$1"
+	git pull origin master
+	if [ $? -ne 0 ]; then 
+		error_c "Git Update error " "   project $1"
+	fi 
+	cd "$PWD"
+fi
+} #EX
+
+# $1 project name
+# $2 link
+# $3 filename 
+function file_packet(){ #EX
+local RES=0
+print_c "$GREEN_LIGHT" "   - File copy source $3" "$YELLOW" $1
+local PNAME=$2/$3
+check_exist $SOURCES/$1/$3
+if [ $? -ne 0 ]; then
+	rsync -ry $PNAME $SOURCES/$1/$3	
+	if [ $? -ne 0 ]; then
+		error_c "Cannot copy file $3" " project $1"
+	fi
+	RES=99
+fi
+return $RES
+} #EX
+
+
+# $1 project name
+# $2 source path with source created
+# $3 filename
+function apt_packet(){ #EX
+print_c "$GREEN_LIGHT" "   - File copy source $3" "$YELLOW" $1
+local PWD=$(pwd)
+rm -rf /tmp/$3
+mkdir -p /tmp/$3
+cd  /tmp/$3
+apt-get source $3
+if [ $? -ne  0 ] ; then 
+	error_c "apt-get  fail to download source packet" " project $1"
+fi
+if [ -d $2 ]; then 
+	if [ ! -d "$SOURCES/$1" ]; then
+		mkdir -p "$SOURCES/$1"
+	fi
+	cp -a /tmp/$3/$2/* "$SOURCES/$1"
+	if [ $? -ne  0 ] ; then 
+		error_c "Cannot copy downloaded source " " project $1"
+	fi
+fi
+cd $PWD
+rm -rf /tmp/$3
+} #EX
+
+
+# $1 file out
+# $2 method download
+# $3 url
+# $4 file
+# $5 packet name
+# $6 status
+# $7 key url
+# $8 key file
+function write_download_mode(){
+echo "" >>  "$1"
+echo "" >>  "$1"
+case  $2 in
+	"WGET")
+	echo "wget_packet $5 $3 $4 $7 $8">> "$1"
+	;;
+	"GIT")
+	echo "git_packet $5 $3 $4 ">> "$1"
+	;;
+	"SVN")
+	echo "svn_packet $5 $3 $4 ">> "$1"
+	;;
+	"FILE")
+	echo "file_packet $5 $3 $4 ">> "$1"
+	;;
+	"APT")
+	echo "apt_packet $5 $3 $4">> "$1"
+	;;
+	*)
+	error_c "Unknow method to get sources " "$2 - project : $7"
+	;;
+esac 
+}
+
+
+# $1 file out
+# $2 method download
+# $3 url
+# $4 file
+# $5 packet name
+# $6 status
+# $7 key url
+# $8 key file
+function create_download_source(){
+# $1=--force or not
+echo "if [ \$# -ne 0 ]; then">> "$1"
+echo "  case \$1 in ">> "$1"
+echo "    -F|--force)">> "$1"
+echo "     if [ -f \"$STORE/\$4\" ]; then" >> "$1"
+echo "       rm  -f  \"$STORE/\$4\"" >> "$1"
+echo "       rm  -f  \"$STORE/\$4.*\"" >> "$1"
+echo "     fi ">> "$1"
+echo "     if [ -d \"$SOURCES/\$7\" ]; then" >> "$1"
+echo "       rm -rf  \"$SOURCES/\$7\"" >> "$1"
+echo "     fi ">> "$1"
+echo "     ;;">> "$1"
+echo "  esac">> "$1"
+echo "fi">> "$1"
+echo "">> "$1"
+echo "">> "$1"
+echo "ROOT=$ROOT">> "$1"
+echo "REPO=$REPO">> "$1"
+echo "SOURCES=$SOURCES">> "$1"
+echo "IMAGES=$IMAGES/$STEP_NAME">> "$1"
+echo "REPOBACKUP=$REPOBACKUP">> "$1"
+echo "BUILD=$BUILD/$STEP_NAME">> "$1"
+echo "STORE=$STORE">> "$1"
+echo "STATUS=$BUILD/$STEP_NAME/$6/status">> "$1"
+echo "MOREWRN=1">> "$1"
+echo "check_exist \$STATUS">> "$1"
+echo "if [ \$? -eq 0 ]; then ">> "$1"
+echo "   chmod +w \$STATUS" >> "$1"
+echo "fi" >> "$1"
+echo "ex_setbuildstatus 0" >> "$1"
+write_download_mode $@
+}
+
+#$1 source path
+#$2 file
+#$3 sign file
+# ex file.tar & file.tar.sign ok check
+# ex file.tar.gz  & file.tar.gz.sign  ok ckeck
+# ex file.tar.gz  & file.tar.sign -> gunzip tar and check 
+function test_sign_file(){ #EX
+local RES=100
+local OUTNAME="$2"
+local BNAME_FILE=$(basename $2)
+local BNAME_SIGN=$(basename $3)
+local EXT=${BNAME_FILE##*.}
+local V=$(echo $BNAME_SIGN | grep $EXT )
+local TT=$(echo $EXT |   tr '[:lower:]' '[:upper:]')
+if [ ! $V ]; then 
+	OUTNAME="$1/"$(echo $BNAME_FILE | sed "s/.$EXT//g")
+	V=$(ls -al "$OUTNAME" )
+	if [  !  -f  "$OUTNAME"  ]; then
+		#no match V="" expand file 
+		case $TT in
+			"XZ")		
+				unxz "$2"
+				touch "$2"
+			;;
+			"GZ")
+				gunzip "$2"
+				touch "$2"
+			;;
+			"BZ2")
+				bzip2 -d  "$2"
+				touch "$2"
+			;;
+			*)
+			error_c "Unknow methos for ext $EXT  " "$i - project : $3"
+			;;
+		esac
+	fi
+fi
+echo $OUTNAME
+} #EX
+
+# verify pgp sign 
+#$1 file
+#$2 remote file.sig
+#$3 project
+#$4 ext sig,asc,gpg
+function check_pgp(){ #EX
+local RES=0
+local KEYS=""
+#trap read debug
+if [ ! -f  $1.$4 ]; then 
+	wget  --show-progress -q "$2" -O "$1.$4"
+	RES=$?
+	if [ $RES -eq 8 ]; then 
+	#file not found
+		rm -f "$1.$4"
+		return $RES
+	fi		
+fi	
+
+tmp=$(getFileSize  "$1.$4" )
+tmp=$(getFileSize  "$1.$4" )
+if [  "$tmp" != "0"  ]; then	
+        gpg --quiet --verify    "$1.$4" 
+        RES=$?
+        if [ $RES -eq 0 ]; then
+                chmod 444 "$1"
+                chmod 444 "$1.$4"
+                RES=1
+        else
+                error_c "gpg chek fail " "file  $2" "have to import the public key" "or bad sign" "project $3"
+		rm -f  "$1.$4"
+		RES=$?
+                if [ $RES -ne 1 ]; then
+                                RES=8
+                fi
+        fi
+else
+        rm -f  "$1.$4"
+fi
+return $RES
+} #EX
+
+
+
+# verify md5 sum 
+#$1 file
+#$2 remote file.md5
+#$3 project
+function check_md5sum(){ #EX
+local RES=0
+if [ ! -f  $1.md5 ]; then 
+	wget  --show-progress -q "$2.md5" -O "$1.md5"
+	RES=$?
+	if [ $RES -eq 8 ]; then 
+	#file not found
+		rm -f "$1.md5"
+		return $RES
+	fi			
+fi	
+#	tmp=$( ls -al  "$1.md5"  |  awk  '{print $5}' )
+#	if [  $tmp -ne 0 ]; then
+		md5sum  -c "$1.md5" >  /dev/null 
+		if [ $? -eq 0 ]; then
+			chmod 444 "$1"
+			chmod 444 "$1.md5"
+			RES=1
+		else
+			print_c "$RED_LIGHT" "   - MD5 check source FAIL" "$YELLOW" $3	 
+			rm -f "$1.md5"
+			rm -f "$1"
+			RES=99
+		fi 
+#	else
+#		rm -f  "$1.md5"
+#	fi
+return $RES
+} #EX
+
+# verify sha1 sum 
+#$1 file
+#$2 remote file.sha1
+#$3 project
+function check_sha1sum(){ #EX
+local RES=0
+if [ ! -f  $1.sha1 ]; then
+	wget  --show-progress -q "$2.sha1" -O "$1.sha1"
+	RES=$?
+	if [ $RES -eq 8 ]; then 
+	#file not found
+		rm -f "$1.sha1"
+		return $RES
+	fi	
+fi	
+#	tmp=$( ls -al  "$1.sha1"  |  awk  '{print $5}' )
+#	if [  $tmp -ne 0 ]; then
+		sha1sum  -c "$1" > /dev/null
+		if [ $? -eq 0 ]; then
+			chmod 444 "$1"
+			chmod 444 "$1.sha1"
+			RES=1
+		else
+			print_c "$RED_LIGHT" "   - SHA1 check source FAIL" "$YELLOW" $3	
+			rm -f "$1.sha1"
+			rm -f "$1"
+			RES=99
+		fi 
+#	else
+#		rm -f  "$1.sha1"	
+#	fi
+return $RES
+} #EX
+
+#$1 filename 
+#$2 remote repository
+#$3 project
+#$4 custom sign file name 
+function check_sign(){ #EX
+local RES=0
+local ASIGN="sig md5 sha1 sign asc"
+local i=""
+for i in $ASIGN; do
+ case $i in
+	"sig"|"sign"|"asc")
+	if [ $4 -eq 1 ]; then 
+		check_pgp $1 $2 $3 $i  
+	else
+		check_pgp $1 "$2.$i" $3 $i  
+	fi
+	RES=$?	
+	;;
+	"md5")
+	if [ $4 -eq 1 ]; then 
+		check_md5sum $1 $2 $3
+	else
+		check_md5sum $1 "$2.$i" $3
+	fi
+	RES=$?
+	;;
+	"sha1")
+	if [ $4 -eq 1 ]; then 
+		check_sha1sum $1 $2 $3
+	else
+		check_sha1sum $1 "$2.$i" $3
+	fi
+	RES=$?
+	;;
+	*)
+	error_c "Unknow sign " "$i - project : $3"
+	;;	
+esac 
+if [ $RES -eq 1 ] || [ $RES -eq 99 ]; then 
+	break
+fi
+done
+return $RES
+} #EX
+
+
+# get a packet from internet
+# $1 project name
+# $2 link
+# $3 filename 
+# $4 sign key furl
+# $5  sign key file
+function wget_packet(){ #EX
+local RES=0
+local DOWN=0
+local CUSTOM=0
+local FILEIN="$STORE/$3"
+print_c "$GREEN_LIGHT" "   - Download $1" "$YELLOW" $3
+local PNAME="$2/$3"
+#set -x ; trap read debug
+tmp=$(getFileSize "$FILEIN")
+if [ "$tmp" == "0" ]; then
+	rm -f "$FILEIN"
+	wget  --show-progress -q  "$PNAME" -O "$FILEIN"
+	RES=$?
+	if [ $RES -ne 0 ]; then
+		error_c  "Wget fail : error $RES " " file $PNAME project $1"
+	else
+		DOWN=1
+	fi
+else
+	print_c "$GREEN_LIGHT" "   - Checking $1 source from local store " "$YELLOW" "$tmp bytes"
+fi
+if [  $4 ] && [ $5 ]; then
+		FILEIN=$(test_sign_file "$STORE" "$STORE/$3" "$4/$5") 		
+		PNAME="$4/$5"
+		CUSTOM=1
+	fi
+tmp=$(getFileSize "$FILEIN")	
+if [ "$tmp" != "0" ]; then	
+	check_sign "$FILEIN" "$PNAME" "$1" "$CUSTOM"
+	RES=$?
+	if [ $RES -eq 99 ]; then 
+		wget_packet $1 $2 $3 $4 $5
+	fi
+	if [ $RES -eq 8 ]; then
+	warning_c "No sign file found !" "$3" "add md5sum to it"
+	md5sum "$STORE/$3" > "$STORE/$3.md5"
+	chmod 444 	 "$STORE/$3.md5"
+	RES=1
+	fi
+	if [ $RES -eq 1 ]; then 
+		if [ ! -d "$SOURCES/$1" ]; then 
+			mkdir -p "$SOURCES/$1"
+		fi
+		if [ ! -e "$SOURCES/$1" ] ; then
+			mkdir -p "$SOURCES/$1"
+		fi
+		#echo "-->tar -xf $REPO/$1/$3 -C  $SOURCES/$1"
+		tar -xf "$FILEIN" -C  "$SOURCES/$1"
+		if [ $? -ne 0 ]; then
+			error_c "Unable to untar file " "$REPO/$1/$3 project $1"
+		fi
+	fi
+fi
+if [ $RES -eq 1 ] && [ $DOWN -eq 1 ] ; then 
+   RES=99; 
+else
+	if [ $RES -eq 1 ] && [ $DOWN -eq 0 ] ; then 
+	RES=0
+	fi
+fi
+return $RES
+} #EX
+
+
+
+# $1 packet name
+# $2 step
+# $3 build
+# $4 file out
+function get_source_param_packet(){
+local RES=0
+local tmp=""
+local REMOTE=""
+local MODE=""
+local PACKET=""
+local NUM=0
+local KEY_URL=""
+local KEY_FILE=""
+check_project $1
+if [ $? -eq 1 ]; then
+#exist project name <name> in repo 
+#load prj/conf.egg to download the packet
+#conf.h REMOTE link packet name md5sum
+	if [ -f $REPO/$1/conf.egg ]; then
+		MODE=$(xml_value $1 "/egg/project/remote/method")
+		equs "$MODE"  
+		if [ $? -eq 1 ]; then 
+			error_c "Missing  download mode" "project : $1"
+		fi
+		REMOTE=$(xml_value $1 "/egg/project/remote/url")
+		equs "$REMOTE" 
+		if [ $? -eq 1 ]; then 
+			error_c "Missing remote repository name" "project : $1"
+		fi
+		PACKET=$(xml_value $1 "/egg/project/remote/file")
+		equs "$PACKET" 
+		if [ $? -eq 1 ]; then 
+			error_c "Missing  packet name " "project : $1"
+		fi	
+		xml_count $1 "/egg/project/remote/key"
+		NUM=$?
+		if [ $NUM -ne 0 ]; then 
+			KEY_URL=$(xml_value $1 "/egg/project/remote/key/url")
+			equs "$KEY_URL" 
+			if [ $? -eq 1 ]; then 
+				error_c "Missing  key url " "project : $1"
+			fi
+			KEY_FILE=$(xml_value $1 "/egg/project/remote/key/file")
+			equs "$KEY_FILE" 
+			if [ $? -eq 1 ]; then 
+				error_c "Missing  key file " "project : $1"
+			fi
+		fi
+		MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
+		prepare_script_download "$1" "$2"  "$4" "$3" 
+		create_download_source "$4"  "$MODE"  "$REMOTE" "$PACKET"  "$1"  "$1_$2" "$KEY_URL" "$KEY_FILE" 
+	else
+		error_c "Missing conf.egg file " "project : $1"
+	fi
+else
+	error_c "Missing project in $REPO " "project : $1"
+fi
+}
+
+
+
+
+# $1 packet name
+# $2 step
+# $3 build
+# $4 file out
+function get_patch_param_packet(){
+local -i tmp=0
+local -i i=0
+local REMOTE=""
+local MODE=""
+local PACKET=""
+check_project $1
+if [ $? -eq 1 ]; then
+#exist project name <name> in repo 
+#load prj/conf.egg to download the packet
+#conf.h REMOTE link packet name md5sum
+	if [ -f $REPO/$1/conf.egg ]; then		
+		xml_count $1 "/egg/project/patch"
+		tmp=$?
+		if [ $tmp -ne 0 ]; then
+			while [ $i -lt $tmp ]; do
+				MODE=$(xml_value $1 "/egg/project/patch[@id='$i']/method")
+				equs "$MODE"  
+				if [ $? -eq 1 ]; then 
+					error_c "Missing  patch download mode" "project : $1"
+				fi
+				REMOTE=$(xml_value $1 "/egg/project/patch[@id='$i']/url")
+				equs "$REMOTE" 
+				if [ $? -eq 1 ]; then 
+					error_c "Missing patch remote repository name" "project : $1"
+				fi
+				PACKET=$(xml_value $1 "/egg/project/patch[@id='$i']/file")
+				equs "$PACKET" 
+				if [ $? -eq 1 ]; then 
+					error_c "Missing  patch packet name " "project : $1"
+				fi	
+				xml_count $1 "/egg/project/patch[@id='$i']/key"
+				NUM=$?
+				if [ $NUM -ne 0 ]; then 
+					KEY_URL=$(xml_value $1 "/egg/project/patch[@id='$i']/key/url")
+					equs "$KEY_URL" 
+					if [ $? -eq 1 ]; then 
+						error_c "Missing  key url " "project : $1"
+					fi
+					KEY_FILE=$(xml_value $1 "/egg/project/patch[@id='$i']/key/file")
+					equs "$KEY_FILE" 
+					if [ $? -eq 1 ]; then 
+						error_c "Missing  key file " "project : $1"
+					fi
+				fi
+				MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]') 
+				prepare_script_download "$1" "$2"  "$4" "$3"
+				create_download_source "$4"  "$MODE"  "$REMOTE" "$PACKET"  "$1"  "$1_$2" "$KEY_URL" "$KEY_FILE"
+				write_apply_patch "$4"  "$(getSourcePath $1)" "$SOURCES/$1/$PACKET" "$1"
+				i=$((i+1))
+			done 	
+		fi
+	else
+		error_c "Missing conf.egg file " "project : $1"
+	fi
+else
+	error_c "Missing project in $REPO " "project : $1"
+fi
+}
+
+#$1 project
+#$2 build phase number 0,1,2.....
+#$3 make priority
+#$4 build name
+function check_source(){ 
+local -i RES=0
+local S_BUILD="$BUILD/$STEP_NAME/$1_$2"
+mkdir -p "$BUILD"
+mkdir -p "$BUILD/$STEP_NAME"
+mkdir -p "$S_BUILD"
+local S_FILE="$S_BUILD/download.sh"
+rm -f "$S_FILE"
+get_source_param_packet "$1" "$2" "$4" "$S_FILE" 	
+end_script_generic "$1" "$2" "$4" "$S_FILE" 
+chmod +x "$S_FILE"
+}
+
+
+
+#$1 project
+#$2 build phase number 0,1,2.....
+#$3 make priority
+#$4 build name
+function check_patch(){ 
+local -i RES=0
+local S_BUILD="$BUILD/$STEP_NAME/$1_$2"
+local S_FILE="$S_BUILD/patch.sh"
+rm -f "$S_FILE"
+get_patch_param_packet "$1" "$2" "$4" "$S_FILE" 
+end_script_generic "$1" "$2" "$4" "$S_FILE" 
+chmod +x "$S_FILE"
+}
+
+#$1 project
 #$2 build phase number 0,1,2.....
 #$3 make priority
 #$4 build name
@@ -1700,6 +2393,95 @@ else
 fi
 }
 
+
+
+#$1 number id
+#$@ argv optional
+function conf_download_all(){
+#set -x; trap read debug
+local V=""
+isNumber $1
+if [ $? -ne 0 ]; then
+	error_c "first input param must be the step number!" "configure_all <step x> <optional projets>"
+fi
+
+local ID=$1
+local PRJS=""
+local PRI=""
+local NAME=""
+shift
+
+if [ "$#" -eq  0 ]; then
+	PRJS=$ALL_PACKETS
+else
+	PRJS=$@
+fi
+
+prepare_seq_priority "$ID"
+
+MYPATH=$START_PATH
+V=${SORTREQ[0]}
+if [ "$V" ]; then
+	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
+	PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')	
+	if [ ! -e "$BUILD/$STEP_NAME" ]; then
+		mkdir -p "$BUILD/$STEP_NAME"
+	fi
+	
+	for V in $SORTREQ; do
+		PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
+		PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')		
+		if [ "$PRJS" ] ; then 
+			check_source  "$PRJS" "$ID" "$PRI" "$STEP_NAME"
+		fi
+	done
+fi	
+}
+
+#$1 number id
+#$@ argv optional
+function conf_patch_all(){
+#set -x; trap read debug
+local V=""
+isNumber $1
+if [ $? -ne 0 ]; then
+	error_c "first input param must be the step number!" "configure_all <step x> <optional projets>"
+fi
+
+local ID=$1
+local PRJS=""
+local PRI=""
+local NAME=""
+shift
+
+if [ "$#" -eq  0 ]; then
+	PRJS=$ALL_PACKETS
+else
+	PRJS=$@
+fi
+
+prepare_seq_priority "$ID"
+
+MYPATH=$START_PATH
+V=${SORTREQ[0]}
+if [ "$V" ]; then
+	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
+	PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')	
+	if [ ! -e "$BUILD/$STEP_NAME" ]; then
+		mkdir -p "$BUILD/$STEP_NAME"
+	fi
+	
+	for V in $SORTREQ; do
+		PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
+		PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')		
+		if [ "$PRJS" ] ; then 
+			check_patch  "$PRJS" "$ID" "$PRI" "$STEP_NAME"
+		fi
+	done
+fi	
+}
+
+
 #$1 number id
 #$@ argv optional
 function configure_all_packet(){
@@ -1721,14 +2503,6 @@ if [ "$#" -eq  0 ]; then
 else
 	PRJS=$@
 fi
-
-#unset BSEQ
-#declare -A BSEQ
-#read_default_for_step "$ID"
-#for V in $PRJS; do
-#	insert_packet "$V" "$ID"
-#done
-#SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 
 prepare_seq_priority "$ID"
 
@@ -1791,7 +2565,7 @@ function print_conf_msg(){
 print_ita  "CONF  : $1"  "$2"  "$3"
 } 
 
-#print build start 
+ 
 #$1 pririty
 #$2 name
 #$3 project
@@ -1799,6 +2573,21 @@ function print_clean_msg(){
 print_ita  "CLEAN : $1"  "$2"  "$3"
 }
 
+#$1 pririty
+#$2 name
+#$3 project
+function print_download_msg(){
+print_ita  "DWLOAD: $1"  "$2"  "$3"
+} 
+
+
+
+#$1 pririty
+#$2 name
+#$3 project
+function print_patch_msg(){
+print_ita  "PATCH: $1"  "$2"  "$3"
+} 
 
 #none
 function build_all(){
@@ -1818,7 +2607,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 		PRJ=$(echo $V | awk '{print $3}')
 		if [ -d "$BUILD/$PRJ/$NAME" ]; then
 			print_conf_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$PRJ/$NAME"
+			cd "$BUILD/$PRJ/$NAME"		
 			"$BUILD/$PRJ/$NAME/bootstrap.sh"
 			if [ $? -ne 0 ] ; then
 				exit -1;
@@ -1841,6 +2630,83 @@ done
 if [ $HAVE_BUILD -ne 0 ]; then 
 	packetize_all
 fi	
+}
+
+#none
+function download_all(){
+#set -x; trap read debug
+local HAVE_BUILD=0
+local STATUS=0
+local ID=0 
+local V=""
+local PRI=""
+local NAME=""
+local PRJ=""
+local ALL=""
+local LPWD=$(pwd)
+while [ $ID -lt $MAX_STEP ] ; do
+	prepare_seq_priority $ID
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		PRI=$(echo $V | awk '{print $1}')
+		NAME=$(echo $V | awk '{print $2}')
+		PRJ=$(echo $V | awk '{print $3}')		
+		V=$(echo $ALL | grep $NAME)
+		if [ "$V" == "" ]; then 
+			V="$NAME""_$ID"
+			if [ -d "$BUILD/$PRJ/$V" ]; then
+				print_download_msg "$PRI" "$NAME" "$PRJ"
+				cd "$BUILD/$PRJ/$V"
+				"$BUILD/$PRJ/$V/download.sh"
+				if [ $? -ne 0 ] ; then
+					exit -1;
+				fi	
+				ALL="$ALL $NAME"
+			fi
+		fi
+	done
+	ID=$((ID+1))
+done	
+cd "$LPWD"
+
+}
+
+#none
+function patch_all(){
+#set -x; trap read debug
+local HAVE_BUILD=0
+local STATUS=0
+local ID=0 
+local V=""
+local PRI=""
+local NAME=""
+local PRJ=""
+local ALL=""
+local PPWD=$(pwd)
+while [ $ID -lt $MAX_STEP ] ; do
+	prepare_seq_priority $ID
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		PRI=$(echo $V | awk '{print $1}')
+		NAME=$(echo $V | awk '{print $2}')
+		PRJ=$(echo $V | awk '{print $3}')		
+		V=$(echo $ALL | grep $NAME)
+		if [ "$V" == "" ]; then 
+			V="$NAME""_$ID"
+			if [ -d "$BUILD/$PRJ/$V" ]; then
+				print_patch_msg "$PRI" "$NAME" "$PRJ"
+				cd "$BUILD/$PRJ/$V"
+				"$BUILD/$PRJ/$V/patch.sh"
+				if [ $? -ne 0 ] ; then
+					exit -1;
+				fi	
+				ALL="$ALL $NAME"
+			fi
+		fi
+	done
+	ID=$((ID+1))
+done	
+cd "$PPWD"
 }
 
 
@@ -2013,6 +2879,7 @@ local NAME=""
 local PRJ=""
 local SEQ=""
 local FUNCTION=""
+local FBUILD=""
 if [ ! "$1" ]; then
 	error_c "Input missing function to execute  !!"
 fi
@@ -2045,8 +2912,9 @@ for V in $PRJ_NAMES; do
 		PRI=$(echo $SEQ | awk '{print $1}')
 		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
 		PRJ=$(echo $SEQ | awk '{print $3}')
-		if [ -d "$BUILD/$V/$NAME" ]; then
-			$FUNCTION   "$PRI" "$NAME" "$PRJ" "$BUILD/$V/$NAME"
+		FBUILD="$BUILD/$PRJ/$NAME"
+		if [ -d "$FBUILD" ]; then
+			$FUNCTION   "$PRI" "$NAME" "$PRJ" "$FBUILD"
 		fi
 	done 
 done
@@ -2074,6 +2942,49 @@ fi
 function build_single(){
 local ARGV="$@"
 exec_single "exec_build" $ARGV
+}
+
+
+
+function exec_download(){
+#set -x ; trap read debug
+local PRI=$1
+local NAME=$2
+local PRJ=$3
+local PATH=$4
+print_download_msg "$PRI" "$NAME" "$PRJ"
+cd "$PATH"
+"$PATH/download.sh"
+if [ $? -ne 0 ] ; then
+	exit -1;
+fi
+}
+
+#$@ from argv build.sh
+function download_single(){
+local ARGV="$@"
+exec_single "exec_download" $ARGV
+}
+
+
+function exec_patch(){
+#set -x ; trap read debug
+local PRI=$1
+local NAME=$2
+local PRJ=$3
+local PATH=$4
+print_patch_msg "$PRI" "$NAME" "$PRJ"
+cd "$PATH"
+"$PATH/patch.sh"
+if [ $? -ne 0 ] ; then
+	exit -1;
+fi
+}
+
+#$@ from argv build.sh
+function patch_single(){
+local ARGV="$@"
+exec_single "exec_patch" $ARGV
 }
 
 function exec_compile(){
@@ -2146,6 +3057,26 @@ print_del_ita
 }
 
 #$@
+function download_all_packet(){
+if [ "$1" == "" ]; then
+	download_all
+else
+	download_single $@
+fi
+print_del_ita
+}
+
+#$@
+function patch_all_packet(){
+if [ "$1" == "" ]; then
+	patch_all
+else
+	patch_single $@
+fi
+print_del_ita
+}
+
+#$@
 function compile_all_packet(){
 if [ "$1" == "" ]; then
 	compile_all
@@ -2179,7 +3110,7 @@ print_del_ita
 
 #$ARGV TODO
 function config_all_step(){
-declare -i CONF_NUM=0
+local -i CONF_NUM=0
 if [ $# -eq 0 ]; then
 	while [ $CONF_NUM -lt $MAX_STEP ]; do 
 		configure_all_packet  $CONF_NUM $@
@@ -2204,7 +3135,58 @@ fi
 print_del_ita
 }
 
+#$ARGV TODO
+function conf_download_all_step(){
+local -i DW_NUM=0
+if [ $# -eq 0 ]; then
+	while [ $DW_NUM -lt $MAX_STEP ]; do 
+		conf_download_all  $DW_NUM $@
+		if [ $? -ne 0 ]; then 
+			exit 1
+		fi
+		DW_NUM=$((DW_NUM+1))
+	done
+else
+	isNumber $1
+	if [ $? -eq 0 ]; then	
+		DW_NUM=$1
+		shift
+		conf_download_all $DW_NUM $@
+		if [ $? -ne 0 ]; then 
+			exit 1
+		fi
+	else
+		error_c " Missing step number " "usage ./egg source 0<-- step "
+	fi
+fi
+}
 
+
+#$ARGV TODO
+function conf_patch_all_step(){
+local -i DW_NUM=0
+if [ $# -eq 0 ]; then
+	while [ $DW_NUM -lt $MAX_STEP ]; do 
+		conf_patch_all  $DW_NUM $@
+		if [ $? -ne 0 ]; then 
+			exit 1
+		fi
+		DW_NUM=$((DW_NUM+1))
+	done
+else
+	isNumber $1
+	if [ $? -eq 0 ]; then	
+		DW_NUM=$1
+		shift
+		conf_patch_all $DW_NUM $@
+		if [ $? -ne 0 ]; then 
+			exit 1
+		fi
+	else
+		error_c " Missing step number " "usage ./egg patch 0<-- step "
+	fi
+fi
+}
 
 #$ARGV 
 # ex 0 gcc -> try step of project gcc
@@ -2304,9 +3286,6 @@ else
 				self.conf)
 				$EDITOR "$OREPO/conf.egg" > /dev/null  &
 				;;
-				self.source)
-				$EDITOR "$SCRIPT_DIR/sources.sh" > /dev/null  &
-				;;			
 				self.repo)
 				edit_repo_files
 				;;
@@ -2327,13 +3306,17 @@ exit 0
 
 
 #$ARGV
-function redoall(){
-$SCRIPT_DIR/sources.sh
-	if [ $? -ne 0 ]; then 
-		exit 1
-	fi
-	config_all_step
-	build_all_packet
+function source_download(){
+	conf_download_all_step $@
+	download_all_packet $@
+	conf_patch_all_step $@
+	patch_all_packet $@
+}
+#$ARGV
+function redoall(){	        
+	source_download	
+	config_all_step	
+	build_all_packet	
 }
 
 #$1 staus 0,1,2,...?
@@ -2347,7 +3330,7 @@ else
 		if [ $1 -eq 2 ]; then 
 			echo -n "stable";
 			else
-				if [ $1 -eq 2 ]; then 
+				if [ $1 -eq 1000 ]; then 
 					echo -n "to configure";
 				else
 					echo -n "$1: unknow";
@@ -2820,7 +3803,7 @@ case $i in
 	shift
 	;;
 	source)
-	torun=$SCRIPT_DIR/sources.sh
+	torun=source_download
 	shift
 	break
 	;;
