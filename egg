@@ -83,7 +83,7 @@ exit 1
 #$2   string
 #$3   string
 function warning_c(){
-if [ $NOWRN -ne 0 ]; then return 0; fi
+if [ $MOREWRN -eq 0 ]; then return 0; fi
 print_del_ita
 print_c "$GREEN_LIGHT" "WARNING : " "$BLUE_LIGHT" "- $1" 
 if [ "$2" ]; then
@@ -398,8 +398,8 @@ HW_ARCH=""
 #if 1 no packetize output
 declare -i NOPKT=0
 
-#if 1 no warning output
-declare -i NOWRN=0
+#if 1 yes warning output
+declare -i MOREWRN=0
    
 declare -A SORTREQ
 
@@ -2347,7 +2347,11 @@ else
 		if [ $1 -eq 2 ]; then 
 			echo -n "stable";
 			else
-			echo -n "$1: unknow";
+				if [ $1 -eq 2 ]; then 
+					echo -n "to configure";
+				else
+					echo -n "$1: unknow";
+			fi
 		fi	
 	fi
 fi
@@ -2368,7 +2372,12 @@ while [ $ID -lt $MAX_STEP ] ; do
 		PRI=$(echo $V | awk '{print $1}')
 		NAME=$(echo $V | awk '{print $2}')"_$ID"
 		PRJ=$(echo $V | awk '{print $3}')
-		ST=$( cat $BUILD/$PRJ/$NAME/status)
+		ST=$(getFileSize $BUILD/$PRJ/$NAME/status)
+		if [ $ST -eq 0 ]; then 
+			ST=1000
+		else	
+			ST=$( cat $BUILD/$PRJ/$NAME/status)
+		fi	
 		if [ $ST -lt $STMIN ]; then STMIN=$ST; fi
 		ST=$(getStatusString $ST)
 		print_ita "STEP : $ID" "$PRI - $ST" "$NAME"
@@ -2543,6 +2552,7 @@ function usage(){
 	print_c "$BLUE_LIGHT" "usage : ./build.sh <option> command  <args to pass subcommand>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -D or --debug : set debug mode" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -Q or --nopacketize : dont craete output tar" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option +W or --warning : print also warnings" 
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : download all sources from repo projects"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure repo projects "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure and build repo projects"
@@ -2717,6 +2727,7 @@ help_c "command : packetize" \
 function help_listall(){
 help_c "command : listall" \
 "list all repo step-project in build ordered sequence" \
+"the last line show the all project status...." \
 "ex ./egg listall"
 }
 
@@ -2743,25 +2754,44 @@ help_c "command : source" \
 "ex ./egg source"
 }
 
+function help_options(){
+help_c "command : before any command you can set an option" \
+"option -D or --debug : set debug mode"  \
+"option -Q or --nopacketize : dont craete output tar"  \
+"option +W or --warning : print also warnings" \
+"ex ./egg +W build"
+}
+
 function help_command(){
-local COMMANDS="source shell configure edit build reset \
-					clean multi distclean do redoall \
-					packetize listall setrepo freeze"
+local OK=0
+local -a  COMMANDS=('source' 'shell' 'configure' 'edit' 'build' 'reset' \
+					'clean' 'multi' 'distclean' 'do' 'redoall' \
+					'packetize' 'listall' 'setrepo' 'freeze' 'options')
 local VV=""
 local torun=""
 if [ $# -eq 0 ]; then
 	warning_c "missing argument" "help command require an argument! ex ./egg help do"
 	for VV in $COMMANDS ; do 
 			torun="help_$VV"
-			"$torun"			
+			"$torun"		
+			OK=1	
 	done
 else
 	for VV in $COMMANDS ; do 
 		if [ "$VV" == "$1" ]; then 
 			torun="help_$VV"
 			"$torun"
+			OK=1
 		fi		
 	done
+fi
+
+if [ $OK -eq 0 ]; then
+	help_c "Available help commands:" \
+	"${COMMANDS[0]} ${COMMANDS[1]} ${COMMANDS[2]} ${COMMANDS[3]}" \
+	"${COMMANDS[4]} ${COMMANDS[5]} ${COMMANDS[6]} ${COMMANDS[7]}" \
+	"${COMMANDS[8]} ${COMMANDS[9]} ${COMMANDS[10]} ${COMMANDS[11]}" \
+	"${COMMANDS[12]} ${COMMANDS[13]} ${COMMANDS[14]} ${COMMANDS[15]}" 	
 fi
 
 }
@@ -2785,8 +2815,8 @@ case $i in
 	warning_c "quick mode , no packetize output..."
 	shift
 	;;	
-	-W|--nowarning)
-	NOWRN=1	
+	+W|--warning)
+	MOREWRN=1	
 	shift
 	;;
 	source)
