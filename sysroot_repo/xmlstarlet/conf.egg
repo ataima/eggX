@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>xmlstarlet</name>
+		<download>check</download>		
+		<remote>
+			<method>wget</method>
+			<url>https://downloads.sourceforge.net/project/xmlstar/xmlstarlet/1.6.1</url>
+			<file>xmlstarlet-1.6.1.tar.gz</file>		
+		</remote>
+		<patch id="0">
+			<method>file</method>
+			<url>$REPO/xmlstarlet</url>
+			<file>0001-usage2c.awk-fix-wrong-basename-regexp.patch</file>		
+		</patch>
+		<build>
+			<step id="1">				
+				<silent>yes</silent>
+				<threads>8</threads>
+				<path>
+					<pre>
+						<set>$DEPLOY/bin</set>
+						<add id="1">DEPLOYo/$CROSS/bin</add>						
+					</pre>	
+				</path>
+				<configure>
+					<extra id="0">--prefix=$DEPLOY</extra>
+					<extra id="1">--target=$CROSS</extra>
+				</configure>
+				<make id="0">
+					<priority>20</priority>
+					<rule id="0">
+						<name>all</name> 
+					</rule>
+					<rule id="1">
+						<name>install</name> 
+						<thread>1</thread>						
+					</rule>
+				</make>
+			</step>
+		</build>
+	</project>
+</egg>

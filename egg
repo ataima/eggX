@@ -1716,7 +1716,7 @@ patch -s  --directory="$2"  --input="$3"
 if [ $? -ne 0 ]; then
 	error_c "On apply patch " "   - $2 project $1"
 else
-	print_c "$GREEN_LIGHT" "   - Apply patch $2 OK" "$YELLOW" $1
+	print_c "$GREEN_LIGHT" "   - Apply patch $( basename "$3" ) OK" "$YELLOW" $1
 fi
 } #EX
 
