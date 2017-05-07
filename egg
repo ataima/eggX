@@ -90,7 +90,6 @@ exit 1
 #$2   string
 #$3   string
 function warning_c(){ #EX
-if [ $MOREWRN -eq 0 ]; then return 0; fi
 print_del_ita
 print_c "$GREEN_LIGHT" "WARNING : " "$BLUE_LIGHT" "- $1" 
 if [ "$2" ]; then
@@ -421,8 +420,6 @@ HW_ARCH=""
 #if 1 no packetize output
 declare -i NOPKT=0
 
-#if 1 yes warning output
-declare -i MOREWRN=0
    
 declare -A SORTREQ
 
@@ -456,6 +453,7 @@ return 0
 #$1 build name
 #$2 dir
 function remove_path(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local V=$(echo $MYPATH | sed -e 's/:/  /g')
 local OLD=$2
 MYPATH=""
@@ -470,6 +468,7 @@ done
 #$1 build name
 #$2 dir
 function add_path(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local NEW=$2
 local V=$(echo $MYPATH | sed -e 's/:/  /g')
 for I in $V; do
@@ -489,6 +488,7 @@ MYPATH="$2"
 #$1 project
 #$2 build phase number 0,1,2.....
 function insert_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local PRI=""
 local SILENT=""
 local INDEX=""
@@ -521,10 +521,14 @@ if [ $? -eq 1 ]; then
 					done	
 				fi
 			else
+				if [ $MOREWRN -ne 0 ]; then
 				warning_c "no build step $2  !" "project : $1"
+				fi
 			fi
 		else
+			if [ $MOREWRN -ne 0 ]; then
 			warning_c "no build  !" "project : $1"
+			fi
 		fi
 	else
 		error_c "Missing conf.egg file " "project : $1"
@@ -538,6 +542,7 @@ fi
 #$1 project
 #$2 build phase number 0,1,2.....
 function insert_packet_download(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local NUM=0
 local ID=0
 local TPATH=""
@@ -551,7 +556,7 @@ if [ $? -eq 1 ]; then
 			INDEX="$2%$1%$STEP_NAME"
 			BSEQ[$INDEX]="$INDEX"
 		else
-			warning_c "no build  !" "project : $1"
+			warning_c "no download  !" "project : $1"
 		fi
 	else
 		error_c "Missing conf.egg file " "project : $1"
@@ -566,6 +571,7 @@ fi
 #$1 project
 #$2 build phase number 0,1,2.....
 function manage_path_pre(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local TPATH=""
 local NUM=0
 local MAX=0
@@ -625,6 +631,7 @@ fi
 #$1 project
 #$2 build phase number 0,1,2.....
 function manage_path_post(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local TPATH=""
 local NUM=0
 local MAX=0
@@ -679,6 +686,7 @@ fi
 
 #$1 project
 function getSourcePath(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local RES=""
 if [ -e $SOURCES/$1/configure ]; then
 	RES=$SOURCES/$1	
@@ -723,6 +731,7 @@ echo $RES
 #$3 fileout
 #$4 build name
 function generate_setenv(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 	local SRC=$(getSourcePath $1)	
 	echo "#!/bin/sh" > "$3"
 	echo "#unset all except $HOME ..." >> "$3"
@@ -807,6 +816,7 @@ function generate_setenv(){
 #$3 build path
 #$4 value 0,1,2,
 function setbuildstatus(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local FILEIN="$3/status"
 case $4 in
 	0|1|2)
@@ -831,6 +841,7 @@ esac
 #		<value>setbuildstatus 2</value>
 #	</post >
 function getbuildstatus(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local RES=0
 local FILEIN="$3/status" 
 local VV=""
@@ -870,6 +881,7 @@ esac
 
 #$1 file to create rewrite
 function prepare_script_head(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local II=""
 local FUNCEXP="print_c print_s_ita print_del_ita print_ita \
 				error_c warning_c check_exist \
@@ -892,6 +904,7 @@ done
 #$6 status to check value else exit :if $6=1000 don't check
 #$7 msg in stable mode
 function prepare_script_generic(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local VV=0
 VV=$6
 prepare_script_head "$4"
@@ -959,6 +972,7 @@ fi
 #$3 file to write 
 #$4 BUILD NAME
 function prepare_script_download(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 prepare_script_head "$3"
 extract_function  test_sign_file >> "$3"
 extract_function  check_pgp >> "$3"
@@ -1001,6 +1015,7 @@ echo "" >> $4
 #$4 path build
 #$5 build name
 function add_pre_conf(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 declare -i i=0
 local VALUE=""
 local MODE=""
@@ -1066,6 +1081,7 @@ echo " "  >> $3
 #$4 path build
 #$5 build name
 function add_post_conf(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 declare -i i=0
 local VALUE=""
 check_project $1
@@ -1132,6 +1148,7 @@ echo " "  >> $3
 #$3 file out
 #$4 silent
 function add_extra_conf(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 declare -i i=0
 local VALUE=""
 check_project $1
@@ -1186,6 +1203,7 @@ echo "fi" >> $3
 #$7 make index 
 #s8 build file
 function add_rules_build(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local NUM_R=0
 local II=0
 xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule"
@@ -1232,6 +1250,7 @@ xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule"
 #</make>
 #
 function generate_build_rules(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 #build
 local SH_BUILD=""
 declare -i II=0
@@ -1289,6 +1308,7 @@ echo " "  >> "$SH_BUILD"
 #$6 thread
 
 function generate_clean_rule(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local SH_CLEAN="$3/clean.sh"
 rm -f "$SH_CLEAN" 
 touch "$SH_CLEAN" 
@@ -1323,6 +1343,7 @@ end_script_generic "$1" "$2" "done clean build " "$SH_CLEAN"
 #$5 silent
 #$6 thread
 function generate_distclean_rule(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local SH_DISTCLEAN="$3/distclean.sh"
 rm -f "$SH_DISTCLEAN"  
 touch "$SH_DISTCLEAN" 
@@ -1351,6 +1372,7 @@ end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
 #$5 silent
 #$6 thread
 function generate_rebuild_rule(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local NUM_R=0
 local NUM_M=0
 local UU=0
@@ -1396,6 +1418,7 @@ end_script_generic "$1" "$2" "done  rebuild " "$SH_REBUILD"
 #$5 silent
 #$6 thread
 function add_build_script(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5"
 generate_clean_rule $@
 generate_distclean_rule $@ 
@@ -1411,6 +1434,7 @@ generate_rebuild_rule $@
 #$6 rule index
 #$7 make index
 function add_pre_build(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 declare -i i=0
 local VALUE=""
 local MODE=""
@@ -1479,6 +1503,7 @@ echo " "  >> $3
 #$6 rule index
 #$7 make index
 function add_post_build(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 declare -i i=0
 local VALUE=""
 check_project $1
@@ -1547,6 +1572,7 @@ echo " "  >> $3
 #$6 max thread
 #$7 make rule name
 function add_entry_in_main_build_script(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 echo "start_time=\$(date +%s)">> "$3"
 echo " print_s_ita \"       Make \"  \"$7-$6:$5\"  \"start\"" >> "$3"
 if [ "$4" == "yes" ]; then 
@@ -1566,6 +1592,7 @@ echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$3"
 #$1 project
 #$2 build phase number 0,1,2.....
 function create_configure_cmd(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local SILENT=""
 local NUM=0
 #set -x ; trap read debug
@@ -1665,7 +1692,7 @@ echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$C_FILE"
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 chmod +x "$C_FILE" 
 add_build_script "$1" "$2"  "$C_BUILD"  "$STEP_NAME" "$SILENT" "$THREADS" 
-print_ita "STEP : $2:$3" "$1"  "configured done !"
+print_ita "STEP : $2 PRI : $3" "$1"  "configured done !"
 }
 
 #$1 project
@@ -1673,6 +1700,7 @@ print_ita "STEP : $2:$3" "$1"  "configured done !"
 #$3 make priority
 #$4 build name
 function create_main_scripts(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local FILES="bootstrap clean distclean build_$3 rebuild setenv"
 local RES=0
 local VV=""
@@ -1696,6 +1724,7 @@ done
 #$3 make priority
 #$4 build name
 function create_main_entry(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local FMAIN="$BUILD/$4/step_$2.sh"
 RES=$(getFileSize "$FMAIN")
 if [ $RES -ne 0 ]; then 
@@ -1804,6 +1833,7 @@ fi
 # $3 patch
 #$4 project
 function write_apply_patch(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 echo "if [ \$? -eq 99 ]; then" >>  "$1"
 echo "	ex_apply_patch $4 $2 $3" >>  "$1"
 echo "fi" >>  "$1"
@@ -1925,6 +1955,7 @@ rm -rf /tmp/$3
 # $7 key url
 # $8 key file
 function write_download_mode(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 echo "" >>  "$1"
 echo "" >>  "$1"
 case  $2 in
@@ -1959,6 +1990,7 @@ esac
 # $7 key url
 # $8 key file
 function create_download_source(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 # $1=--force or not
 echo "if [ \$# -ne 0 ]; then">> "$1"
 echo "  case \$1 in ">> "$1"
@@ -1983,7 +2015,6 @@ echo "REPOBACKUP=$REPOBACKUP">> "$1"
 echo "BUILD=$BUILD/$STEP_NAME">> "$1"
 echo "STORE=$STORE">> "$1"
 echo "STATUS=$BUILD/$STEP_NAME/$6/status">> "$1"
-echo "MOREWRN=1">> "$1"
 echo "check_exist \$STATUS">> "$1"
 echo "if [ \$? -eq 0 ]; then ">> "$1"
 echo "   chmod +w \$STATUS" >> "$1"
@@ -2061,10 +2092,7 @@ if [  "$tmp" != "0"  ]; then
                 chmod 444 "$1.$4"
                 RES=1
         else
-		tmp=MOREWRN
-		MOREWRN=1
                 warning_c "gpg chek fail " "file  $2" "have to import the public key" "(gpg --recv-key <xxxxxxxx> )" "or bad sign" "project $3"
-		MOREWRN=tmp
 		rm -f  "$1.$4"
 		#RES=$?
                 if [ $RES -ne 1 ]; then
@@ -2269,6 +2297,7 @@ return $RES
 # $3 build
 # $4 file out
 function get_source_param_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local RES=0
 local tmp=""
 local REMOTE=""
@@ -2331,6 +2360,7 @@ fi
 # $3 build
 # $4 file out
 function get_patch_param_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local -i tmp=0
 local -i i=0
 local REMOTE=""
@@ -2421,6 +2451,7 @@ fi
 #$3 make priority
 #$4 build name
 function check_source(){ 
+[ $STEP_STEP -eq 1 ] && trap read debug
 local -i RES=0
 local S_BUILD="$BUILD/$STEP_NAME/$1_$2"
 mkdir -p "$BUILD"
@@ -2445,6 +2476,7 @@ chmod +x "$S_FILE"
 #$3 make priority
 #$4 build name
 function check_patch(){ 
+[ $STEP_STEP -eq 1 ] && trap read debug
 local -i RES=0
 local S_BUILD="$BUILD/$STEP_NAME/$1_$2"
 local S_FILE="$S_BUILD/patch.sh"
@@ -2463,6 +2495,7 @@ chmod +x "$S_FILE"
 #$3 make priority
 #$4 build name
 function configure_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 manage_path_pre  $1  $2
 create_configure_cmd "$1" "$2" "$3"
 manage_path_post $1  $2
@@ -2473,6 +2506,7 @@ sync
 
 #$1 build phase number 0,1,2.....
 function read_default_for_step(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local VV=""
 local VALUE=""
 local VAR=""
@@ -2513,6 +2547,7 @@ fi
 #$1 number id
 #$@ argv optional
 function conf_download_all(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
 local V=""
 isNumber $1
@@ -2556,6 +2591,7 @@ fi
 #$1 number id
 #$@ argv optional
 function conf_patch_all(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
 local V=""
 isNumber $1
@@ -2600,6 +2636,7 @@ fi
 #$1 number id
 #$@ argv optional
 function configure_all_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
 local V=""
 isNumber $1
@@ -2648,6 +2685,7 @@ fi
 #$1 ID BUILD STEP
 #$2 array of project
 function prepare_seq_priority(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local V=""
 unset BSEQ
 declare -A BSEQ
@@ -2663,6 +2701,7 @@ SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 #$1 ID BUILD STEP
 #$2 array of project
 function prepare_seq_download(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local V=""
 unset BSEQ
 declare -A BSEQ
@@ -2723,6 +2762,7 @@ print_ita  "PATCH: $1"  "$2"  "$3"
 
 #none
 function build_all(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local HAVE_BUILD=0
 local STATUS=0
 local ID=0 
@@ -2766,6 +2806,7 @@ fi
 
 #none
 function download_all(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
 local HAVE_BUILD=0
 local STATUS=0
@@ -2805,6 +2846,7 @@ cd "$LPWD"
 
 #none
 function patch_all(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
 local HAVE_BUILD=0
 local STATUS=0
@@ -2844,6 +2886,7 @@ cd "$PPWD"
 
 #none
 function packetize_all(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ID=0 
 local V=""
 local PRI=""
@@ -2909,6 +2952,7 @@ print_del_ita
 
 #none
 function compile_all(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local HAVE_BUILD=0
 local STATUS=0
 local ID=0 
@@ -2946,6 +2990,7 @@ fi
 
 #none
 function clean_all(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ID=0 
 local V=""
 local PRI=""
@@ -2973,6 +3018,7 @@ done
 
 #none
 function distclean_all(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ID=0 
 local V=""
 local PRI=""
@@ -3003,6 +3049,7 @@ done
 #$3 ... SN projects
 #$@ from argv build.sh
 function exec_single(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 #trovo nomi build per ogni progetto
 local ID=0
 local PRI=""
@@ -3051,6 +3098,7 @@ done
 #$3 ... SN projects
 #$@ from argv build.sh
 function exec_single_download(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 #trovo nomi build per ogni progetto
 local ID=0
 local PRI=""
@@ -3093,6 +3141,7 @@ done
 }
 
 function exec_build(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local PRI=$1
 local NAME=$2
 local PRJ=$3
@@ -3112,6 +3161,7 @@ fi
 
 #$@ from argv build.sh
 function build_single(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single "exec_build" $ARGV
 }
@@ -3119,6 +3169,7 @@ exec_single "exec_build" $ARGV
 
 
 function exec_download(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 #set -x ; trap read debug
 local PRI=$1
 local NAME=$2
@@ -3134,12 +3185,14 @@ fi
 
 #$@ from argv build.sh
 function download_single(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single_download "exec_download" $ARGV
 }
 
 
 function exec_patch(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 #set -x ; trap read debug
 local PRI=$1
 local NAME=$2
@@ -3155,11 +3208,13 @@ fi
 
 #$@ from argv build.sh
 function patch_single(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single_download "exec_patch" $ARGV
 }
 
 function exec_compile(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local PRI=$1
 local NAME=$2
 local PRJ=$3
@@ -3174,12 +3229,14 @@ fi
 
 #$@ from argv build.sh
 function compile_single(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single "exec_compile" $ARGV
 }
 
 
 function exec_clean(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local PRI=$1
 local NAME=$2
 local PRJ=$3
@@ -3194,11 +3251,13 @@ fi
 
 #$@ from argv build.sh
 function clean_single(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single "exec_clean" $ARGV
 }
 
 function exec_distclean(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local PRI=$1
 local NAME=$2
 local PRJ=$3
@@ -3213,6 +3272,7 @@ fi
 
 #$@ from argv build.sh
 function distclean_single(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single "exec_distclean" $ARGV
 }
@@ -3220,6 +3280,7 @@ exec_single "exec_distclean" $ARGV
 
 #$@
 function build_all_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	build_all
 else
@@ -3230,6 +3291,7 @@ print_del_ita
 
 #$@
 function download_all_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	download_all
 else
@@ -3240,6 +3302,7 @@ print_del_ita
 
 #$@
 function patch_all_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	patch_all
 else
@@ -3250,6 +3313,7 @@ print_del_ita
 
 #$@
 function compile_all_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	compile_all
 else
@@ -3260,6 +3324,7 @@ print_del_ita
 
 #$@
 function clean_all_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	clean_all
 else
@@ -3270,6 +3335,7 @@ print_del_ita
 
 #$@
 function distclean_all_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	distclean_all
 else
@@ -3282,6 +3348,7 @@ print_del_ita
 
 #$ARGV TODO
 function config_all_step(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local -i CONF_NUM=0
 if [ $# -eq 0 ]; then
 	while [ $CONF_NUM -lt $MAX_STEP ]; do 
@@ -3309,6 +3376,7 @@ print_del_ita
 
 #$ARGV TODO
 function conf_download_all_step(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local -i DW_NUM=0
 if [ $# -eq 0 ]; then
 	while [ $DW_NUM -lt $MAX_STEP ]; do 
@@ -3336,6 +3404,7 @@ fi
 
 #$ARGV TODO
 function conf_patch_all_step(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local -i DW_NUM=0
 if [ $# -eq 0 ]; then
 	while [ $DW_NUM -lt $MAX_STEP ]; do 
@@ -3363,6 +3432,7 @@ fi
 #$ARGV 
 # ex 0 gcc -> try step of project gcc
 function shell_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local PRJ=""
 local V=""
 local i=""
@@ -3424,6 +3494,7 @@ fi
 
 #recussive edit on repo project
 function edit_repo_files(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ALL_FILES=$(ls "$OREPO")
 local VV=""
 #cp "$OREPO/conf.egg" "$OREPO/conf.egg_$(date +%d-%m-%y_%H:%M:%S).backup"
@@ -3442,6 +3513,7 @@ done
 #$ARGV 
 #  gcc -> edit conf.egg of project gcc
 function edit_packet(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local PRJ=""
 local V=""
 if [ ! "$1" ]; then
@@ -3479,13 +3551,15 @@ exit 0
 
 #$ARGV
 function source_download(){
+	[ $STEP_STEP -eq 1 ] && trap read debug
 	conf_download_all_step $@
 	download_all_packet $@
 	conf_patch_all_step $@
 	patch_all_packet $@
 }
 #$ARGV
-function redoall(){	        
+function redoall(){	
+	[ $STEP_STEP -eq 1 ] && trap read debug
 	source_download	
 	config_all_step	
 	build_all_packet	
@@ -3514,6 +3588,7 @@ fi
 
 # $1 optional 
 function list_all(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ID=0 
 local V=""
 local PRI=""
@@ -3549,6 +3624,7 @@ print_ita "STATUS" "$ST" "$PRJ"
 #$1 step nn 
 #$2 optional prj
 function freeze_step(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local ID=$1 
 local V=""
 local PRI=""
@@ -3584,6 +3660,7 @@ prepare_seq_priority "$ID" "$ALL_PACKETS"
 #$1 optional step
 #$2 optional projects
 function freeze_build(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local FNUM=0
 if [ $# -eq 0 ];  then 
 while [ $FNUM -lt $MAX_STEP ] ; do
@@ -3600,6 +3677,7 @@ fi
 
 #$1 new repo to set repo
 function set_repo(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local RES=""
 RES=$(ls -d $1)
 if [ "$RES" ]; then 
@@ -3615,6 +3693,7 @@ fi
 
 #$1 file with list of repos
 function multi_repo(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local PWDM=""
 local RES=""
 local NUMM=0
@@ -3730,11 +3809,9 @@ function usage(){
 }
 
 function reset_all(){
+	[ $STEP_STEP -eq 1 ] && trap read debug
 	local VV=""
-	VV=MOREWRN
-	MOREWRN=1
 	warning_c "WARNING : this operation is unrecoverable" "Do You want continue? <y,n>"
-	MOREWRN=VV
 	read -r ;
 	VV=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
 	if [ "$VV" == "Y" ]
@@ -3916,30 +3993,38 @@ function help_options(){
 help_c "command : before any command you can set an option" \
 "option -D or --debug : set debug mode"  \
 "option -Q or --nopacketize : dont craete output tar"  \
-"option +W or --warning : print also warnings" \
-"ex ./egg +W build"
+"option -S or --step :execute step by step script" \
+"option +W or --verbose : show more warning" \
+"ex ./egg -S build"
 }
 
 function help_command(){
+[ $STEP_STEP -eq 1 ] && trap read debug
 local OK=0
-local -a  COMMANDS=('source' 'shell' 'configure' 'edit' 'build' 'reset' \
+local -a COMMANDS=('source' 'shell' 'configure' 'edit' 'build' 'reset' \
 					'clean' 'multi' 'distclean' 'do' 'redoall' \
 					'packetize' 'listall' 'setrepo' 'freeze' 'options')
 local VV=""
 local torun=""
 if [ $# -eq 0 ]; then
-	warning_c "missing argument" "help command require an argument! ex ./egg help do"
-	for VV in $COMMANDS ; do 
-			torun="help_$VV"
-			"$torun"		
-			OK=1	
-	done
+	warning_c "missing argument" "help command require an argument!" " ex ./egg help do" "show all command help <y,n>"
+	read -r ;
+	VV=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
+	if [ "$VV" == "Y" ]
+	then
+		for VV in ${COMMANDS[@]} ; do 
+				torun="help_$VV"
+				"$torun"		
+				OK=1	
+		done
+	fi
 else
-	for VV in $COMMANDS ; do 
+	for VV in ${COMMANDS[@]} ; do 
 		if [ "$VV" == "$1" ]; then 
 			torun="help_$VV"
 			"$torun"
 			OK=1
+			break
 		fi		
 	done
 fi
@@ -3960,9 +4045,18 @@ fi
 function main(){
 local torun=default_do
 NOPKT=0
+MOREWRN=0
+STEP_STEP=0
 if [ $# -ne 0 ]; then
 for i in $@; do
 case $i in 
+	-S|--step)
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	STEP_STEP=1
+	set -x
+	trap read debug
+	shift
+	;;
 	-D|--debug)
 	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 	set -x
@@ -3973,8 +4067,8 @@ case $i in
 	warning_c "quick mode , no packetize output..."
 	shift
 	;;	
-	+W|--warning)
-	MOREWRN=1	
+	+W|--verbose)
+	MOREWRN=1
 	shift
 	;;
 	source)
@@ -4073,8 +4167,15 @@ if [ ! -d $ROOT ]; then
 	mkdir -p $ROOT
 fi
 
+
+
+if [ -d  $OREPO ]; then 
 # sync repo file to build path 
 rsync -ry $OREPO $REPO
+else
+    error_c "missing link a repo path" "have to do ln -s <your repo> repo" \
+    "ex: ln -s sysroot_repo repo" "and continue with ./egg <commands>"
+fi
 
 xml_get_env 
 
@@ -4091,6 +4192,7 @@ if [ $? -ne 0 ]; then
 fi
 
 get_max_step
+
 "$torun" "$@"
 }
 
@@ -4101,5 +4203,12 @@ print_c "$GREEN" "There is NO warranty; not even for MERCHANTABILITY or FITNESS 
 print_c "$GREEN" "FOR A PARTICULAR PURPOSE."
 }
 
+EGG_RES=0
+EGG_START_TIME=$(date  +%s)
 legal
 main "$@"
+EGG_RES=$?
+EGG_STOP_TIME=$(date  +%s)
+EGG_TOTAL_TIME=$((EGG_STOP_TIME-EGG_START_TIME))
+print_c "$PURPLE" " -- " "$YELLOW " $EGG_TOTAL_TIME "$WHITE" " sec"
+exit $EGG_RES

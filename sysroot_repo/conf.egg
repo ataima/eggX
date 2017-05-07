@@ -55,7 +55,7 @@
 		</step>
 		<step id="2">
 			<step_name>egg_sysroot</step_name>
-			<info>build with new  compiler arm gcc compiler</info>
+			<info>build with new  compiler x86_64 the arm gcc compiler none eabi</info>
 			<cc></cc>
 			<cxx></cxx>
 			<as></as>
@@ -73,6 +73,27 @@
 			<cplus_include_path></cplus_include_path>
 			<arch>x86_64</arch>
 			<cross>arm-none-eabi</cross>
+		</step>
+			<step id="3">
+			<step_name>egg_sysroot</step_name>
+			<info>build with new  compiler  x86_64 the arm gcc compiler gnu linux eabi</info>
+			<cc></cc>
+			<cxx></cxx>
+			<as></as>
+			<ld></ld>
+			<nm></nm>
+			<ar></ar>
+			<strip></strip>
+			<cflags>-O3</cflags>
+			<cppflags>-O3</cppflags>
+			<cxxflags>-O3</cxxflags>
+			<ldflags></ldflags>
+			<libs></libs>
+			<cpath></cpath>
+			<c_include_path></c_include_path>
+			<cplus_include_path></cplus_include_path>
+			<arch>x86_64</arch>
+			<cross>arm-linux-gnueabi</cross>
 		</step>
 	</defaults>
 </egg>

@@ -66,6 +66,65 @@
 					</rule>										
 				</make>				
 			</step>
+			<step id="3">
+				<silent>yes</silent>
+				<threads>8</threads>	
+				<path>
+					<pre>
+						<set id="0">$DEPLOY/bin</set>
+						<add id="0">$DEPLOY/x86_64-pc-linux-gnu/bin</add>	
+					</pre>	
+				</path>	
+				<configure>		
+					<pre id="0">
+						<mode>code</mode>		
+						<value>mkdir -p $DEPLOY/$CROSS/lib</value>
+					</pre>					
+					<pre id="1">
+						<mode>code</mode>		
+						<value>mkdir -p $DEPLOY/$CROSS/include</value>
+					</pre>					
+					<extra id="0">--prefix=$DEPLOY/$CROSS</extra>					
+					<extra id="1"> --build=$NATIVE</extra>
+					<extra id="2"> --host=$CROSS</extra>	
+					<extra id="3">--target=$CROSS</extra>
+					<extra id="4">--with-headers=$DEPLOY/$CROSS/include</extra>						
+					<extra id="5"> --disable-multilib</extra>	
+					<extra id="6"> libc_cv_forced_unwind=yes</extra>										
+				</configure>				
+				<make id="0">
+					<priority>4</priority>
+					<rule id="0">
+						<name>install-bootstrap-headers=yes install-headers</name> 
+						<thread>1 </thread>						
+					</rule>
+					<rule id="1">
+						<name>csu/subdir_lib</name> 
+						<post id="0">
+							<mode>code</mode>		
+							<value>install $BUILD/csu/crt1.o $BUILD/csu/crti.o $BUILD/csu/crtn.o $DEPLOY/$CROSS/lib</value>
+						</post>
+						<post id="1">
+							<mode>code</mode>		
+							<value>$CROSS-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $DEPLOY/$CROSS/lib/libc.so</value>
+						</post>
+						<post id="2">
+							<mode>code</mode>		
+							<value>touch $DEPLOY/$CROSS/include/gnu/stubs.h</value>
+						</post>
+					</rule>					
+				</make>	
+				<make id="1">
+					<priority>6</priority>
+					<rule id="0">						
+						<name></name> 						
+					</rule>
+					<rule id="1">
+						<name>install</name> 
+						<thread>1</thread>	
+					</rule>										
+				</make>				
+			</step>
 		</build>	
 	</project>
 </egg>
