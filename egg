@@ -1764,15 +1764,37 @@ chmod +x "$FMAIN"
 }
 
 #$1 project
-#$2 source
-#$3 dest
+#$2 dest
+#$3 patch
 function ex_apply_patch(){ #EX
-
-patch -s  --directory="$2"  --input="$3"
-if [ $? -ne 0 ]; then
-	error_c "On apply patch " "   - $2 project $1"
+if [ -d "$3" ] ; then
+	local VV=$(ls $3)
+	local II=""
+	local PWD=$(pwd)
+	cd $2
+	for II in $VV; do
+		patch  -p1 < "$3/$II" 
+		if [ $? -ne 0 ]; then
+			print_c "$RED_LIGHT" "   - FAIL : On apply patch $II ""$YELLOW""project $1"
+			print_c "$RED_LIGHT" "   - Try to revert and skip $II ""$YELLOW""project $1"
+			patch   -p1 -R < "$3/$II" 
+			if [ $? -ne 0 ]; then
+				error_c "On revert patch " "$II ""$YELLOW""project $1"
+			else
+				print_c "$PURPLE" "Reverted patch $II ""$YELLOW""project $1"
+			fi
+		else
+			print_c "$GREEN_LIGHT" "   - Apply patch $II OK" "$YELLOW" "project $1"
+		fi
+	done
+	cd $PWD
 else
-	print_c "$GREEN_LIGHT" "   - Apply patch $( basename "$3" ) OK" "$YELLOW" $1
+	patch -s  --directory="$2"  --input="$3" > /dev/null
+	if [ $? -ne 0 ]; then
+		error_c "On apply patch " "$3 project $1"
+	else
+		print_c "$GREEN_LIGHT" "   - Apply patch $( basename "$3" ) OK" "$YELLOW" $1
+	fi
 fi
 } #EX
 
@@ -2314,6 +2336,10 @@ local -i i=0
 local REMOTE=""
 local MODE=""
 local PACKET=""
+local KEY_URL=""
+local KEY_FILE=""
+local PATCH_DIR=""
+local AID=0
 check_project $1
 if [ $? -eq 1 ]; then
 #exist project name <name> in repo 
@@ -2353,10 +2379,32 @@ if [ $? -eq 1 ]; then
 						error_c "Missing  key file " "project : $1"
 					fi
 				fi
+				xml_count $1 "/egg/project/patch[@id='$i']/dir"
+				NUM=$?
+				if [ $NUM -ne 0 ]; then
+					PATCH_DIR=$(xml_value $1 "/egg/project/patch[@id='$i']/dir")	
+				else
+					PATCH_DIR=""
+				fi
 				MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]') 
 				prepare_script_download "$1" "$2"  "$4" "$3"
 				create_download_source "$4"  "$MODE"  "$REMOTE" "$PACKET"  "$1"  "$1_$2" "$KEY_URL" "$KEY_FILE"
-				write_apply_patch "$4"  "$(getSourcePath $1)" "$SOURCES/$1/$PACKET" "$1"
+				if [ "$PATCH_DIR" ] ; then
+					xml_count $1 "/egg/project/patch[@id='$i']/apply"
+					NUM=$?
+					if [ $NUM -ne 0 ]; then
+						AID=0
+						while [ $AID -lt $NUM ]; do
+							PACKET=$(xml_value $1 "/egg/project/patch[@id='$i']/apply[@id='$AID']")
+							write_apply_patch "$4"  "$(getSourcePath $1)" "$(getSourcePath $1)/$PATCH_DIR/$PACKET" "$1"
+							AID=$((AID+1))
+						done
+					else
+						write_apply_patch "$4"  "$(getSourcePath $1)" "$(getSourcePath $1)/$PATCH_DIR" "$1"
+					fi
+				else
+					write_apply_patch "$4"  "$(getSourcePath $1)" "$SOURCES/$1/$PACKET" "$1"
+				fi
 				i=$((i+1))
 			done 	
 		fi
@@ -2484,7 +2532,7 @@ else
 	PRJS=$@
 fi
 
-prepare_seq_download "$ID"
+prepare_seq_download "$ID" "$PRJS"
 
 MYPATH=$START_PATH
 V=${SORTREQ[0]}
@@ -2527,7 +2575,7 @@ else
 	PRJS=$@
 fi
 
-prepare_seq_download "$ID"
+prepare_seq_download "$ID" "$PRJS"
 
 MYPATH=$START_PATH
 V=${SORTREQ[0]}
@@ -2571,7 +2619,8 @@ else
 	PRJS=$@
 fi
 
-prepare_seq_priority "$ID"
+
+prepare_seq_priority "$ID" "$PRJS"
 
 MYPATH=$START_PATH
 V=${SORTREQ[0]}
@@ -2597,12 +2646,13 @@ fi
 
 
 #$1 ID BUILD STEP
+#$2 array of project
 function prepare_seq_priority(){
 local V=""
 unset BSEQ
 declare -A BSEQ
 read_default_for_step "$1"
-for V in $ALL_PACKETS; do
+for V in $2; do
 	insert_packet $V $1
 done	
 SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
@@ -2611,12 +2661,13 @@ SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 
 
 #$1 ID BUILD STEP
+#$2 array of project
 function prepare_seq_download(){
 local V=""
 unset BSEQ
 declare -A BSEQ
 read_default_for_step "$1"
-for V in $ALL_PACKETS; do
+for V in $2; do
 	insert_packet_download  $V $1
 done	
 SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
@@ -2680,7 +2731,7 @@ local PRI=""
 local NAME=""
 local PRJ=""
 while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority $ID
+	prepare_seq_priority "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')
 		PRI=$(echo $V | awk '{print $1}')
@@ -2726,7 +2777,7 @@ local PRJ=""
 local ALL=""
 local LPWD=$(pwd)
 while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_download $ID
+	prepare_seq_download "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')
 		PRI=$(echo $V | awk '{print $1}')
@@ -2765,7 +2816,7 @@ local PRJ=""
 local ALL=""
 local PPWD=$(pwd)
 while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_download $ID
+	prepare_seq_download "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')
 		PRI=$(echo $V | awk '{print $1}')
@@ -2804,7 +2855,7 @@ if [ $NOPKT -eq 1 ];then
 	return 0
 fi
 while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority $ID
+	prepare_seq_priority "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')
 		PRI=$(echo $V | awk '{print $1}')
@@ -2835,7 +2886,7 @@ if [ $RESULT -eq 0 ]; then
 	cd $PWD
 	ID=0;
 	while [ $ID -lt $MAX_STEP ] ; do
-		prepare_seq_priority $ID
+		prepare_seq_priority "$ID" "$ALL_PACKETS"
 		for V in $SORTREQ; do
 			V=$(echo $V  | sed -e 's/%/   /g')
 			PRI=$(echo $V | awk '{print $1}')
@@ -2867,7 +2918,7 @@ local NAME=""
 local PRJ=""
 #set -x ; trap read debug
 while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority $ID
+	prepare_seq_priority "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')
 		PRI=$(echo $V | awk '{print $1}')
@@ -2901,7 +2952,7 @@ local PRI=""
 local NAME=""
 local PRJ=""
 while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority $ID
+	prepare_seq_priority "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')
 		PRI=$(echo $V | awk '{print $1}')
@@ -2928,7 +2979,7 @@ local PRI=""
 local NAME=""
 local PRJ=""
 while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority $ID
+	prepare_seq_priority "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')
 		PRI=$(echo $V | awk '{print $1}')
@@ -2954,7 +3005,6 @@ done
 function exec_single(){
 #trovo nomi build per ogni progetto
 local ID=0
-local PRJ_NAMES=""
 local PRI=""
 local NAME=""
 local PRJ=""
@@ -2971,34 +3021,28 @@ if [ $? -ne 0 ]; then
 fi
 ID=$2
 if [ ! "$3" ]; then
-	error_c "Input missing project  !!"
+	PRJ=$ALL_PACKETS
+else
+	PRJ=$3
 fi
 shift
 shift
-# set -x ; trap read debug
 
-PRJ_NAMES=$@
 
 local PWD=$(pwd)
-prepare_seq_priority $ID
-for V in $PRJ_NAMES; do
-	for I in $@; do
-		for T in $SORTREQ; do
-			SEQ=$(echo $T | grep $V | grep $I )
-				if [ "$SEQ" != "" ]; then 
-					break;
-				fi
-		done
-		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
-		PRI=$(echo $SEQ | awk '{print $1}')
-		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
-		PRJ=$(echo $SEQ | awk '{print $3}')
-		FBUILD="$BUILD/$PRJ/$NAME"
-		if [ -d "$FBUILD" ]; then
-			$FUNCTION   "$PRI" "$NAME" "$PRJ" "$FBUILD"
-		fi
-	done 
+prepare_seq_priority "$ID" "$PRJ"
+
+for T in $SORTREQ; do
+	SEQ=$(echo $T  | sed -e 's/%/   /g')
+	PRI=$(echo $T | awk '{print $1}')
+	NAME=$(echo $T | awk '{print $2}')"_$ID"
+	PRJ=$(echo $T | awk '{print $3}')
+	FBUILD="$BUILD/$PRJ/$NAME"
+	if [ -d "$FBUILD" ]; then
+		$FUNCTION   "$PRI" "$NAME" "$PRJ" "$FBUILD"
+	fi
 done
+
 }
 
 
@@ -3009,7 +3053,6 @@ done
 function exec_single_download(){
 #trovo nomi build per ogni progetto
 local ID=0
-local PRJ_NAMES=""
 local PRI=""
 local NAME=""
 local PRJ=""
@@ -3026,33 +3069,26 @@ if [ $? -ne 0 ]; then
 fi
 ID=$2
 if [ ! "$3" ]; then
-	error_c "Input missing project  !!"
+	PRJ=$ALL_PACKETS
+else
+	PRJ=$3
 fi
 shift
 shift
 # set -x ; trap read debug
 
-PRJ_NAMES=$@
 
 local PWD=$(pwd)
-prepare_seq_download $ID
-for V in $PRJ_NAMES; do
-	for I in $@; do
-		for T in $SORTREQ; do
-			SEQ=$(echo $T | grep $V | grep $I )
-				if [ "$SEQ" != "" ]; then 
-					break;
-				fi
-		done
-		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
-		PRI=$(echo $SEQ | awk '{print $1}')
-		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
-		PRJ=$(echo $SEQ | awk '{print $3}')
-		FBUILD="$BUILD/$PRJ/$NAME"
-		if [ -d "$FBUILD" ]; then
-			$FUNCTION   "$PRI" "$NAME" "$PRJ" "$FBUILD"
-		fi
-	done 
+prepare_seq_download "$ID" "$PRJ"
+for T in $SORTREQ; do
+	SEQ=$(echo $T  | sed -e 's/%/   /g')
+	PRI=$(echo $T | awk '{print $1}')
+	NAME=$(echo $T | awk '{print $2}')"_$ID"
+	PRJ=$(echo $T | awk '{print $3}')
+	FBUILD="$BUILD/$PRJ/$NAME"
+	if [ -d "$FBUILD" ]; then
+		$FUNCTION   "$PRI" "$NAME" "$PRJ" "$FBUILD"
+	fi
 done
 }
 
@@ -3337,7 +3373,7 @@ if [ $? -ne 0 ]; then
 fi
 if [ ! "$2" ]; then
 	if [ $NUM -lt $MAX_STEP ]; then
-		prepare_seq_priority $NUM
+		prepare_seq_priority "$NUM" "$ALL_PACKETS"
 		if [ "$SORTREQ" == "" ]; then
 			error_c "Step $1 for project $2 not configured!" "project : $2"
 		fi
@@ -3357,7 +3393,7 @@ if [ ! "$2" ]; then
 	fi	
 else
 	if [ $NUM -lt $MAX_STEP ]; then
-		prepare_seq_priority $NUM
+		prepare_seq_priority "$NUM" "$2"
 		if [ "$SORTREQ" == "" ]; then
 			error_c "Step $1 for project $2 not configured!" "project : $2"
 		fi
@@ -3485,7 +3521,7 @@ local NAME=""
 local PRJ=""
 local STMIN=1000
 while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority $ID
+	prepare_seq_priority "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')
 		PRI=$(echo $V | awk '{print $1}')
@@ -3519,7 +3555,7 @@ local PRI=""
 local NAME=""
 local PRJ=""
 local RNAME="$2_$1"
-prepare_seq_priority $ID
+prepare_seq_priority "$ID" "$ALL_PACKETS" 
 #set -x ; trap read debug
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')

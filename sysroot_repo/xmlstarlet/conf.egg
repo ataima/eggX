@@ -34,7 +34,11 @@
 					</rule>
 					<rule id="1">
 						<name>install</name> 
-						<thread>1</thread>						
+						<thread>1</thread>
+						<post id="0">
+							<mode> code</mode>
+							<value> mv $DEPLOY/bin/xml $DEPLOY/bin/xmlstarlet </value>
+						</post>	
 					</rule>
 				</make>
 			</step>
