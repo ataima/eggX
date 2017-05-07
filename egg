@@ -302,7 +302,7 @@ echo $RES
 #$2 xml node
 #return num node match
 function xml_get_env(){
-HW_ARCH=$(arch)
+HW_ARCH=$(uname -m)
 local MAINFILE="$REPO/conf.egg"
 declare -A XNAME="root  repo sources images store  build editor \
 				 start_path"
