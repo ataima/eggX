@@ -68,6 +68,12 @@ if [ "$2" ]; then
 		print_c "$WHITE" "	> " "$YELLOW" "- $3" 
 		if [ "$4" ]; then
 			print_c "$WHITE" "	> " "$YELLOW" "- $4" 
+			if [ "$5" ]; then
+				print_c "$WHITE" "	> " "$YELLOW" "- $5" 
+				if [ "$6" ]; then
+					print_c "$WHITE" "	> " "$YELLOW" "- $6" 
+				fi
+			fi	
 		fi
 	fi
 fi
@@ -93,6 +99,12 @@ if [ "$2" ]; then
 		print_c "$WHITE" "	 >"  "$YELLOW" " - $3" 
 		if [ "$4" ]; then
 			print_c "$WHITE" "	 >"  "$YELLOW" " - $4" 
+			if [ "$5" ]; then
+				print_c "$WHITE" "	 >"  "$YELLOW" " - $5" 
+				if [ "$6" ]; then
+					print_c "$WHITE" "	 >"  "$YELLOW" " - $6" 
+				fi
+			fi
 		fi
 	fi
 fi
@@ -276,21 +288,35 @@ VALUE=$(xmlstarlet sel -t  -v "$2" -n $1)
 echo $VALUE
 }
 
+#$1 file
+#$2 node
+function getXmlConfValue(){
+local RES=xmlstarlet sel -t  -v "egg/conf/$1" -n "$2"
+if [ $? -ne 0 ]; then 
+		error_c "XML file $MAINFILE" "node $II fail : check valid xml"
+fi
+echo $RES
+}
+
 #$1 project
 #$2 xml node
 #return num node match
 function xml_get_env(){
 HW_ARCH=$(arch)
 local MAINFILE="$REPO/conf.egg"
-declare -A XNAME="root  repo sources images store repobackup build editor \
+declare -A XNAME="root  repo sources images store  build editor \
 				 start_path"
 local II=""
+#load global variable
 for II in $XNAME; do
-	local VALUE=$(xmlstarlet sel -t  -v "egg/conf/$II" -n $MAINFILE)
+	local VALUE=$(xmlstarlet sel -t  -v egg/conf/$II -n $MAINFILE)	
 	if [ "$VALUE" ]; then
 		eval $(echo $II |   tr '[:lower:]' '[:upper:]')="$VALUE"
+	else
+		error_c "XML file $MAINFILE" "node $II fail : check xml"
 	fi	
 done
+
 }
 
 
@@ -508,6 +534,33 @@ else
 fi
 
 }
+
+#$1 project
+#$2 build phase number 0,1,2.....
+function insert_packet_download(){
+local NUM=0
+local ID=0
+local TPATH=""
+check_project $1
+if [ $? -eq 1 ]; then
+	if [ -f $REPO/$1/conf.egg ]; then
+		xml_count $1 "/egg/project/remote"
+		NUM=$?
+		if [ $NUM -eq 1 ]; then
+			#optional				
+			INDEX="$2%$1%$STEP_NAME"
+			BSEQ[$INDEX]="$INDEX"
+		else
+			warning_c "no build  !" "project : $1"
+		fi
+	else
+		error_c "Missing conf.egg file " "project : $1"
+	fi
+else
+	error_c "Missing project in $REPO " "project : $1"
+fi
+}
+
 
 
 #$1 project
@@ -1277,8 +1330,11 @@ chmod +rwx "$SH_DISTCLEAN"
 #distclean 
 prepare_script_generic "$1" "$2" "Start distclean build " "$SH_DISTCLEAN" "$4" 1000
 echo "cd \$PWD " >> "$SH_DISTCLEAN"
-echo "chmod +w \$BUILD_PATH/status">> "$SH_DISTCLEAN"
-echo "rm -f \$BUILD_PATH/status">> "$SH_DISTCLEAN"
+echo "check_exist \$BUILD_PATH/status">> "$SH_DISTCLEAN"
+echo "if [ $? -eq 0 ]; then ">> "$SH_DISTCLEAN"
+echo "  chmod +w \$BUILD_PATH/status">> "$SH_DISTCLEAN"
+echo "  rm -f \$BUILD_PATH/status">> "$SH_DISTCLEAN"
+echo "fi">> "$SH_DISTCLEAN"
 echo "rm -rf \$BUILD/* " >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
@@ -1975,7 +2031,6 @@ if [ ! -f  $1.$4 ]; then
 fi	
 
 tmp=$(getFileSize  "$1.$4" )
-tmp=$(getFileSize  "$1.$4" )
 if [  "$tmp" != "0"  ]; then	
         gpg --quiet --verify    "$1.$4" 
         RES=$?
@@ -1984,9 +2039,12 @@ if [  "$tmp" != "0"  ]; then
                 chmod 444 "$1.$4"
                 RES=1
         else
-                error_c "gpg chek fail " "file  $2" "have to import the public key" "or bad sign" "project $3"
+		tmp=MOREWRN
+		MOREWRN=1
+                warning_c "gpg chek fail " "file  $2" "have to import the public key" "(gpg --recv-key <xxxxxxxx> )" "or bad sign" "project $3"
+		MOREWRN=tmp
 		rm -f  "$1.$4"
-		RES=$?
+		#RES=$?
                 if [ $RES -ne 1 ]; then
                                 RES=8
                 fi
@@ -2322,8 +2380,13 @@ mkdir -p "$BUILD/$STEP_NAME"
 mkdir -p "$S_BUILD"
 local S_FILE="$S_BUILD/download.sh"
 rm -f "$S_FILE"
-get_source_param_packet "$1" "$2" "$4" "$S_FILE" 	
-end_script_generic "$1" "$2" "$4" "$S_FILE" 
+touch "$S_FILE"
+print_ita  "CONF : $1"  "$2"  "download source"
+get_source_param_packet "$1" "$2" "$4" "$S_FILE" 
+RES=$(getFileSize $S_FILE)
+if [ $RES -ne 0 ]; then
+	end_script_generic "$1" "$2" "$4" "$S_FILE" 
+fi
 chmod +x "$S_FILE"
 }
 
@@ -2338,8 +2401,12 @@ local -i RES=0
 local S_BUILD="$BUILD/$STEP_NAME/$1_$2"
 local S_FILE="$S_BUILD/patch.sh"
 rm -f "$S_FILE"
+touch "$S_FILE"
+print_ita  "CONF : $1"  "$2"  "patch source"
 get_patch_param_packet "$1" "$2" "$4" "$S_FILE" 
-end_script_generic "$1" "$2" "$4" "$S_FILE" 
+if [ $RES -ne 0 ]; then
+	end_script_generic "$1" "$2" "$4" "$S_FILE" 
+fi
 chmod +x "$S_FILE"
 }
 
@@ -2417,7 +2484,7 @@ else
 	PRJS=$@
 fi
 
-prepare_seq_priority "$ID"
+prepare_seq_download "$ID"
 
 MYPATH=$START_PATH
 V=${SORTREQ[0]}
@@ -2460,7 +2527,7 @@ else
 	PRJS=$@
 fi
 
-prepare_seq_priority "$ID"
+prepare_seq_download "$ID"
 
 MYPATH=$START_PATH
 V=${SORTREQ[0]}
@@ -2537,6 +2604,20 @@ declare -A BSEQ
 read_default_for_step "$1"
 for V in $ALL_PACKETS; do
 	insert_packet $V $1
+done	
+SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
+}
+
+
+
+#$1 ID BUILD STEP
+function prepare_seq_download(){
+local V=""
+unset BSEQ
+declare -A BSEQ
+read_default_for_step "$1"
+for V in $ALL_PACKETS; do
+	insert_packet_download  $V $1
 done	
 SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 }
@@ -2645,7 +2726,7 @@ local PRJ=""
 local ALL=""
 local LPWD=$(pwd)
 while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority $ID
+	prepare_seq_download $ID
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')
 		PRI=$(echo $V | awk '{print $1}')
@@ -2684,7 +2765,7 @@ local PRJ=""
 local ALL=""
 local PPWD=$(pwd)
 while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority $ID
+	prepare_seq_download $ID
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')
 		PRI=$(echo $V | awk '{print $1}')
@@ -2920,6 +3001,61 @@ for V in $PRJ_NAMES; do
 done
 }
 
+
+#$1 function to execute
+#$2 ID step build
+#$3 ... SN projects
+#$@ from argv build.sh
+function exec_single_download(){
+#trovo nomi build per ogni progetto
+local ID=0
+local PRJ_NAMES=""
+local PRI=""
+local NAME=""
+local PRJ=""
+local SEQ=""
+local FUNCTION=""
+local FBUILD=""
+if [ ! "$1" ]; then
+	error_c "Input missing function to execute  !!"
+fi
+FUNCTION="$1  "
+isNumber $2
+if [ $? -ne 0 ]; then
+   error_c "$2 : Input step isn't a number !!"
+fi
+ID=$2
+if [ ! "$3" ]; then
+	error_c "Input missing project  !!"
+fi
+shift
+shift
+# set -x ; trap read debug
+
+PRJ_NAMES=$@
+
+local PWD=$(pwd)
+prepare_seq_download $ID
+for V in $PRJ_NAMES; do
+	for I in $@; do
+		for T in $SORTREQ; do
+			SEQ=$(echo $T | grep $V | grep $I )
+				if [ "$SEQ" != "" ]; then 
+					break;
+				fi
+		done
+		SEQ=$(echo $SEQ  | sed -e 's/%/   /g')
+		PRI=$(echo $SEQ | awk '{print $1}')
+		NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
+		PRJ=$(echo $SEQ | awk '{print $3}')
+		FBUILD="$BUILD/$PRJ/$NAME"
+		if [ -d "$FBUILD" ]; then
+			$FUNCTION   "$PRI" "$NAME" "$PRJ" "$FBUILD"
+		fi
+	done 
+done
+}
+
 function exec_build(){
 local PRI=$1
 local NAME=$2
@@ -2963,7 +3099,7 @@ fi
 #$@ from argv build.sh
 function download_single(){
 local ARGV="$@"
-exec_single "exec_download" $ARGV
+exec_single_download "exec_download" $ARGV
 }
 
 
@@ -2984,7 +3120,7 @@ fi
 #$@ from argv build.sh
 function patch_single(){
 local ARGV="$@"
-exec_single "exec_patch" $ARGV
+exec_single_download "exec_patch" $ARGV
 }
 
 function exec_compile(){
@@ -3559,7 +3695,10 @@ function usage(){
 
 function reset_all(){
 	local VV=""
+	VV=MOREWRN
+	MOREWRN=1
 	warning_c "WARNING : this operation is unrecoverable" "Do You want continue? <y,n>"
+	MOREWRN=VV
 	read -r ;
 	VV=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
 	if [ "$VV" == "Y" ]
@@ -3893,9 +4032,6 @@ done
 
 fi
 
-
-
-
 #set log to download
 if [ ! -d $ROOT ]; then 
 	mkdir -p $ROOT
@@ -3905,9 +4041,6 @@ fi
 rsync -ry $OREPO $REPO
 
 xml_get_env 
-
-
-
 
 #sort project in repo to bin search
 ALL_PACKETS=$(ls $OROOT/repo  | sed 's/conf.egg//g')
@@ -3921,7 +4054,6 @@ if [ $? -ne 0 ]; then
 	error_c "Cannot  sync work repository"
 fi
 
-
 get_max_step
 "$torun" "$@"
 }
@@ -3932,7 +4064,6 @@ print_c "$GREEN" "This is free software; see the LICENSE file for copying condit
 print_c "$GREEN" "There is NO warranty; not even for MERCHANTABILITY or FITNESS "
 print_c "$GREEN" "FOR A PARTICULAR PURPOSE."
 }
-
 
 legal
 main "$@"
