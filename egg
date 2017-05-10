@@ -824,7 +824,9 @@ function setbuildstatus(){
 local FILEIN="$3/status"
 case $4 in
 	0|1|2)
-	chmod +w $FILEIN
+	if [ -f $FILEIN ]; then 
+		chmod +w $FILEIN
+	fi	
 	echo $4 > $FILEIN
 	;;
 	*)
@@ -3085,9 +3087,9 @@ prepare_seq_priority "$ID" "$PRJ"
 
 for T in $SORTREQ; do
 	SEQ=$(echo $T  | sed -e 's/%/   /g')
-	PRI=$(echo $T | awk '{print $1}')
-	NAME=$(echo $T | awk '{print $2}')"_$ID"
-	PRJ=$(echo $T | awk '{print $3}')
+	PRI=$(echo $SEQ | awk '{print $1}')
+	NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
+	PRJ=$(echo $SEQ | awk '{print $3}')
 	FBUILD="$BUILD/$PRJ/$NAME"
 	if [ -d "$FBUILD" ]; then
 		$FUNCTION   "$PRI" "$NAME" "$PRJ" "$FBUILD"
@@ -3134,9 +3136,9 @@ local PWD=$(pwd)
 prepare_seq_download "$ID" "$PRJ"
 for T in $SORTREQ; do
 	SEQ=$(echo $T  | sed -e 's/%/   /g')
-	PRI=$(echo $T | awk '{print $1}')
-	NAME=$(echo $T | awk '{print $2}')"_$ID"
-	PRJ=$(echo $T | awk '{print $3}')
+	PRI=$(echo $SEQ | awk '{print $1}')
+	NAME=$(echo $SEQ | awk '{print $2}')"_$ID"
+	PRJ=$(echo $SEQ | awk '{print $3}')
 	FBUILD="$BUILD/$PRJ/$NAME"
 	if [ -d "$FBUILD" ]; then
 		$FUNCTION   "$PRI" "$NAME" "$PRJ" "$FBUILD"
@@ -3815,24 +3817,40 @@ function usage(){
 function reset_all(){
 	[ $STEP_STEP -eq 1 ] && trap read debug
 	local VV=""
+	local ID=0
+	local LL="$ROOT/build  $ROOT/sources   $ROOT/repo"
+	local TT=""
 	warning_c "WARNING : this operation is unrecoverable" "Do You want continue? <y,n>"
 	read -r ;
 	VV=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
 	if [ "$VV" == "Y" ]
 	then
-		local LL="$ROOT/build  $ROOT/sources  $ROOT/images $ROOT/repo"
-		local TT=""
-		for TT in $LL
-			do			
-				if  [  -d $TT ]
-				then					
-					local SIZE=$(du -sh $TT | awk '{print $1}')
-					print_ita " REMOVE : "  "$TT" "$SIZE"
-					rm -rf "$TT"
-				else
-					print_ita " WARNING : "  "$TT" "not exist"		
-				fi	
+		ID=0
+		while [ $ID -lt $MAX_STEP ] ; do
+			prepare_seq_priority "$ID" "$ALL_PACKETS"
+			for V in $SORTREQ; do
+				VV=$(echo $V  | sed -e 's/%/   /g')				
+				TT=$(echo $VV | awk '{print $3}')
+				if [ "$VV" != "$ROOT/images/$TT" ]; then
+					VV="$ROOT/images/$TT"				
+					if [ -d $VV ]; then
+					print_ita " REMOVE : "  "$TT : STEP $ID" "$SIZE"
+					rm -rf "$VV"
+					fi
+				fi					
 			done
+		ID=$((ID+1))
+		done
+		for TT in $LL ; do			
+			if  [  -d $TT ]
+			then					
+				local SIZE=$(du -sh $TT | awk '{print $1}')
+				print_ita " REMOVE : "  "$TT" "$SIZE"
+				rm -rf "$TT"
+			else
+				print_ita " WARNING : "  "$TT" "not exist"		
+			fi	
+		done
 		if [ -d "$ROOT/store" ]	
 		then
 			print_ita " .... "  "$ROOT/store" "$(du -sh $ROOT/store| awk '{print $1}')"		
