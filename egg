@@ -126,10 +126,6 @@ function check_version(){ #EX
 if [ $# -ne 2 ]; then 
 	error_c "Missing parameter on call check_version" "$1 $(basename "$0")"
 fi
-local VV=$(which $1)
-if [ ! "$VV" ]; then
-	error_c "which $1 fail, PATH : $PATH" "$1 $(basename "$0")"
-fi
 local VERSION=`$1 --version `
 if [ $? -ne 0 ]; then 
 	error_c "Request $1 --version Fail!" "$1 $(basename "$0")"

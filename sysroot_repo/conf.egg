@@ -8,7 +8,7 @@
 		<images>$ROOT/images</images>
 		<build>$ROOT/build</build>
 		<editor>scite</editor>
-		<start_path>/usr/bin:/sbin:/bin</start_path>
+		<start_path>/bin:/usr/bin</start_path>
 	</conf>	
 	<defaults>
 		<step id="0">
