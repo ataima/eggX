@@ -302,16 +302,18 @@ local MAINFILE="$REPO/conf.egg"
 declare -A XNAME="root  repo sources images store  build editor \
 				 start_path"
 local II=""
+local VV=""
 #load global variable
 for II in $XNAME; do
 	local VALUE=$(xmlstarlet sel -t  -v egg/conf/$II -n $MAINFILE)	
 	if [ "$VALUE" ]; then
-		eval $(echo $II |   tr '[:lower:]' '[:upper:]')="$VALUE"
+		VV=$(echo $II |   tr '[:lower:]' '[:upper:]')
+		eval $VV="$VALUE"
+		export $VV
 	else
 		error_c "XML file $MAINFILE" "node $II fail : check xml"
 	fi	
 done
-
 }
 
 
@@ -3589,14 +3591,25 @@ fi
 }
 
 # $1 optional 
-function list_all(){
+function list(){
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ID=0 
 local V=""
 local PRI=""
 local NAME=""
 local PRJ=""
-local STMIN=1000
+local STMIN=10000
+#is $1 then chek if a var to list-> list deploy -> ls $DEPLOY
+if [ $# -ne 0 ] && [ "$1" != "" ]; then
+	V=$(echo $1  | tr '[:lower:]' '[:upper:]')	
+	PRI=$(env | grep $V)
+	if [ "$PRI" != "" ]; then 	
+		NAME=$( echo $PRI | sed -e 's/=/ /g' | awk '{print $2}' )		
+		tree -L 1 "$NAME"
+	else
+		error_c "missing VAR" "Var $1 not in current env"
+	fi
+else
 while [ $ID -lt $MAX_STEP ] ; do
 	prepare_seq_priority "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do
@@ -3618,6 +3631,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 done
 ST=$(getStatusString $STMIN)
 print_ita "STATUS" "$ST" "$PRJ"
+fi
 }
 
 
@@ -3686,7 +3700,7 @@ if [ "$RES" ]; then
 	rm -f $OROOT/repo
 	ln -s $1 $OROOT/repo
 	sync
-	main listall
+	main list
 else
 	error_c "setrepo : direcory $1 " "not exist!"
 fi	
@@ -3802,8 +3816,8 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "info : show program info..."
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "packetize : create a tar of the output "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "multi <file.egg list of repos >: sequence building of projects"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "listall : list work repo "
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "setrepo <path with new repo> : set a new work repo and listall  "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "list : list work repo "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "setrepo <path with new repo> : set a new work repo and list  "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "freeze nn < step number> : set status stable "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "help <command>: more info about command and repo"
 	print_c  "$PURPLE_LIGHT" "do help <command> for more info"
@@ -3977,19 +3991,21 @@ help_c "command : packetize" \
 "ex ./egg packetize"
 }
 
-function help_listall(){
-help_c "command : listall" \
+function help_list(){
+help_c "command : list" \
+"\$1 : env variable : optional " \
 "list all repo step-project in build ordered sequence" \
 "the last line show the all project status...." \
-"ex ./egg listall"
+"if \$1 is present do tree -L 1 \$1" \
+"ex ./egg list or ./egg list IMAGES"
 }
 
 function help_setrepo(){
 help_c "command : setrepo" \
 "\$1 : file : request " \
 "set file to current repo (set repo lnk in eggX folder to file)" \
-"and call listall" \
-"ex ./egg listall"
+"and call list" \
+"ex ./egg setrepo x86_64_toolkit_repo"
 }
 
 function help_freeze(){
@@ -4021,7 +4037,7 @@ function help_command(){
 local OK=0
 local -a COMMANDS=('source' 'shell' 'configure' 'edit' 'build' 'reset' \
 					'clean' 'multi' 'distclean' 'do' 'redoall' \
-					'packetize' 'listall' 'setrepo' 'freeze' 'options')
+					'packetize' 'list' 'setrepo' 'freeze' 'options')
 local VV=""
 local torun=""
 if [ $# -eq 0 ]; then
@@ -4152,8 +4168,9 @@ case $i in
 	torun=packetize_all		
 	break
 	;;	
-	listall)
-	torun=list_all		
+	list)
+	shift
+	torun=list 		
 	break
 	;;	
 	setrepo)
