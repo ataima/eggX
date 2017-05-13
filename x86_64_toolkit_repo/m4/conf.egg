@@ -12,6 +12,11 @@
 			<step id="1">				
 				<silent>yes</silent>
 				<threads>9</threads>
+				<path>
+					<pre>
+						<set id="0">$USER_PATH</set>
+					</pre>	
+				</path>				
 				<configure>
 					<extra id="0">--prefix=$DEPLOY</extra>
 					<extra id="1">--target=$CROSS</extra>

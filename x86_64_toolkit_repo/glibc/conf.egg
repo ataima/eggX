@@ -12,6 +12,11 @@
 			<step id="0">
 				<silent>yes</silent>
 				<threads>8</threads>	
+				<path>
+					<pre>
+						<set id="0">$USER_PATH</set>
+					</pre>	
+				</path>				
 				<configure>		
 					<pre id="0">
 						<mode>code</mode>		
@@ -64,6 +69,11 @@
 			<step id="3">
 				<silent>yes</silent>
 				<threads>8</threads>	
+				<path>
+					<pre>
+						<set id="0">$USER_PATH</set>
+					</pre>	
+				</path>				
 				<configure>		
 					<pre id="0">
 						<mode>code</mode>		

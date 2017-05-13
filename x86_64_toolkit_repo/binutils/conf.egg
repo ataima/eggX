@@ -12,6 +12,11 @@
 			<step id="0">				
 				<silent>yes</silent>
 				<threads>8</threads>
+				<path>
+					<pre>
+						<set id="0">$USER_PATH</set>
+					</pre>	
+				</path>
 				<configure>
 					<extra id="0">--prefix=$DEPLOY</extra>
 					<extra id="1">--target=$CROSS</extra>
@@ -33,8 +38,7 @@
 				<threads>8</threads>
 				<path>
 					<pre>
-						<set id="0">$DEPLOY/bin</set>
-						<add id="0">$DEPLOY/x86_64-pc-linux-gnu/bin</add>	
+						<set id="0">$USER_PATH</set>
 					</pre>	
 				</path>
 				<configure>
@@ -60,8 +64,7 @@
 				<threads>8</threads>
 				<path>
 					<pre>
-						<set id="0">$DEPLOY/bin</set>
-						<add id="0">$DEPLOY/x86_64-pc-linux-gnu/bin</add>	
+						<set id="0">$USER_PATH</set>
 					</pre>	
 				</path>
 				<configure>

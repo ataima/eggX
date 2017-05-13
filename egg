@@ -303,6 +303,24 @@ declare -A XNAME="root  repo sources images store  build editor \
 				 start_path"
 local II=""
 local VV=""
+local NUM=0
+local ID=0
+#load user defined variable globals
+NUM=$(xmlstarlet sel -t  -v "count(egg/conf/user_env)" -n $MAINFILE)
+if [ $NUM -ne 0 ]; then 
+	ID=0
+	while [ $ID -lt $NUM ]; do
+	local VV=$(xmlstarlet sel -t  -v egg/conf/user_env[@id=\"$ID\"]/name -n $MAINFILE)
+	local VALUE=$(xmlstarlet sel -t  -v egg/conf/user_env[@id=\"$ID\"]/value -n $MAINFILE)
+	if [ "$VV" != "" ] && [ "$VALUE" != "" ]; then
+		eval $VV="$VALUE"
+		export $VV
+	else
+		error_c "XML file $MAINFILE" "node user_env id=\"$ID\" fail, check xml"
+	fi
+	ID=$((ID+1))
+	done 
+fi
 #load global variable
 for II in $XNAME; do
 	local VALUE=$(xmlstarlet sel -t  -v egg/conf/$II -n $MAINFILE)	
@@ -311,9 +329,10 @@ for II in $XNAME; do
 		eval $VV="$VALUE"
 		export $VV
 	else
-		error_c "XML file $MAINFILE" "node $II fail : check xml"
+		error_c "XML file $MAINFILE" "node $II fail, check xml"
 	fi	
 done
+
 }
 
 
