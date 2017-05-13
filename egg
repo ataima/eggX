@@ -3499,7 +3499,7 @@ fi
 #recussive edit on repo project
 function edit_repo_files(){
 [ $STEP_STEP -eq 1 ] && trap read debug
-local ALL_FILES=$(ls "$OREPO")
+local ALL_FILES=$(get_priority_list )
 local VV=""
 #cp "$OREPO/conf.egg" "$OREPO/conf.egg_$(date +%d-%m-%y_%H:%M:%S).backup"
 $EDITOR "$OREPO/conf.egg"
@@ -3590,6 +3590,28 @@ else
 fi
 }
 
+function get_priority_list(){
+[ $STEP_STEP -eq 1 ] && trap read debug
+local PRI_LIST=""
+local ID=0 
+local V=""
+local NAME=""
+while [ $ID -lt $MAX_STEP ] ; do
+	prepare_seq_priority "$ID" "$ALL_PACKETS"
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		NAME=$(echo $V | awk '{print $2}')
+		V=$(echo $PRI_LIST  | grep $NAME)
+		if [ "$V" == "" ]; then 
+			PRI_LIST="$PRI_LIST $NAME"
+		fi
+	done
+	ID=$((ID+1))
+done
+echo $PRI_LIST
+}
+
+
 # $1 optional 
 function list(){
 [ $STEP_STEP -eq 1 ] && trap read debug
@@ -3605,11 +3627,28 @@ if [ $# -ne 0 ] && [ "$1" != "" ]; then
 	PRI=$(env | grep $V)
 	if [ "$PRI" != "" ]; then 	
 		NAME=$( echo $PRI | sed -e 's/=/ /g' | awk '{print $2}' )		
-		tree -L 1 "$NAME"
+		shift
+		if [ "$1" == "" ]; then 
+				tree -L 1 "$NAME"
+			else
+				while [ "$1" != "" ]; do
+				isNumber $1
+				if [ $? -eq 0 ]; then 
+					tree -L "$1" "$NAME"
+					break
+				else
+					NAME="$NAME/$1"
+					tree -L 1 "$NAME"
+				fi
+				shift
+				done
+			fi 	
 	else
 		error_c "missing VAR" "Var $1 not in current env"
 	fi
 else
+V=$(ls -al $OROOT/repo | awk '{print $11}')
+print_ita "REPO" "$OROOT/repo" "$V"	
 while [ $ID -lt $MAX_STEP ] ; do
 	prepare_seq_priority "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do

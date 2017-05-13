@@ -1,23 +1,23 @@
 <?xml version="1.0"?>
 <egg>
 	<project>
-		<name>diffutils</name>
+		<name>m4</name>
 		<download>check</download>		
 		<remote>
 			<method>wget</method>
-			<url>ftp://ftp.gnu.org/gnu/diffutils</url>
-			<file>diffutils-3.5.tar.xz</file>		
+			<url>ftp://ftp.gnu.org/gnu/m4/</url>
+			<file>m4-1.4.9.tar.gz</file>		
 		</remote>	
 		<build>
 			<step id="1">				
 				<silent>yes</silent>
-				<threads>8</threads>
+				<threads>9</threads>
 				<configure>
 					<extra id="0">--prefix=$DEPLOY</extra>
 					<extra id="1">--target=$CROSS</extra>
 				</configure>
 				<make id="0">
-					<priority>11</priority>
+					<priority>9</priority>
 					<rule id="0">
 						<name>all</name> 
 					</rule>
