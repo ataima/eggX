@@ -707,14 +707,14 @@ function getSourcePath(){
 local RES=""
 local NAME=$(echo $1 | tr '[:lower:]' '[:upper:]')
 local CSOURCE="$SOURCES/$1"
-local VV=$(ls -d $CSOURCE/* | tr '[:lower:]' '[:upper:]' | grep $NAME ) 
+local VV=$(ls -d $CSOURCE/*/ | tr '[:lower:]' '[:upper:]' | grep $NAME ) 
 if [ "$VV" ]; then
-	CSOURCE=$(ls -d $CSOURCE/*)
+	CSOURCE=$(ls -d $CSOURCE/*/)
 fi
 
 local TEST="configure configure.ac Makefile Configure"
 for VV in $TEST ; do
-if [ -e $CSOURCE/configure ]; then
+if [ -e $CSOURCE$VV ]; then
 	RES=$CSOURCE
 	break;
 fi	
