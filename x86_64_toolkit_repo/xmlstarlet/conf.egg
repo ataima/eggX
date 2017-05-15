@@ -11,7 +11,8 @@
 		<patch id="0">
 			<method>file</method>
 			<url>$REPO/xmlstarlet</url>
-			<file>0001-usage2c.awk-fix-wrong-basename-regexp.patch</file>		
+			<file>0001-usage2c.awk-fix-wrong-basename-regexp.patch</file>
+			<dest_dir>$BUILD/src</dest_dir>	
 		</patch>
 		<build>
 			<step id="1">				

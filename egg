@@ -705,39 +705,21 @@ fi
 function getSourcePath(){
 [ $STEP_STEP -eq 1 ] && trap read debug
 local RES=""
-if [ -e $SOURCES/$1/configure ]; then
-	RES=$SOURCES/$1	
-else
-	if [ -e $SOURCES/$1/$1-*/configure ]; then		
-		RES=$(ls -d $SOURCES/$1/$1-* )		
-	else
-		if [ -e $SOURCES/$1/configure.ac ]; then
-			RES=$SOURCES/$1	 
-		else
-			if [ -e $SOURCES/$1/$1-*/configure.ac ]; then				
-				RES=$(ls -d $SOURCES/$1/$1-*)				
-			else
-				if [ -e $SOURCES/$1/Makefile ]; then
-					RES=$SOURCES/$1	 
-				else
-					if [ -e $SOURCES/$1/$1-*/Makefile ]; then
-						RES=$(ls -d $SOURCES/$1/$1-*)						
-					else
-						if [ -e $SOURCES/$1/Configure ]; then
-						#perl
-							RES=$SOURCES/$1 
-						else
-							if [ -e $SOURCES/$1/$1-*/Configure ]; then
-							#perl
-								RES=$(ls -d $SOURCES/$1/$1-*)									
-							fi
-						fi				
-					fi
-				fi
-			fi
-		fi
-	fi
+local NAME=$(echo $1 | tr '[:lower:]' '[:upper:]')
+local CSOURCE="$SOURCES/$1"
+local VV=$(ls -d $CSOURCE/* | tr '[:lower:]' '[:upper:]' | grep $NAME ) 
+if [ "$VV" ]; then
+	CSOURCE=$(ls -d $CSOURCE/*)
+fi
+
+local TEST="configure configure.ac Makefile Configure"
+for VV in $TEST ; do
+if [ -e $CSOURCE/configure ]; then
+	RES=$CSOURCE
+	break;
 fi	
+done
+
 echo $RES
 }
 
