@@ -2245,6 +2245,14 @@ if [ -f "$FILEIN.status" ]; then
 	STATUS=$(cat  "$FILEIN.status")
 	if [ $STATUS -eq 1 ] ; then
 		# previous download ended ok all exit
+		if [ ! -e "$SOURCES/$1" ] ; then
+			mkdir -p "$SOURCES/$1"				
+			#echo "-->tar -xf $REPO/$1/$3 -C  $SOURCES/$1"
+			tar -xf "$FILEIN" -C  "$SOURCES/$1"
+			if [ $? -ne 0 ]; then
+				error_c "Unable to untar file " "$REPO/$1/$3 project $1"
+			fi
+		fi
 		return $RES
 	else	
 		rm -f "$FILEIN"
@@ -2286,12 +2294,14 @@ if [ "$tmp" != "0" ]; then
 	RES=1
 	fi
 	if [ $RES -eq 1 ]; then 
-		if [ ! -d "$SOURCES/$1" ]; then 
-			mkdir -p "$SOURCES/$1"
-		fi
 		if [ ! -e "$SOURCES/$1" ] ; then
 			mkdir -p "$SOURCES/$1"
 		fi
+		if [ ! -d "$SOURCES/$1" ]; then 
+			rm -rf "$SOURCES/$1"
+			mkdir -p "$SOURCES/$1"
+		fi
+		
 		#echo "-->tar -xf $REPO/$1/$3 -C  $SOURCES/$1"
 		tar -xf "$FILEIN" -C  "$SOURCES/$1"
 		if [ $? -ne 0 ]; then
