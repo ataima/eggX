@@ -470,6 +470,12 @@ return 0
 #$1 build name
 #$2 dir
 function remove_path(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi	
 [ $STEP_STEP -eq 1 ] && trap read debug
 local V=$(echo $MYPATH | sed -e 's/:/  /g')
 local OLD=$2
@@ -485,6 +491,12 @@ done
 #$1 build name
 #$2 dir
 function add_path(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local NEW=$2
 local V=$(echo $MYPATH | sed -e 's/:/  /g')
@@ -505,6 +517,12 @@ MYPATH="$2"
 #$1 project
 #$2 build phase number 0,1,2.....
 function insert_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local PRI=""
 local SILENT=""
@@ -559,6 +577,12 @@ fi
 #$1 project
 #$2 build phase number 0,1,2.....
 function insert_packet_download(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local NUM=0
 local ID=0
@@ -588,6 +612,12 @@ fi
 #$1 project
 #$2 build phase number 0,1,2.....
 function manage_path_pre(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local TPATH=""
 local NUM=0
@@ -648,6 +678,12 @@ fi
 #$1 project
 #$2 build phase number 0,1,2.....
 function manage_path_post(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local TPATH=""
 local NUM=0
@@ -703,6 +739,12 @@ fi
 
 #$1 project
 function getSourcePath(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local RES=""
 local NAME=$(echo $1 | tr '[:lower:]' '[:upper:]')
@@ -730,6 +772,12 @@ echo $RES
 #$3 fileout
 #$4 build name
 function generate_setenv(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 	local SRC=$(getSourcePath $1)	
 	echo "#!/bin/sh" > "$3"
@@ -819,6 +867,12 @@ function generate_setenv(){
 #$3 build path
 #$4 value 0,1,2,
 function setbuildstatus(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local FILEIN="$3/status"
 case $4 in
@@ -846,6 +900,12 @@ esac
 #		<value>setbuildstatus 2</value>
 #	</post >
 function getbuildstatus(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local RES=0
 local FILEIN="$3/status" 
@@ -886,6 +946,12 @@ esac
 
 #$1 file to create rewrite
 function prepare_script_head(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local II=""
 local FUNCEXP="print_c print_s_ita print_del_ita print_ita \
@@ -909,6 +975,12 @@ done
 #$6 status to check value else exit :if $6=1000 don't check
 #$7 msg in stable mode
 function prepare_script_generic(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local VV=0
 VV=$6
@@ -977,6 +1049,12 @@ fi
 #$3 file to write 
 #$4 BUILD NAME
 function prepare_script_download(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 prepare_script_head "$3"
 extract_function  test_sign_file >> "$3"
@@ -1020,6 +1098,12 @@ echo "" >> $4
 #$4 path build
 #$5 build name
 function add_pre_conf(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 declare -i i=0
 local VALUE=""
@@ -1086,6 +1170,12 @@ echo " "  >> $3
 #$4 path build
 #$5 build name
 function add_post_conf(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 declare -i i=0
 local VALUE=""
@@ -1153,6 +1243,12 @@ echo " "  >> $3
 #$3 file out
 #$4 silent
 function add_extra_conf(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 declare -i i=0
 local VALUE=""
@@ -1208,6 +1304,12 @@ echo "fi" >> $3
 #$7 make index 
 #s8 build file
 function add_rules_build(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local NUM_R=0
 local II=0
@@ -1255,6 +1357,12 @@ xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule"
 #</make>
 #
 function generate_build_rules(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #build
 local SH_BUILD=""
@@ -1313,6 +1421,12 @@ echo " "  >> "$SH_BUILD"
 #$6 thread
 
 function generate_clean_rule(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local SH_CLEAN="$3/clean.sh"
 rm -f "$SH_CLEAN" 
@@ -1348,6 +1462,12 @@ end_script_generic "$1" "$2" "done clean build " "$SH_CLEAN"
 #$5 silent
 #$6 thread
 function generate_distclean_rule(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local SH_DISTCLEAN="$3/distclean.sh"
 rm -f "$SH_DISTCLEAN"  
@@ -1377,6 +1497,12 @@ end_script_generic "$1" "$2" "done distclean build " "$SH_DISTCLEAN"
 #$5 silent
 #$6 thread
 function generate_rebuild_rule(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local NUM_R=0
 local NUM_M=0
@@ -1423,6 +1549,12 @@ end_script_generic "$1" "$2" "done  rebuild " "$SH_REBUILD"
 #$5 silent
 #$6 thread
 function add_build_script(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 generate_setenv "$1" "$2" "$3/setenv.sh" "$4" "$5"
 generate_clean_rule $@
@@ -1439,6 +1571,12 @@ generate_rebuild_rule $@
 #$6 rule index
 #$7 make index
 function add_pre_build(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 declare -i i=0
 local VALUE=""
@@ -1508,6 +1646,12 @@ echo " "  >> $3
 #$6 rule index
 #$7 make index
 function add_post_build(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 declare -i i=0
 local VALUE=""
@@ -1577,6 +1721,12 @@ echo " "  >> $3
 #$6 max thread
 #$7 make rule name
 function add_entry_in_main_build_script(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 echo "start_time=\$(date +%s)">> "$3"
 echo " print_s_ita \"       Make \"  \"$7-$6:$5\"  \"start\"" >> "$3"
@@ -1597,6 +1747,12 @@ echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$3"
 #$1 project
 #$2 build phase number 0,1,2.....
 function create_configure_cmd(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local SILENT=""
 local NUM=0
@@ -1705,6 +1861,12 @@ print_ita "STEP : $2 PRI : $3" "$1"  "configured done !"
 #$3 make priority
 #$4 build name
 function create_main_scripts(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local FILES="bootstrap clean distclean build_$3 rebuild setenv"
 local RES=0
@@ -1729,6 +1891,12 @@ done
 #$3 make priority
 #$4 build name
 function create_main_entry(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local FMAIN="$BUILD/$4/step_$2.sh"
 RES=$(getFileSize "$FMAIN")
@@ -1838,6 +2006,12 @@ fi
 # $3 patch
 #$4 project
 function write_apply_patch(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 echo "if [ \$? -eq 99 ]; then" >>  "$1"
 echo "	ex_apply_patch $4 $2 $3" >>  "$1"
@@ -1960,6 +2134,11 @@ rm -rf /tmp/$3
 # $7 key url
 # $8 key file
 function write_download_mode(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	set -x
+	STEP_STEP=1
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 echo "" >>  "$1"
 echo "" >>  "$1"
@@ -1995,6 +2174,12 @@ esac
 # $7 key url
 # $8 key file
 function create_download_source(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 # $1=--force or not
 echo "if [ \$# -ne 0 ]; then">> "$1"
@@ -2327,6 +2512,12 @@ return $RES
 # $3 build
 # $4 file out
 function get_source_param_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local RES=0
 local tmp=""
@@ -2390,6 +2581,12 @@ fi
 # $3 build
 # $4 file out
 function get_patch_param_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local -i tmp=0
 local -i i=0
@@ -2493,6 +2690,12 @@ fi
 #$3 make priority
 #$4 build name
 function check_source(){ 
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local -i RES=0
 local S_BUILD="$BUILD/$STEP_NAME/$1_$2"
@@ -2518,6 +2721,12 @@ chmod +x "$S_FILE"
 #$3 make priority
 #$4 build name
 function check_patch(){ 
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local -i RES=0
 local S_BUILD="$BUILD/$STEP_NAME/$1_$2"
@@ -2537,6 +2746,12 @@ chmod +x "$S_FILE"
 #$3 make priority
 #$4 build name
 function configure_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 manage_path_pre  $1  $2
 create_configure_cmd "$1" "$2" "$3"
@@ -2548,6 +2763,12 @@ sync
 
 #$1 build phase number 0,1,2.....
 function read_default_for_step(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local VV=""
 local VALUE=""
@@ -2589,6 +2810,12 @@ fi
 #$1 number id
 #$@ argv optional
 function conf_download_all(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
 local V=""
@@ -2633,6 +2860,12 @@ fi
 #$1 number id
 #$@ argv optional
 function conf_patch_all(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
 local V=""
@@ -2678,6 +2911,12 @@ fi
 #$1 number id
 #$@ argv optional
 function configure_all_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
 local V=""
@@ -2727,6 +2966,12 @@ fi
 #$1 ID BUILD STEP
 #$2 array of project
 function prepare_seq_priority(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local V=""
 unset BSEQ
@@ -2743,6 +2988,12 @@ SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
 #$1 ID BUILD STEP
 #$2 array of project
 function prepare_seq_download(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local V=""
 unset BSEQ
@@ -2804,6 +3055,12 @@ print_ita  "PATCH: $1"  "$2"  "$3"
 
 #none
 function build_all(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local HAVE_BUILD=0
 local STATUS=0
@@ -2848,6 +3105,11 @@ fi
 
 #none
 function download_all(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	set -x
+	STEP_STEP=1
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
 local HAVE_BUILD=0
@@ -2888,6 +3150,12 @@ cd "$LPWD"
 
 #none
 function patch_all(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
 local HAVE_BUILD=0
@@ -2928,6 +3196,12 @@ cd "$PPWD"
 
 #none
 function packetize_all(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ID=0 
 local V=""
@@ -2994,6 +3268,12 @@ print_del_ita
 
 #none
 function compile_all(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local HAVE_BUILD=0
 local STATUS=0
@@ -3032,6 +3312,12 @@ fi
 
 #none
 function clean_all(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ID=0 
 local V=""
@@ -3060,6 +3346,12 @@ done
 
 #none
 function distclean_all(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ID=0 
 local V=""
@@ -3091,6 +3383,12 @@ done
 #$3 ... SN projects
 #$@ from argv build.sh
 function exec_single(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #trovo nomi build per ogni progetto
 local ID=0
@@ -3140,6 +3438,12 @@ done
 #$3 ... SN projects
 #$@ from argv build.sh
 function exec_single_download(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #trovo nomi build per ogni progetto
 local ID=0
@@ -3183,6 +3487,12 @@ done
 }
 
 function exec_build(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local PRI=$1
 local NAME=$2
@@ -3203,6 +3513,12 @@ fi
 
 #$@ from argv build.sh
 function build_single(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single "exec_build" $ARGV
@@ -3211,6 +3527,12 @@ exec_single "exec_build" $ARGV
 
 
 function exec_download(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #set -x ; trap read debug
 local PRI=$1
@@ -3227,6 +3549,12 @@ fi
 
 #$@ from argv build.sh
 function download_single(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single_download "exec_download" $ARGV
@@ -3234,6 +3562,12 @@ exec_single_download "exec_download" $ARGV
 
 
 function exec_patch(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #set -x ; trap read debug
 local PRI=$1
@@ -3250,12 +3584,24 @@ fi
 
 #$@ from argv build.sh
 function patch_single(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single_download "exec_patch" $ARGV
 }
 
 function exec_compile(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local PRI=$1
 local NAME=$2
@@ -3271,6 +3617,12 @@ fi
 
 #$@ from argv build.sh
 function compile_single(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single "exec_compile" $ARGV
@@ -3278,6 +3630,12 @@ exec_single "exec_compile" $ARGV
 
 
 function exec_clean(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local PRI=$1
 local NAME=$2
@@ -3293,12 +3651,24 @@ fi
 
 #$@ from argv build.sh
 function clean_single(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single "exec_clean" $ARGV
 }
 
 function exec_distclean(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local PRI=$1
 local NAME=$2
@@ -3314,6 +3684,12 @@ fi
 
 #$@ from argv build.sh
 function distclean_single(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ARGV="$@"
 exec_single "exec_distclean" $ARGV
@@ -3322,6 +3698,12 @@ exec_single "exec_distclean" $ARGV
 
 #$@
 function build_all_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	build_all
@@ -3333,6 +3715,12 @@ print_del_ita
 
 #$@
 function download_all_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	download_all
@@ -3344,6 +3732,12 @@ print_del_ita
 
 #$@
 function patch_all_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	patch_all
@@ -3355,6 +3749,12 @@ print_del_ita
 
 #$@
 function compile_all_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	compile_all
@@ -3366,6 +3766,12 @@ print_del_ita
 
 #$@
 function clean_all_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	clean_all
@@ -3377,6 +3783,12 @@ print_del_ita
 
 #$@
 function distclean_all_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 if [ "$1" == "" ]; then
 	distclean_all
@@ -3390,6 +3802,12 @@ print_del_ita
 
 #$ARGV TODO
 function config_all_step(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local -i CONF_NUM=0
 if [ $# -eq 0 ]; then
@@ -3418,6 +3836,12 @@ print_del_ita
 
 #$ARGV TODO
 function conf_download_all_step(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local -i DW_NUM=0
 if [ $# -eq 0 ]; then
@@ -3446,6 +3870,12 @@ fi
 
 #$ARGV TODO
 function conf_patch_all_step(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local -i DW_NUM=0
 if [ $# -eq 0 ]; then
@@ -3474,6 +3904,12 @@ fi
 #$ARGV 
 # ex 0 gcc -> try step of project gcc
 function shell_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local PRJ=""
 local V=""
@@ -3536,6 +3972,12 @@ fi
 
 #recussive edit on repo project
 function edit_repo_files(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ALL_FILES=$(get_priority_list )
 local VV=""
@@ -3555,6 +3997,12 @@ done
 #$ARGV 
 #  gcc -> edit conf.egg of project gcc
 function edit_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local PRJ=""
 local V=""
@@ -3593,18 +4041,30 @@ exit 0
 
 #$ARGV
 function source_download(){
-	[ $STEP_STEP -eq 1 ] && trap read debug
-	conf_download_all_step $@
-	download_all_packet $@
-	conf_patch_all_step $@
-	patch_all_packet $@
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
+[ $STEP_STEP -eq 1 ] && trap read debug
+conf_download_all_step $@
+download_all_packet $@
+conf_patch_all_step $@
+patch_all_packet $@
 }
 #$ARGV
 function redoall(){	
-	[ $STEP_STEP -eq 1 ] && trap read debug
-	source_download	
-	config_all_step	
-	build_all_packet	
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
+[ $STEP_STEP -eq 1 ] && trap read debug
+source_download	
+config_all_step	
+build_all_packet	
 }
 
 #$1 staus 0,1,2,...?
@@ -3629,6 +4089,12 @@ fi
 }
 
 function get_priority_list(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local PRI_LIST=""
 local ID=0 
@@ -3652,6 +4118,12 @@ echo $PRI_LIST
 
 # $1 optional 
 function list(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ID=0 
 local V=""
@@ -3717,6 +4189,12 @@ fi
 #$1 step nn 
 #$2 optional prj
 function freeze_step(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local ID=$1 
 local V=""
@@ -3738,13 +4216,58 @@ prepare_seq_priority "$ID" "$ALL_PACKETS"
 					chmod +w "$BUILD/$PRJ/$NAME/status"
 					echo 2 > "$BUILD/$PRJ/$NAME/status"
 					chmod -w "$BUILD/$PRJ/$NAME/status"
-					print_ita "STEP : $ID" "PRI : $PRI" "$NAME -> stable"
+					print_ita "STEP : $ID" "PRI : $PRI" "$NAME -> set as stable"					
 			fi
-			if [ $# -eq 2 ] && [  "$NAME" == "SRNAME" ]; then
+			if [ $# -eq 2 ] && [  "$NAME" == "$RNAME" ]; then
 					chmod +w "$BUILD/$PRJ/$NAME/status"
 					echo 2 > "$BUILD/$PRJ/$NAME/status"
 					chmod -w "$BUILD/$PRJ/$NAME/status"
-					print_ita "STEP : $ID" "PRI : $PRI" "$NAME -> stable"
+					print_ita "STEP : $ID" "PRI : $PRI" "$NAME -> set as stable"
+					break
+			fi
+		fi				
+	done
+}
+
+
+#$1 step nn 
+#$2 optional prj
+function hot_step(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
+[ $STEP_STEP -eq 1 ] && trap read debug
+local ID=$1 
+local V=""
+local PRI=""
+local NAME=""
+local PRJ=""
+local RNAME="$2_$1"
+prepare_seq_priority "$ID" "$ALL_PACKETS" 
+#set -x ; trap read debug
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		PRI=$(echo $V | awk '{print $1}')
+		NAME=$(echo $V | awk '{print $2}')"_$ID"
+		PRJ=$(echo $V | awk '{print $3}')
+		V=$( getFileSize $BUILD/$PRJ/$NAME/status)
+		if [ $V -ne 0 ]; then 
+			if [ $# -eq 1 ]; then
+				
+					chmod +w "$BUILD/$PRJ/$NAME/status"
+					echo 0 > "$BUILD/$PRJ/$NAME/status"
+					chmod -w "$BUILD/$PRJ/$NAME/status"
+					print_ita "STEP : $ID" "PRI : $PRI" "$NAME -> reset to configure"
+			fi
+			if [ $# -eq 2 ] && [  "$NAME" == "$RNAME" ]; then
+					chmod +w "$BUILD/$PRJ/$NAME/status"
+					echo 0 > "$BUILD/$PRJ/$NAME/status"
+					chmod -w "$BUILD/$PRJ/$NAME/status"
+					print_ita "STEP : $ID" "PRI : $PRI" "$NAME -> reset to configure"
+					break
 			fi
 		fi				
 	done
@@ -3753,6 +4276,12 @@ prepare_seq_priority "$ID" "$ALL_PACKETS"
 #$1 optional step
 #$2 optional projects
 function freeze_build(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local FNUM=0
 if [ $# -eq 0 ];  then 
@@ -3766,10 +4295,36 @@ else
 fi
 }
 
-
+#$1 optional step
+#$2 optional projects
+function hot_build(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
+[ $STEP_STEP -eq 1 ] && trap read debug
+local FNUM=0
+if [ $# -eq 0 ];  then 
+while [ $FNUM -lt $MAX_STEP ] ; do
+	hot_step $FNUM
+	FNUM=$((FNUM+1))
+done
+	
+else
+	hot_step $1 $2
+fi
+}
 
 #$1 new repo to set repo
 function set_repo(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local RES=""
 RES=$(ls -d $1)
@@ -3786,6 +4341,12 @@ fi
 
 #$1 file with list of repos
 function multi_repo(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local PWDM=""
 local RES=""
@@ -3880,6 +4441,9 @@ function usage(){
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -D or --debug : set debug mode" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -Q or --nopacketize : dont craete output tar" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option +W or --warning : print also warnings" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -B or --break : break and debug function" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -X or --debug : break and debug functions into" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -S or --step : debug functions into step by step" 
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : download all sources from repo projects"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure repo projects "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure and build repo projects"
@@ -3896,57 +4460,64 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "list : list work repo "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "setrepo <path with new repo> : set a new work repo and list  "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "freeze nn < step number> : set status stable "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "hot nn < step number> : set status to configure "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "help <command>: more info about command and repo"
 	print_c  "$PURPLE_LIGHT" "do help <command> for more info"
 	exit 1
 }
 
 function reset_all(){
-	[ $STEP_STEP -eq 1 ] && trap read debug
-	local VV=""
-	local ID=0
-	local LL="$ROOT/build  $ROOT/sources   $ROOT/repo"
-	local TT=""
-	warning_c "WARNING : this operation is unrecoverable" "Do You want continue? <y,n>"
-	read -r ;
-	VV=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
-	if [ "$VV" == "Y" ]
-	then
-		ID=0
-		while [ $ID -lt $MAX_STEP ] ; do
-			prepare_seq_priority "$ID" "$ALL_PACKETS"
-			for V in $SORTREQ; do
-				VV=$(echo $V  | sed -e 's/%/   /g')				
-				TT=$(echo $VV | awk '{print $3}')
-				if [ "$VV" != "$ROOT/images/$TT" ]; then
-					VV="$ROOT/images/$TT"				
-					if [ -d $VV ]; then
-					print_ita " REMOVE : "  "$TT : STEP $ID" "$SIZE"
-					rm -rf "$VV"
-					fi
-				fi					
-			done
-		ID=$((ID+1))
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
+[ $STEP_STEP -eq 1 ] && trap read debug
+local VV=""
+local ID=0
+local LL="$ROOT/build  $ROOT/sources   $ROOT/repo"
+local TT=""
+warning_c "WARNING : this operation is unrecoverable" "Do You want continue? <y,n>"
+read -r ;
+VV=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
+if [ "$VV" == "Y" ]
+then
+	ID=0
+	while [ $ID -lt $MAX_STEP ] ; do
+		prepare_seq_priority "$ID" "$ALL_PACKETS"
+		for V in $SORTREQ; do
+			VV=$(echo $V  | sed -e 's/%/   /g')				
+			TT=$(echo $VV | awk '{print $3}')
+			if [ "$VV" != "$ROOT/images/$TT" ]; then
+				VV="$ROOT/images/$TT"				
+				if [ -d $VV ]; then
+				print_ita " REMOVE : "  "$TT : STEP $ID" "$SIZE"
+				rm -rf "$VV"
+				fi
+			fi					
 		done
-		for TT in $LL ; do			
-			if  [  -d $TT ]
-			then					
-				local SIZE=$(du -sh $TT | awk '{print $1}')
-				print_ita " REMOVE : "  "$TT" "$SIZE"
-				rm -rf "$TT"
-			else
-				print_ita " WARNING : "  "$TT" "not exist"		
-			fi	
-		done
-		if [ -d "$ROOT/store" ]	
-		then
-			print_ita " .... "  "$ROOT/store" "$(du -sh $ROOT/store| awk '{print $1}')"		
+	ID=$((ID+1))
+	done
+	for TT in $LL ; do			
+		if  [  -d $TT ]
+		then					
+			local SIZE=$(du -sh $TT | awk '{print $1}')
+			print_ita " REMOVE : "  "$TT" "$SIZE"
+			rm -rf "$TT"
 		else
-			print_ita " WARNING : "  "$ROOT/store" "not exist"	
-			rm -rf $ROOT	
+			print_ita " WARNING : "  "$TT" "not exist"		
 		fi	
-		tree $ROOT
-	fi
+	done
+	if [ -d "$ROOT/store" ]	
+	then
+		print_ita " .... "  "$ROOT/store" "$(du -sh $ROOT/store| awk '{print $1}')"		
+	else
+		print_ita " WARNING : "  "$ROOT/store" "not exist"	
+		rm -rf $ROOT	
+	fi	
+	tree $ROOT
+fi
 }
 
 function default_do(){
@@ -4094,6 +4665,13 @@ help_c "command : freeze" \
 }
 
 
+function help_hot(){
+help_c "command : hot" \
+"set project<s> to configure :  to enable rebuild of a project " \
+"previous declared as stable" \
+"ex ./egg hot"
+}
+
 function help_source(){
 help_c "command : source" \
 "source download or check the source of projects" \
@@ -4106,15 +4684,23 @@ help_c "command : before any command you can set an option" \
 "option -Q or --nopacketize : dont craete output tar"  \
 "option -S or --step :execute step by step script" \
 "option +W or --verbose : show more warning" \
+"option -B <function> or --break : break and set debug at function " \
+"option -X <function> or --break : break and set debug at function (into) " \
 "ex ./egg -S build"
 }
 
 function help_command(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	set -x ; trap read debug
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1		
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local OK=0
 local -a COMMANDS=('source' 'shell' 'configure' 'edit' 'build' 'reset' \
 					'clean' 'multi' 'distclean' 'do' 'redoall' \
-					'packetize' 'list' 'setrepo' 'freeze' 'options')
+					'packetize' 'list' 'setrepo' 'freeze' 'hot''options')
 local VV=""
 local torun=""
 if [ $# -eq 0 ]; then
@@ -4155,17 +4741,25 @@ fi
 #$1 build id number
 function main(){
 local torun=default_do
+#non  zero no create final packet output
 NOPKT=0
+#non zero more verbose warning
 MOREWRN=0
+#non zero step by step debug from start
 STEP_STEP=0
+#non zero a function breakpoint enable
+BREAK_BREAK=0
+#non zero set  STEP_STEP to 1 to debug into 
+BREAK_DEEP=0
+#start debug a function name $BREAK_FUNCTION
+BREAK_FUNCTION=""
 if [ $# -ne 0 ]; then
-for i in $@; do
-case $i in 
+while [ $# -ne 0 ]; do
+case $1 in 
 	-S|--step)
 	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 	STEP_STEP=1
-	set -x
-	trap read debug
+	set -x ; trap read debug
 	shift
 	;;
 	-D|--debug)
@@ -4181,6 +4775,28 @@ case $i in
 	+W|--verbose)
 	MOREWRN=1
 	shift
+	;;
+	-B|--break)
+	BREAK_BREAK=1
+	BREAK_DEEP=0	
+	shift
+	BREAK_FUNCTION=$1
+	if [ "$BREAK_FUNCTION" == "" ] ; then
+		error_c "On set function breakpoint" "missing function name!"
+	fi
+	shift
+	warning_c "Set debug breakpoint" "At function $BREAK_FUNCTION"
+	;;
+	-X|--debug)
+	BREAK_BREAK=1
+	BREAK_DEEP=1	
+	shift
+	BREAK_FUNCTION=$1
+	if [ "$BREAK_FUNCTION" == "" ] ; then
+		error_c "On set function breakpoint" "missing function name!"
+	fi
+	shift
+	warning_c "Set debug breakpoint" "At function $BREAK_FUNCTION"
 	;;
 	source)
 	torun=source_download
@@ -4260,6 +4876,11 @@ case $i in
 	shift
 	break
 	;;
+	hot)
+	torun=hot_build		
+	shift
+	break
+	;;
 	help)
 	torun=help_command		
 	shift
@@ -4270,7 +4891,7 @@ case $i in
 	error_c "Command line" " unknow option $i"
 	;;
 esac
-done
+ done
 
 fi
 
