@@ -340,8 +340,11 @@ done
 function isNumber(){
 local RES='^[0-9]+$'
 if ! [[ $1 =~ $RES ]] ; then
-   return 1
+	RES=1
+else
+	RES=0
 fi
+return $RES
 }
 
 #$1 fulle filename
@@ -3971,6 +3974,7 @@ fi
 }
 
 #recussive edit on repo project
+#$1 optnional step : if presente edit only projects in this step
 function edit_repo_files(){
 if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
@@ -3979,7 +3983,13 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-local ALL_FILES=$(get_priority_list )
+if  [ "$1" != ""  ] ; then
+	isNumber $1
+	if [ $? -ne 0 ]; then 
+		error_c "Input parameter not is a number" "insert step level "
+	fi
+fi
+local ALL_FILES=$(get_priority_list "$1")
 local VV=""
 #cp "$OREPO/conf.egg" "$OREPO/conf.egg_$(date +%d-%m-%y_%H:%M:%S).backup"
 $EDITOR "$OREPO/conf.egg"
@@ -4021,7 +4031,7 @@ else
 				$EDITOR "$OREPO/conf.egg" > /dev/null  &
 				;;
 				self.repo)
-				edit_repo_files
+				edit_repo_files "$2"
 				;;
 				*)
 				error_c "Missing project in $OREPO " "project : $1"
@@ -4088,6 +4098,7 @@ else
 fi
 }
 
+#$1 if present only this level
 function get_priority_list(){
 if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
@@ -4100,6 +4111,19 @@ local PRI_LIST=""
 local ID=0 
 local V=""
 local NAME=""
+isNumber $1
+if [ $? -eq 0 ]; then 
+	ID=$1
+	prepare_seq_priority "$ID" "$ALL_PACKETS"
+	for V in $SORTREQ; do
+		V=$(echo $V  | sed -e 's/%/   /g')
+		NAME=$(echo $V | awk '{print $2}')
+		V=$(echo $PRI_LIST  | grep $NAME)
+		if [ "$V" == "" ]; then 
+			PRI_LIST="$PRI_LIST $NAME"
+		fi
+	done
+else
 while [ $ID -lt $MAX_STEP ] ; do
 	prepare_seq_priority "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do
@@ -4112,6 +4136,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 	done
 	ID=$((ID+1))
 done
+fi
 echo $PRI_LIST
 }
 
