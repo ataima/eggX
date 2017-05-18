@@ -95,7 +95,7 @@
 						<post id="0">
 							<mode>code</mode>		
 							<value> cd  $DEPLOY/bin; rm -f cc; ln -s gcc cc; </value>
-						</pre>							
+						</post>							
 					</rule>										
 				</make>
 			</step>
