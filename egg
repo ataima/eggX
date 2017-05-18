@@ -1832,17 +1832,17 @@ else
 		mkdir -p "$C_BUILD/build"
 		echo -n "$SRC/configure  ">> $C_FILE
 		add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
-	else
-		if [ -e $SRC/Makefile ]; then
-			rm -rf $C_BUILD/build
-			ln -s  "$SRC" "$C_BUILD/build"
-			echo  "#no configure is needed .... ">> $C_FILE
 		else
 			if [ -e $SRC/Configure ]; then
 			#perl
 				mkdir -p "$C_BUILD/build"
 				echo -n "$SRC/Configure ">> $C_FILE
 				add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
+			else
+				if [ -e $SRC/Makefile ]; then
+					rm -rf $C_BUILD/build
+					ln -s  "$SRC" "$C_BUILD/build"
+					echo  "#no configure is needed .... ">> $C_FILE
 			else
 				error_c "Configure script or Makefile missing" "project : $1"
 			fi							
