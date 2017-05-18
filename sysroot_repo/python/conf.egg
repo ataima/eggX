@@ -26,7 +26,7 @@
 						<thread>1</thread>	
 						<post id="0">
 							<mode>code</mode>		
-							<value>cd $DEPLOY/bin; ln -s pythom3.6 python</value>
+							<value>cd $DEPLOY/bin;rm -f  python;ln -s python3.6 python</value>
 						</post>							
 					</rule>
 				</make>
