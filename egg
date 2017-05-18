@@ -936,7 +936,11 @@ function ex_setbuildstatus(){ #EX
 if [ "$PWD" != "" ]; then
 	cd "$PWD"
 fi
-chmod +w "$STATUS"
+check_exist $STATUS
+if [ $? -eq 0 ]; then
+   chmod +w $STATUS
+fi
+
 case $1 in 
 	0|1)
 		echo $1 > $STATUS
@@ -2443,10 +2447,12 @@ if [ -f "$FILEIN.status" ]; then
 			#echo "-->tar -xf $REPO/$1/$3 -C  $SOURCES/$1"
 			tar -xf "$FILEIN" -C  "$SOURCES/$1"
 			if [ $? -ne 0 ]; then
-				error_c "Unable to untar file " "$REPO/$1/$3 project $1"
+				rm -f "$FILEIN"
+				rm -f "$FILEIN.*"
+			else
+				return $RES			
 			fi
 		fi
-		return $RES
 	else	
 		rm -f "$FILEIN"
 		rm -f "$FILEIN.*"
@@ -2844,13 +2850,12 @@ else
 	PRJS=$@
 fi
 
+
 prepare_seq_download "$ID" "$PRJS"
 
 MYPATH=$START_PATH
 V=${SORTREQ[0]}
-if [ "$V" ]; then
-	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
-	PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')	
+if [ "$V" ]; then	
 	if [ ! -e "$BUILD/$STEP_NAME" ]; then
 		mkdir -p "$BUILD/$STEP_NAME"
 	fi
@@ -2864,6 +2869,8 @@ if [ "$V" ]; then
 	done
 fi	
 }
+
+
 
 #$1 number id
 #$@ argv optional
@@ -2890,7 +2897,7 @@ shift
 
 if [ "$#" -eq  0 ]; then
 	PRJS=$ALL_PACKETS
-else
+else	
 	PRJS=$@
 fi
 
@@ -2898,9 +2905,7 @@ prepare_seq_download "$ID" "$PRJS"
 
 MYPATH=$START_PATH
 V=${SORTREQ[0]}
-if [ "$V" ]; then
-	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
-	PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')	
+if [ "$V" ]; then	
 	if [ ! -e "$BUILD/$STEP_NAME" ]; then
 		mkdir -p "$BUILD/$STEP_NAME"
 	fi
@@ -4474,6 +4479,7 @@ function usage(){
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -B or --break : break and debug function" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -X or --debug : break and debug functions into" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -S or --step : debug functions into step by step" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -T or --test : call direct a function ad debug step by step"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : download all sources from repo projects"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure repo projects "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure and build repo projects"
@@ -4715,7 +4721,8 @@ help_c "command : before any command you can set an option" \
 "option -S or --step :execute step by step script" \
 "option +W or --verbose : show more warning" \
 "option -B <function> or --break : break and set debug at function " \
-"option -X <function> or --break : break and set debug at function (into) " \
+"option -X <function> or --deepbreak : break and set debug at function (into) " \
+"option -T <function> or --test : break and set debug and call function " \
 "ex ./egg -S build"
 }
 
@@ -4817,7 +4824,7 @@ case $1 in
 	shift
 	warning_c "Set debug breakpoint" "At function $BREAK_FUNCTION"
 	;;
-	-X|--debug)
+	-X|--deepbreak)
 	BREAK_BREAK=1
 	BREAK_DEEP=1	
 	shift
@@ -4828,6 +4835,19 @@ case $1 in
 	shift
 	warning_c "Set debug breakpoint" "At function $BREAK_FUNCTION"
 	;;
+	-T|--test)
+	BREAK_BREAK=1
+	BREAK_DEEP=0	
+	shift
+	BREAK_FUNCTION=$1
+	if [ "$BREAK_FUNCTION" == "" ] ; then
+		error_c "On set function breakpoint" "missing function name!"
+	fi
+	shift
+	warning_c "Set debug breakpoint" "At function $BREAK_FUNCTION"
+	torun="$BREAK_FUNCTION"
+	break
+	;;	
 	source)
 	torun=source_download
 	shift
