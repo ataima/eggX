@@ -4472,14 +4472,14 @@ fi
 
 
 function usage(){
-	print_c "$BLUE_LIGHT" "usage : ./build.sh <option> command  <args to pass subcommand>"
+	print_c "$BLUE_LIGHT" "usage : ./egg <option> command  <args to pass subcommand>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -D or --debug : set debug mode" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -Q or --nopacketize : dont craete output tar" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option +W or --warning : print also warnings" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -B or --break : break and debug function" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -X or --debug : break and debug functions into" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -S or --step : debug functions into step by step" 
-	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -T or --test : call direct a function ad debug step by step"
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -T or --test : call direct a function and debug step by step"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : download all sources from repo projects"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure repo projects "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure and build repo projects"
