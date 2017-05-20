@@ -1834,6 +1834,9 @@ else
 	if [ -e $SRC/configure.ac ]; then
 		# add <pre> autoconf...
 		mkdir -p "$C_BUILD/build"
+		echo "pushd $SRC">> $C_FILE
+		echo "autoconf">> $C_FILE
+		echo "popd">> $C_FILE
 		echo -n "$SRC/configure  ">> $C_FILE
 		add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 		else
