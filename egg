@@ -2443,6 +2443,7 @@ local DOWN=0
 local STATUS=0
 local CUSTOM=0
 local FILEIN=""
+local EXT=""
 local VV=$(echo $3 | grep $1) 
 if [ "$VV" == "" ]; then 
 # in case of : ex dwload v2.4rev1 -> ($1)-v2.4rev1
@@ -2460,8 +2461,13 @@ if [ -f "$FILEIN.status" ]; then
 		# previous download ended ok all exit
 		if [ ! -e "$SOURCES/$1" ] ; then
 			mkdir -p "$SOURCES/$1"				
-			#echo "-->tar -xf $REPO/$1/$3 -C  $SOURCES/$1"
-			tar -xf "$FILEIN" -C  "$SOURCES/$1"
+			#echo "-->tar -xf $REPO/$1/$3 -C  $SOURCES/$1"			
+			EXT=$(echo $FILEIN | grep -i zip)
+			if [ "$EXT" != "" ]; then 
+				unzip -u "$FILEIN"  -d "$SOURCES/$1"
+			else
+				tar -xf "$FILEIN" -C  "$SOURCES/$1"
+			fi			
 			if [ $? -ne 0 ]; then
 				rm -f "$FILEIN"
 				rm -f "$FILEIN.*"
@@ -2518,7 +2524,12 @@ if [ "$tmp" != "0" ]; then
 		fi
 		
 		#echo "-->tar -xf $REPO/$1/$3 -C  $SOURCES/$1"
-		tar -xf "$FILEIN" -C  "$SOURCES/$1"
+		EXT=$(echo $FILEIN | grep -i zip)
+		if [ "$EXT" != "" ]; then 
+			unzip -u "$FILEIN"   -d "$SOURCES/$1"
+		else
+			tar -xf "$FILEIN" -C  "$SOURCES/$1"
+		fi		
 		if [ $? -ne 0 ]; then
 			error_c "Unable to untar file " "$REPO/$1/$3 project $1"
 		fi
