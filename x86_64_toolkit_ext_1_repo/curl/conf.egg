@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <egg>
 	<project>
-		<name>openssl</name>
+		<name>curl</name>
 		<download>check</download>		
 		<remote>
 			<method>wget</method>
-			<url>https://www.openssl.org/source</url>
-			<file>openssl-1.1.0e.tar.gz</file>	
-		</remote>		
+			<url>https://curl.haxx.se/download</url>
+			<file>curl-7.54.0.tar.gz</file>
+		</remote>	
 		<build>
 			<step id="1">				
 				<silent>yes</silent>
@@ -19,7 +19,7 @@
 				</path>				
 				<configure>
 					<extra id="0">--prefix=$DEPLOY</extra>
-					<extra id="1">linux-x86_64</extra>
+					<extra id="1">--target=$CROSS</extra>
 				</configure>
 				<make id="0">
 					<priority>4</priority>
