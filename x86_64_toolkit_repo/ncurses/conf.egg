@@ -17,11 +17,11 @@
 						<set id="0">$USER_PATH</set>
 					</pre>	
 				</path>				
-				<configure>
+				<configure>			
 					<pre id="0">
 						<mode>code</mode>
-						<value>export CPPFLAGS="-P"</value>
-					</pre>					
+						<value>CFLAGS+=" -fPIC"</value>
+					</pre>		
 					<extra id="0">--prefix=$DEPLOY</extra>
 					<extra id="1">--target=$CROSS</extra>
 				</configure>

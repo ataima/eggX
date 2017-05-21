@@ -425,6 +425,7 @@ MYPATH=""
 CPATH=""
 C_INCLUDE_PATH=""
 CPLUS_INCLUDE_PATH=""
+LD_LIBRARY_PATH=""
 ARCH=""
 CROSS=""
 CC=""
@@ -845,6 +846,8 @@ fi
 	echo "export C_INCLUDE_PATH=\"$C_INCLUDE_PATH\"" >> "$3"
 	echo "#current CPLUS_INCLUDE_PATH this project">> "$3"
 	echo "export CPLUS_INCLUDE_PATH=\"$CPLUS_INCLUDE_PATH\"" >> "$3"
+	echo "#current LD_LIBRARY_PATH this project">> "$3"
+	echo "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\"" >> "$3"
 	echo "#current CC this project">> "$3"
 	echo "export CC=$CC" >> "$3"
 	echo "#current CXX this project">> "$3"
@@ -1141,6 +1144,7 @@ if [ $? -eq 1 ]; then
 					error_c "Missing  pre conf id=$i mode Phase $2" "project : $1"
 				fi
 				MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
+				echo "#add pre build custom step $i" >> "$3"
 				case $MODE in 
 					SCRIPTS)
 						rsync -sy "$REPO/$1/$VALUE" "$4/$VALUE"				
@@ -1152,7 +1156,7 @@ if [ $? -eq 1 ]; then
 					;;		
 					CODE)
 						echo "$VALUE"  >> $3
-						echo "if [ $? -ne 0 ]; then">> $3
+						echo "if [ \$? -ne 0 ]; then">> $3
 						echo " error_c \"Custom command  Fail!\" \"$VALUE\"" >> $3
 						echo "fi" >> $3
 					;;		
@@ -1614,8 +1618,9 @@ if [ $? -eq 1 ]; then
 					error_c "Missing  pre build id=$i mode Phase $2" "project : $1"
 				fi
 				MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
+				echo "#add pre build custom step $i" >> "$3"
 				case $MODE in 
-					SCRIPTS)
+					SCRIPTS)>> "$3"
 						rsync -sy "$REPO/$1/$VALUE" "$4/$VALUE"				
 						echo "$4/$VALUE  $1 $2 $5 $4 $REPO/$1 $SOURCES/$1 $IMAGES/$5"  >> "$3"
 					;;		
@@ -1625,7 +1630,7 @@ if [ $? -eq 1 ]; then
 					;;		
 					CODE)
 						echo "$VALUE"  >> "$3"
-						echo "if [ $? -ne 0 ]; then">> $3
+						echo "if [ \$? -ne 0 ]; then">> $3
 						echo " error_c \"Custom command  Fail!\" \"$VALUE\"" >> $3
 						echo "fi" >> $3						
 					;;		
@@ -2437,8 +2442,16 @@ local RES=0
 local DOWN=0
 local STATUS=0
 local CUSTOM=0
-local FILEIN="$STORE/$3"
-print_c "$GREEN_LIGHT" "   - Download $1" "$YELLOW" $3
+local FILEIN=""
+local VV=$(echo $3 | grep $1) 
+if [ "$VV" == "" ]; then 
+# in case of : ex dwload v2.4rev1 -> ($1)-v2.4rev1
+	VV="$1-$3"
+else
+	VV=$3
+fi
+FILEIN="$STORE/$VV"
+print_c "$GREEN_LIGHT" "   - Download $1" "$YELLOW" $VV
 local PNAME="$2/$3"
 #set -x ; trap read debug
 if [ -f "$FILEIN.status" ]; then 
@@ -2478,7 +2491,7 @@ else
 	print_c "$GREEN_LIGHT" "   - Checking $1 source from local store " "$YELLOW" "$tmp bytes"
 fi
 if [  $4 ] && [ $5 ]; then
-		FILEIN=$(test_sign_file "$STORE" "$STORE/$3" "$4/$5") 		
+		FILEIN=$(test_sign_file "$STORE" "$FILEIN" "$4/$5") 		
 		PNAME="$4/$5"
 		CUSTOM=1
 	fi
@@ -2490,9 +2503,9 @@ if [ "$tmp" != "0" ]; then
 		wget_packet $1 $2 $3 $4 $5
 	fi
 	if [ $RES -eq 8 ]; then
-	warning_c "No sign file found !" "$3" "add md5sum to it"
-	md5sum "$STORE/$3" > "$STORE/$3.md5"
-	chmod 444 	 "$STORE/$3.md5"
+	warning_c "No sign file found !" "$VV" "add md5sum to it"
+	md5sum "$FILEIN" > "$FILEIN.md5"
+	chmod 444 	 "$FILEIN.md5"
 	RES=1
 	fi
 	if [ $RES -eq 1 ]; then 
@@ -2509,7 +2522,7 @@ if [ "$tmp" != "0" ]; then
 		if [ $? -ne 0 ]; then
 			error_c "Unable to untar file " "$REPO/$1/$3 project $1"
 		fi
-		echo 1 > "$STORE/$3.status"
+		echo 1 > "$FILEIN.status"
 	fi
 fi
 if [ $RES -eq 1 ] && [ $DOWN -eq 1 ] ; then 
@@ -2791,7 +2804,7 @@ local VV=""
 local VALUE=""
 local VAR=""
 local NAMES="step_name info cc cxx as ld nm ar strip cflags cppflags cxxflags \
-			ldflags libs cpath c_include_path cplus_include_path \
+			ldflags libs cpath c_include_path cplus_include_path ld_library_path\
 			arch cross"
 VV=$(getFileSize $REPO/conf.egg)
 if [ $VV -ne 0 ]; then

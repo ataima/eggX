@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <egg>
 	<project>
-		<name>git</name>
+		<name>zlib</name>
 		<download>check</download>		
 		<remote>
 			<method>wget</method>
-			<url>https://github.com/git/git/archive</url>
-			<file>v2.13.0.tar.gz</file>	
-		</remote>		
+			<url>https://sourceforge.net/projects/libpng/files/zlib/1.2.11</url>
+			<file>zlib-1.2.11.tar.xz</file>
+		</remote>	
 		<build>
 			<step id="1">				
 				<silent>yes</silent>
@@ -20,25 +20,19 @@
 				<configure>
 					<pre id="0">
 						<mode>code</mode>
-						<value>cd  $SOURCE </value>
+						<value>CC=$CROSS-gcc</value>
+					</pre>
+					<pre id="1">
+						<mode>code</mode>
+						<value>AR=ar</value>
 					</pre>
 					<extra id="0">--prefix=$DEPLOY</extra>
-					<extra id="1">--target=$CROSS</extra>
-					<extra id="2">--with-tcltk=no</extra>
-					<post id="0">
-						<mode>code</mode>
-						<value>cd  $BUILD_PATH</value>
-					</post>
+					<extra id="1">--64</extra>
 				</configure>
 				<make id="0">
-					<priority>15</priority>
+					<priority>3</priority>
 					<rule id="0">
-						<pre id="0">
-							<mode>code</mode>
-							<value>rm -rf  $BUILD; ln -s $SOURCE $BUILD; cd $BUILD</value>
-						</pre>
 						<name>all</name> 
-						<thread>1</thread>
 					</rule>
 					<rule id="1">
 						<name>install</name> 

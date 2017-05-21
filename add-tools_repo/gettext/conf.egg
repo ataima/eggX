@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <egg>
 	<project>
-		<name>git</name>
+		<name>gettext</name>
 		<download>check</download>		
 		<remote>
 			<method>wget</method>
-			<url>https://github.com/git/git/archive</url>
-			<file>v2.13.0.tar.gz</file>	
-		</remote>		
+			<url>ftp://ftp.gnu.org/pub/gnu/gettext</url>
+			<file>gettext-0.19.8.tar.xz</file>
+		</remote>	
 		<build>
 			<step id="1">				
 				<silent>yes</silent>
@@ -18,27 +18,13 @@
 					</pre>	
 				</path>				
 				<configure>
-					<pre id="0">
-						<mode>code</mode>
-						<value>cd  $SOURCE </value>
-					</pre>
 					<extra id="0">--prefix=$DEPLOY</extra>
 					<extra id="1">--target=$CROSS</extra>
-					<extra id="2">--with-tcltk=no</extra>
-					<post id="0">
-						<mode>code</mode>
-						<value>cd  $BUILD_PATH</value>
-					</post>
 				</configure>
 				<make id="0">
-					<priority>15</priority>
+					<priority>2</priority>
 					<rule id="0">
-						<pre id="0">
-							<mode>code</mode>
-							<value>rm -rf  $BUILD; ln -s $SOURCE $BUILD; cd $BUILD</value>
-						</pre>
 						<name>all</name> 
-						<thread>1</thread>
 					</rule>
 					<rule id="1">
 						<name>install</name> 

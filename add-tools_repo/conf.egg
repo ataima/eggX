@@ -33,6 +33,7 @@
 			<cpath></cpath>
 			<c_include_path></c_include_path>
 			<cplus_include_path></cplus_include_path>
+			<ld_library_path></ld_library_path>
 			<arch>x86_64</arch>
 			<cross>x86_64-pc-linux-gnu</cross>
 		</step>
@@ -46,14 +47,15 @@
 			<nm></nm>
 			<ar></ar>
 			<strip></strip>
-			<cflags>-O3</cflags>
-			<cppflags>-O3</cppflags>
-			<cxxflags>-O3</cxxflags>
+			<cflags>-O3 -fPIC</cflags>
+			<cppflags>-O3 -fPIC</cppflags>
+			<cxxflags>-O3 -fPIC</cxxflags>
 			<ldflags></ldflags>
 			<libs></libs>
-			<cpath></cpath>
+			<cpath>$DEPLOY/include</cpath>
 			<c_include_path></c_include_path>
 			<cplus_include_path></cplus_include_path>
+			<ld_library_path>$DEPLOY/lib64:$DEPLOY/lib</ld_library_path>
 			<arch>x86_64</arch>
 			<cross>x86_64-pc-linux-gnu</cross>
 		</step>
@@ -75,6 +77,7 @@
 			<cpath></cpath>
 			<c_include_path></c_include_path>
 			<cplus_include_path></cplus_include_path>
+			<ld_library_path></ld_library_path>
 			<arch>x86_64</arch>
 			<cross>arm-none-eabi</cross>
 		</step>
@@ -96,6 +99,7 @@
 			<cpath></cpath>
 			<c_include_path></c_include_path>
 			<cplus_include_path></cplus_include_path>
+			<ld_library_path></ld_library_path>
 			<arch>x86_64</arch>
 			<cross>arm-linux-gnueabi</cross>
 		</step>
