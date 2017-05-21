@@ -3,9 +3,9 @@
 		sysroot_repo
 	</repo>
 	<repo id="1">
-		arm-none-tools-repo
+		x86_64_toolkit_repo
 	</repo>
 	<repo id="2">
-		arm-linux-tools-repo
+		x86_64_toolkit_ext_1_repo
 	</repo>
 </multi>

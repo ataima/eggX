@@ -2462,8 +2462,8 @@ if [ -f "$FILEIN.status" ]; then
 		if [ ! -e "$SOURCES/$1" ] ; then
 			mkdir -p "$SOURCES/$1"				
 			#echo "-->tar -xf $REPO/$1/$3 -C  $SOURCES/$1"			
-			EXT=$(echo $FILEIN | grep -i zip)
-			if [ "$EXT" != "" ]; then 
+			EXT=$( echo ${FILEIN##*.}  | tr '[:lower:]' '[:upper:]' )
+			if [ "$EXT"  ==  "ZIP" ]; then 
 				unzip -u "$FILEIN"  -d "$SOURCES/$1"
 			else
 				tar -xf "$FILEIN" -C  "$SOURCES/$1"
@@ -2524,8 +2524,8 @@ if [ "$tmp" != "0" ]; then
 		fi
 		
 		#echo "-->tar -xf $REPO/$1/$3 -C  $SOURCES/$1"
-		EXT=$(echo $FILEIN | grep -i zip)
-		if [ "$EXT" != "" ]; then 
+		EXT=$( echo ${FILEIN##*.}  | tr '[:lower:]' '[:upper:]' )
+		if [ "$EXT"  ==  "ZIP"  ]; then 
 			unzip -u "$FILEIN"   -d "$SOURCES/$1"
 		else
 			tar -xf "$FILEIN" -C  "$SOURCES/$1"
