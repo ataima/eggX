@@ -31,7 +31,7 @@
 					</post>
 				</configure>
 				<make id="0">
-					<priority>15</priority>
+					<priority>5</priority>
 					<rule id="0">
 						<pre id="0">
 							<mode>code</mode>

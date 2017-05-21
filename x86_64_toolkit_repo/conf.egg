@@ -11,7 +11,7 @@
 		<start_path>$USER_PATH</start_path>
 		<user_env id="0"> 
 			<name>USER_PATH</name>
-			<value>$HOME/ebuild/images/sysroot_x86_64/bin:$HOME/ebuild/images/sysroot_x86_64/x86_64-pc-linux-gnu/bin</value>
+			<value>$HOME/ebuild/images/egg_sysroot/bin:$HOME/ebuild/images/egg_sysroot/x86_64-pc-linux-gnu/bin</value>
 		</user_env>
 	</conf>	
 	<defaults>

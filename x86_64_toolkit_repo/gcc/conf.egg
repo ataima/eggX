@@ -180,21 +180,6 @@
 						<name>install-target-libgcc</name> 
 						<thread>1</thread>						
 					</rule>										
-					<rule id="4">	
-						<pre id="0">
-							<mode>code</mode>		
-							<value>rm $DEPLOY/$CROSS/lib/libc.so ; echo  'GROUP ( libc.so.6 libc_nonshared.a )' | tee  $DEPLOY/$CROSS/lib/libc.so</value>
-						</pre>	
-						<name>all</name> 
-					</rule>
-					<rule id="5">
-						<name>install</name> 
-						<thread>1</thread>	
-						<post id="0">
-							<mode>code</mode>
-							<value>ln -s  $DEPLOY/bin/$CROSS-gcc cc</value>
-						</post>
-					</rule>										
 				</make>
 			</step>
 			<step id="3">
