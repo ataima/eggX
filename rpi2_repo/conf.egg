@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<egg>   
+	<conf>
+		<root>$HOME/ebuild</root>
+		<repo>$ROOT/repo</repo>
+		<sources>$ROOT/sources</sources>
+		<store>$ROOT/store</store>
+		<images>$ROOT/images</images>
+		<build>$ROOT/build</build>
+		<editor>scite</editor>
+		<start_path>$USER_PATH</start_path>
+		<user_env id="0"> 
+			<name>USER_PATH</name>
+			<value>$ROOT/images/sysroot_x86_64/bin:$ROOT/images/sysroot_x86_64/x86_64-pc-linux-gnu/bin</value>
+		</user_env>
+	</conf>	
+	<defaults>
+		<step id="0">
+			<step_name>rpi2_image</step_name>
+			<info>create from scratch a rpi 2 image</info>
+			<cc>arm-linux-gnueabi-gcc</cc>
+			<cxx>arm-linux-gnueabi-g++</cxx>
+			<as>arm-linux-gnueabi-as</as>
+			<ld>arm-linux-gnueabi-ld</ld>
+			<nm>arm-linux-gnueabi-nm</nm>
+			<ar>arm-linux-gnueabi-ar</ar>
+			<strip>arm-linux-gnueabi-strip</strip>
+			<cflags>-O3</cflags>
+			<cppflags>-O3</cppflags>
+			<cxxflags>-O3</cxxflags>
+			<ldflags></ldflags>
+			<libs></libs>
+			<cpath>$ROOT/images/sysroot_x86_64/arm-linux-gnueabi/include</cpath>
+			<c_include_path></c_include_path>
+			<cplus_include_path></cplus_include_path>
+			<ld_library_path>$ROOT/images/sysroot_x86_64/arm-linux-gnueabi/lib</ld_library_path>
+			<arch>arm</arch>
+			<cross>arm-linux-gnueabi</cross>
+		</step>
+	</defaults>
+</egg>

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>uboot</name>
+		<download>check</download>		
+		<remote>
+			<method>git</method>
+			<url>git://git.denx.de</url>
+			<file>u-boot.git</file>		
+		</remote>	
+		<build>
+			<step id="0">				
+				<silent>no</silent>
+				<threads>8</threads>
+				<path>
+					<pre>
+						<set id="0">$USER_PATH</set>
+					</pre>	
+				</path>
+				<make id="0">
+					<priority>1</priority>
+					<rule id="0">
+						<name>rpi_2_defconfig</name> 
+					</rule>
+					<rule id="1">
+						<name>install</name> 
+						<thread>1</thread>						
+					</rule>
+				</make>
+			</step>
+		</build>
+	</project>
+</egg>
