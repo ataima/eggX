@@ -1449,10 +1449,18 @@ rm -f "$SH_CLEAN"
 touch "$SH_CLEAN" 
 chmod +rwx "$SH_CLEAN" 
 # clean 
-prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" 1 "clean"
+prepare_script_generic "$1" "$2" "Start clean build " "$SH_CLEAN" "$4" 1000 "clean"
 echo "if [ -f \$BUILD/Makefile ]; then " >> "$SH_CLEAN"
 if [ "$5" == "yes" ]; then 
-	echo "	make -C \$BUILD clean >> $SH_CLEAN 2>&1 " >> "$SH_CLEAN"
+	echo "	make -C \$BUILD unistall >> $SH_CLEAN.log 2>&1 " >> "$SH_CLEAN"
+else
+	echo "	make -C \$BUILD  unistall ">> "$SH_CLEAN"
+fi
+echo "	if [ \$? -ne 0 ]; then">> "$SH_CLEAN"
+echo "    	error_c \"Error on unistall \" \"project $1\"" >>"$SH_CLEAN"
+echo "	fi"  >> "$SH_CLEAN"
+if [ "$5" == "yes" ]; then 
+	echo "	make -C \$BUILD clean >> $SH_CLEAN.log 2>&1 " >> "$SH_CLEAN"
 else
 	echo "	make -C \$BUILD  clean ">> "$SH_CLEAN"
 fi
@@ -1497,6 +1505,22 @@ echo "if [ $? -eq 0 ]; then ">> "$SH_DISTCLEAN"
 echo "  chmod +w \$BUILD_PATH/status">> "$SH_DISTCLEAN"
 echo "  rm -f \$BUILD_PATH/status">> "$SH_DISTCLEAN"
 echo "fi">> "$SH_DISTCLEAN"
+if [ "$5" == "yes" ]; then 
+	echo "	make -C \$BUILD unistall >> $SH_DISTCLEAN.log 2>&1 " >> "$SH_DISTCLEAN"
+else
+	echo "	make -C \$BUILD  unistall ">> "$SH_DISTCLEAN"
+fi
+echo "	if [ \$? -ne 0 ]; then">> "$SH_DISTCLEAN"
+echo "    	error_c \"Error on unistall \" \"project $1\"" >>"$SH_DISTCLEAN"
+echo "	fi"  >> "$SH_DISTCLEAN"
+if [ "$5" == "yes" ]; then 
+	echo "	make -C \$BUILD distclean >> $SH_DISTCLEAN.log 2>&1 " >> "$SH_DISTCLEAN"
+else
+	echo "	make -C \$BUILD  distclean ">> "$SH_DISTCLEAN"
+fi
+echo "	if [ \$? -ne 0 ]; then">> "$SH_DISTCLEAN"
+echo "    	error_c \"Error on distclean \" \"project $1\"" >>"$SH_DISTCLEAN"
+echo "	fi"  >> "$SH_DISTCLEAN"
 echo "rm -rf \$BUILD/* " >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"
 echo "" >> "$SH_DISTCLEAN"

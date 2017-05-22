@@ -47,9 +47,9 @@
 			<nm></nm>
 			<ar></ar>
 			<strip></strip>
-			<cflags>-O3 -fPIC</cflags>
-			<cppflags>-O3 -fPIC</cppflags>
-			<cxxflags>-O3 -fPIC</cxxflags>
+			<cflags>-O3 -fPIC -m64</cflags>
+			<cppflags>-O3 -fPIC -m64</cppflags>
+			<cxxflags>-O3 -fPIC -m64</cxxflags>
 			<ldflags></ldflags>
 			<libs></libs>
 			<cpath>$DEPLOY/include</cpath>

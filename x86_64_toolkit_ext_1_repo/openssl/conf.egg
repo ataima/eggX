@@ -28,7 +28,15 @@
 					</rule>
 					<rule id="1">
 						<name>install</name> 
-						<thread>1</thread>						
+						<thread>1</thread>	
+						<post id="0">
+							<mode>code</mode>
+							<value>strip $DEPLOY/lib64/libcrypto.*</value>
+						</post>
+						<post id="1">
+							<mode>code</mode>
+							<value>strip $DEPLOY/lib64/libssl.*</value>
+						</post>
 					</rule>
 				</make>
 			</step>
