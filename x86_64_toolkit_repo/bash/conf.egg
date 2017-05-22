@@ -31,7 +31,7 @@
 						<name>all</name> 
 					</rule>
 					<rule id="1">
-						<name>install</name> 
+						<name>install-strip</name> 
 						<thread>1</thread>	
 						<post id="0">
 							<mode>code</mode>

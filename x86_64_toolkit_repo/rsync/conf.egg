@@ -42,7 +42,7 @@
 						<name>all</name> 
 					</rule>
 					<rule id="1">
-						<name>install</name> 
+						<name>install-strip</name> 
 						<thread>1</thread>						
 					</rule>
 				</make>
