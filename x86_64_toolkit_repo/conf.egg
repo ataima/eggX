@@ -18,13 +18,14 @@
 		<step id="0">
 			<step_name>sysroot_x86_64</step_name>
 			<info>First step to create a gcc native at last version to build all packets</info>
-			<cc></cc>
-			<cxx></cxx>
-			<as></as>
-			<ld></ld>
-			<nm></nm>
-			<ar></ar>
-			<strip></strip>
+			<cc>gcc</cc>
+			<cxx>g++</cxx>
+			<as>as</as>
+			<ld>ld</ld>
+			<nm>nm</nm>
+			<ar>ar</ar>
+			<strip>strip</strip>
+			<asflags></asflags>
 			<cflags>-O3</cflags>
 			<cppflags>-O3</cppflags>
 			<cxxflags>-O3</cxxflags>
@@ -40,13 +41,14 @@
 		<step id="1">
 			<step_name>sysroot_x86_64</step_name>
 			<info>build with new  compiler some basics utilities</info>
-			<cc></cc>
-			<cxx></cxx>
-			<as></as>
-			<ld></ld>
-			<nm></nm>
-			<ar></ar>
-			<strip></strip>
+			<cc>gcc</cc>
+			<cxx>g++</cxx>
+			<as>as</as>
+			<ld>ld</ld>
+			<nm>nm</nm>
+			<ar>ar</ar>
+			<strip>strip</strip>
+			<asflags></asflags>
 			<cflags>-O3 -fPIC -m64</cflags>
 			<cppflags>-O3 -fPIC -m64</cppflags>
 			<cxxflags>-O3 -fPIC -m64</cxxflags>
@@ -62,13 +64,14 @@
 		<step id="2">
 			<step_name>sysroot_x86_64</step_name>
 			<info>build with new  compiler x86_64 the arm gcc compiler none eabi</info>
-			<cc></cc>
-			<cxx></cxx>
-			<as></as>
-			<ld></ld>
-			<nm></nm>
-			<ar></ar>
-			<strip></strip>
+			<cc>gcc</cc>
+			<cxx>g++</cxx>
+			<as>as</as>
+			<ld>ld</ld>
+			<nm>nm</nm>
+			<ar>ar</ar>
+			<strip>strip</strip>
+			<asflags></asflags>
 			<cflags>-O3</cflags>
 			<cppflags>-O3</cppflags>
 			<cxxflags>-O3</cxxflags>
@@ -84,13 +87,14 @@
 			<step id="3">
 			<step_name>sysroot_x86_64</step_name>
 			<info>build with new  compiler  x86_64 the arm gcc compiler gnu linux eabi</info>
-			<cc></cc>
-			<cxx></cxx>
-			<as></as>
-			<ld></ld>
-			<nm></nm>
-			<ar></ar>
-			<strip></strip>
+			<cc>gcc</cc>
+			<cxx>g++</cxx>
+			<as>as</as>
+			<ld>ld</ld>
+			<nm>nm</nm>
+			<ar>ar</ar>
+			<strip>strip</strip>
+			<asflags></asflags>
 			<cflags>-O3</cflags>
 			<cppflags>-O3</cppflags>
 			<cxxflags>-O3</cxxflags>
