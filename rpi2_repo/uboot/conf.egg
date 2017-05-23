@@ -23,6 +23,9 @@
 						<name>rpi_2_defconfig</name> 
 					</rule>
 					<rule id="1">
+						<name>all</name> 
+					</rule>
+					<rule id="2">
 						<name>install</name> 
 						<thread>1</thread>						
 					</rule>

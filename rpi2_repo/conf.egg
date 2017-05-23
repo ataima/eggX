@@ -18,24 +18,25 @@
 		<step id="0">
 			<step_name>rpi2_image</step_name>
 			<info>create from scratch a rpi 2 image</info>
-			<cc>arm-linux-gnueabi-gcc</cc>
-			<cxx>arm-linux-gnueabi-g++</cxx>
-			<as>arm-linux-gnueabi-as</as>
-			<ld>arm-linux-gnueabi-ld</ld>
-			<nm>arm-linux-gnueabi-nm</nm>
-			<ar>arm-linux-gnueabi-ar</ar>
-			<strip>arm-linux-gnueabi-strip</strip>
-			<cflags>-O3</cflags>
-			<cppflags>-O3</cppflags>
-			<cxxflags>-O3</cxxflags>
+			<cc>arm-none-eabi-gcc</cc>
+			<cxx>arm-none-eabi-g++</cxx>
+			<as>arm-none-eabi-as</as>
+			<ld>arm-none-eabi-ld</ld>
+			<nm>arm-none-eabi-nm</nm>
+			<ar>arm-none-eabi-ar</ar>
+			<strip>arm-none-eabi-strip</strip>
+			<asflags>-mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve</asflags>
+			<cflags>-O3 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve -mtune=cortex-a7</cflags>
+			<cppflags>-O3 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve -mtune=cortex-a7</cppflags>
+			<cxxflags>-O3 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve -mtune=cortex-a7</cxxflags>
 			<ldflags></ldflags>
 			<libs></libs>
-			<cpath>$ROOT/images/sysroot_x86_64/arm-linux-gnueabi/include</cpath>
+			<cpath>$ROOT/images/sysroot_x86_64/arm-none-eabi/include</cpath>
 			<c_include_path></c_include_path>
 			<cplus_include_path></cplus_include_path>
-			<ld_library_path>$ROOT/images/sysroot_x86_64/arm-linux-gnueabi/lib</ld_library_path>
+			<ld_library_path>$ROOT/images/sysroot_x86_64/arm-none-eabi/lib</ld_library_path>
 			<arch>arm</arch>
-			<cross>arm-linux-gnueabi</cross>
+			<cross>arm-none-eabi</cross>
 		</step>
 	</defaults>
 </egg>
