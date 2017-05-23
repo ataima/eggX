@@ -1079,6 +1079,8 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 prepare_script_head "$3"
+echo "#fail count ...">> "$3"
+echo "FAIL=0">> "$3"
 extract_function  test_sign_file >> "$3"
 extract_function  check_pgp >> "$3"
 extract_function  check_md5sum >> "$3"
@@ -2534,11 +2536,16 @@ if [  $4 ] && [ $5 ]; then
 	fi
 tmp=$(getFileSize "$FILEIN")	
 if [ "$tmp" != "0" ]; then	
-	check_sign "$FILEIN" "$PNAME" "$1" "$CUSTOM"
-	RES=$?
-	if [ $RES -eq 99 ]; then 
-		wget_packet $1 $2 $3 $4 $5
-	fi
+	if [ $FAIL  -lt 3 ]; then 
+		check_sign "$FILEIN" "$PNAME" "$1" "$CUSTOM"
+		RES=$?
+		if [ $RES -eq 99 ]; then 
+			FAIL=$((FAIL+1))		
+			wget_packet $1 $2 $3 $4 $5
+		fi
+	else
+		RES=8
+	fi	
 	if [ $RES -eq 8 ]; then
 	warning_c "No sign file found !" "$VV" "add md5sum to it"
 	md5sum "$FILEIN" > "$FILEIN.md5"
