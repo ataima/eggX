@@ -8,7 +8,7 @@
 		<images>$ROOT/images</images>
 		<build>$ROOT/build</build>
 		<editor>scite</editor>
-		<start_path>/bin:/usr/bin</start_path>
+		<start_path>$ROOT/images/egg_sysroot/bin:/bin:/usr/bin</start_path>
 	</conf>	
 	<defaults>
 		<step id="0">

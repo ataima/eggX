@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<egg>
+	<project>
+		<name>lzip</name>
+		<download>check</download>		
+		<remote>
+			<method>wget</method>
+			<url>http://download.savannah.gnu.org/releases/lzip</url>
+			<file>lzip-1.19.tar.gz</file>		
+		</remote>	
+		<build>
+			<step id="1">				
+				<silent>yes</silent>
+				<threads>8</threads>
+				<configure>
+					<extra id="0">--prefix=$DEPLOY</extra>
+					<extra id="1">--target=$CROSS</extra>
+				</configure>
+				<make id="0">
+					<priority>27</priority>
+					<rule id="0">
+						<name>all</name> 
+					</rule>
+					<rule id="1">
+						<name>install-strip</name> 
+						<thread>1</thread>						
+					</rule>
+				</make>
+			</step>
+		</build>
+	</project>
+</egg>

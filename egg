@@ -2341,6 +2341,7 @@ echo "REPOBACKUP=$REPOBACKUP">> "$1"
 echo "BUILD=$BUILD/$STEP_NAME">> "$1"
 echo "STORE=$STORE">> "$1"
 echo "STATUS=$BUILD/$STEP_NAME/$6/status">> "$1"
+echo "export PATH=$MYPATH">> "$1"
 echo "check_exist \$STATUS">> "$1"
 echo "if [ \$? -eq 0 ]; then ">> "$1"
 echo "   chmod +w \$STATUS" >> "$1"
@@ -4621,6 +4622,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "setrepo <path with new repo> : set a new work repo and list  "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "freeze nn < step number> : set status stable "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "hot nn < step number> : set status to configure "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "clone <src> <new> : clone an existing prj to a new prj"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "help <command>: more info about command and repo"
 	print_c  "$PURPLE_LIGHT" "do help <command> for more info"
 }
@@ -4839,6 +4841,14 @@ help_c "command : source" \
 "ex ./egg source"
 }
 
+function help_clone(){
+help_c "command : source" \
+"\$1 : source project to clone"\
+"\$2 : new project"\
+"clone an existing project to a new project" \
+"ex ./egg source"
+}
+
 function help_options(){
 help_c "command : before any command you can set an option" \
 "option -D or --debug : set debug mode"  \
@@ -4861,7 +4871,7 @@ fi
 local OK=0
 local -a COMMANDS=('source' 'shell' 'configure' 'edit' 'build' 'reset' \
 					'clean' 'multi' 'distclean' 'do' 'redoall' \
-					'packetize' 'list' 'setrepo' 'freeze' 'hot' 'options')
+					'packetize' 'list' 'setrepo' 'freeze' 'hot' 'clone' 'options')
 local VV=""
 local torun=""
 if [ $# -eq 0 ]; then
@@ -4892,7 +4902,8 @@ if [ $OK -eq 0 ]; then
 	"${COMMANDS[0]} ${COMMANDS[1]} ${COMMANDS[2]} ${COMMANDS[3]}" \
 	"${COMMANDS[4]} ${COMMANDS[5]} ${COMMANDS[6]} ${COMMANDS[7]}" \
 	"${COMMANDS[8]} ${COMMANDS[9]} ${COMMANDS[10]} ${COMMANDS[11]}" \
-	"${COMMANDS[12]} ${COMMANDS[13]} ${COMMANDS[14]} ${COMMANDS[15]}" 	
+	"${COMMANDS[12]} ${COMMANDS[13]} ${COMMANDS[14]} ${COMMANDS[15]}" \
+	"${COMMANDS[16]} ${COMMANDS[17]}"	
 fi
 
 }
@@ -4941,7 +4952,7 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local VV
-local ALL=$(get_priority_list)
+local ALL=$( ls  $OREPO | sed -e 's/conf.egg//g')
 if [ "$1" != "" ]; then 
 	VV=$(echo $ALL | grep "\<$1\>")
 	if [ "$VV" == "" ]; then 
@@ -4952,16 +4963,19 @@ fi
 if [ "$2" != "" ]; then 
 	VV=$(echo $ALL | grep "\<$2\>" )
 	if [ "$VV" != "" ]; then 
-		error_c "Already exist" "$2 : $VV already exist in this repo"
+		error_c "Already exist" "$2 : already exist in this repo"
 	fi
 fi
 #ok copy src to dest
 mkdir -p "$OREPO/$2"
 cp "$OREPO/$1/conf.egg" "$OREPO/$2/."
 if [ $? -ne 0 ]; then 
-		error_c "Fail on copy" "cannot copy $OREPO/$1/conf.egg" "$OREPO/$1/."
-	fi
-edit_packet $2	
+	error_c "Fail on copy" "cannot copy $OREPO/$1/conf.egg" "$OREPO/$1/."
+fi	
+xmlstarlet  ed --inplace -u "/egg/project/name" -v "$2" "$OREPO/$2/conf.egg"
+xmlstarlet  ed --inplace -u "/egg/project/remote/url" -v "" "$OREPO/$2/conf.egg"
+xmlstarlet  ed --inplace -u "/egg/project/remote/file" -v "" "$OREPO/$2/conf.egg"
+./egg edit "$2"
 }
 
 #$1 build id number
