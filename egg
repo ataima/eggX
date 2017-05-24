@@ -4973,8 +4973,8 @@ if [ $? -ne 0 ]; then
 	error_c "Fail on copy" "cannot copy $OREPO/$1/conf.egg" "$OREPO/$1/."
 fi	
 xmlstarlet  ed --inplace -u "/egg/project/name" -v "$2" "$OREPO/$2/conf.egg"
-xmlstarlet  ed --inplace -u "/egg/project/remote/url" -v "" "$OREPO/$2/conf.egg"
-xmlstarlet  ed --inplace -u "/egg/project/remote/file" -v "" "$OREPO/$2/conf.egg"
+xmlstarlet  ed --inplace -u "/egg/project/remote/url" -v "  " "$OREPO/$2/conf.egg"
+xmlstarlet  ed --inplace -u "/egg/project/remote/file" -v "  " "$OREPO/$2/conf.egg"
 ./egg edit "$2"
 }
 
