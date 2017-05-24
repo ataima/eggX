@@ -6,7 +6,7 @@
     <remote>
       <method>wget</method>
       <url>https://www.gnupg.org/ftp/gcrypt/gnupg</url>
-      <file>/gnupg-2.1.21.tar.bz2</file>
+      <file>gnupg-2.1.21.tar.bz2</file>
     </remote>
     <build>
       <step id="1">

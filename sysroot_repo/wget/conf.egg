@@ -6,7 +6,7 @@
     <remote>
       <method>wget</method>
       <url>ftp://ftp.gnu.org/gnu/wget</url>
-      <file>wget-1.9.tar.gz</file>
+      <file>wget-1.19.tar.xz</file>
     </remote>
     <build>
       <step id="1">
