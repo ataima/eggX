@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
 	<project>
-		<name>bc</name>
+		<name>lzip</name>
 		<download>check</download>		
 		<remote>
 			<method>wget</method>
-			<url>ftp://ftp.gnu.org/gnu/bc</url>
-			<file>bc-1.07.tar.gz</file>		
+			<url>http://download.savannah.gnu.org/releases/lzip</url>
+			<file>lzip-1.19.tar.gz</file>		
 		</remote>	
 		<build>
 			<step id="1">				
@@ -22,7 +22,7 @@
 					<extra id="1">--target=$CROSS</extra>
 				</configure>
 				<make id="0">
-					<priority>29</priority>
+					<priority>27</priority>
 					<rule id="0">
 						<name>all</name> 
 					</rule>
