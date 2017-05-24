@@ -988,7 +988,13 @@ local FUNCEXP="print_c print_s_ita print_del_ita print_ita \
 				check_file_exist ex_getbuildstatus ex_setbuildstatus \
 				getFileSize ex_input_param "
 			
-head $0 -n25 >> "$1"				 
+head $0 -n25 >> "$1"	
+echo "">> "$1"
+echo "">> "$1"
+echo "ITERATIVE=0">> "$1"
+echo "">> "$1"
+echo "">> "$1"
+
 for II in $FUNCEXP; do
 	extract_function $II >> "$1"
 done	
@@ -4924,7 +4930,39 @@ done
 ITERATIVE=0
 }
 
+#$1 src project
+#$2 dest project
+function clone_project(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	set -x ; trap read debug
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1		
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+fi
+[ $STEP_STEP -eq 1 ] && trap read debug
+local VV
+local ALL=$(get_priority_list)
+if [ "$1" != "" ]; then 
+	VV=$(echo $ALL | grep "\<$1\>")
+	if [ "$VV" == "" ]; then 
+		error_c "Not Found" "$1 not found in this repo"
+	fi
+fi
 
+if [ "$2" != "" ]; then 
+	VV=$(echo $ALL | grep "\<$2\>" )
+	if [ "$VV" != "" ]; then 
+		error_c "Already exist" "$2 : $VV already exist in this repo"
+	fi
+fi
+#ok copy src to dest
+mkdir -p "$OREPO/$2"
+cp "$OREPO/$1/conf.egg" "$OREPO/$2/."
+if [ $? -ne 0 ]; then 
+		error_c "Fail on copy" "cannot copy $OREPO/$1/conf.egg" "$OREPO/$1/."
+	fi
+edit_packet $2	
+}
 
 #$1 build id number
 function main(){
@@ -5072,6 +5110,11 @@ case $1 in
 	;;
 	hot)
 	torun=hot_build		
+	shift
+	break
+	;;
+	clone)
+	torun=clone_project		
 	shift
 	break
 	;;
