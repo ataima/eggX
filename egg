@@ -82,7 +82,9 @@ print_c "$GRAY_DARK" "FILE  :" "$GRAY_LIGHT" "$0"
 print_c "$GRAY_DARK" "LINE  :" "$GRAY_LIGHT" "${BASH_LINENO[0]}"
 print_del_ita
 #TO DO ITERATIVE 
-exit 1
+if [ $ITERATIVE -eq 0 ]; then
+	exit 1
+fi
 } #EX
 
 
@@ -429,6 +431,7 @@ CPLUS_INCLUDE_PATH=""
 LD_LIBRARY_PATH=""
 ARCH=""
 CROSS=""
+NATIVE=""
 CC=""
 CXX=""
 AS=""
@@ -437,10 +440,10 @@ NM=""
 AR=""
 STRIP=""
 HW_ARCH=""
+CROSS_COMPILE=""
+ITERATIVE=0
 
 
-#if 1 no packetize output
-declare -i NOPKT=0
 
    
 declare -A SORTREQ
@@ -836,7 +839,7 @@ fi
 	echo "export HW_ARCH=$HW_ARCH">> "$3"
 	echo "#current ARCH this project">> "$3"
 	echo "export ARCH=$ARCH">> "$3"
-	echo "#current CROSS this project">> "$3"
+	echo "#current target CROSS for this project">> "$3"
 	echo "export CROSS=$CROSS">> "$3"
 	echo "#current CFLAGS this project">> "$3"
 	echo "export CFLAGS=\"$CFLAGS\"" >> "$3"
@@ -872,8 +875,10 @@ fi
 	echo "export STRIP=$STRIP" >> "$3"
 	echo "#current PATH this project">> "$3"
 	echo "export PATH=$MYPATH" >> "$3"		
-	echo "#current platform : from current path and gcc dumpmachine" >> "$3"	
-	echo "export NATIVE=\$(gcc -dumpmachine)" >> "$3"
+	echo "#current platform " >> "$3"	
+	echo "export NATIVE=$NATIVE" >> "$3"
+	echo "#current cross compile  " >> "$3"
+	echo "export CROSS_COMPILE=$CROSS_COMPILE" >> "$3"
 }
 
 #$1 project
@@ -2075,6 +2080,7 @@ echo "" >>  "$1"
 # $3 filename 
 # $4 password optional
 function svn_packet(){ #EX
+local RES=0
 local RPWD=""
 print_c "$GREEN_LIGHT" "   - Svn update source" "$YELLOW" $1
 local PNAME="$2/$3"
@@ -2082,11 +2088,48 @@ if [ "$4" !=  "" ]; then
 	RPWD="--non-interactive"
 fi
 if [ ! -d "$SOURCES/$1" ]; then 
-	mkdir  -p "$SOURCES/$1"
-	svn   -q co $PNAME  $SOURCES/$1 $RPWD
-	if [ $? -ne 0 ]; then 
-		error_c "Svn Checkout error " "   project $1"
-	fi 	
+	if [ -e "$STORE/$3.tar.bz2" ]; then
+	#exit in store a like packet
+		cd "$STORE"
+		md5sum  -c "$3.tar.bz2.md5" >  /dev/null 
+		if [ $? -eq 0 ]; then 
+			tar -xvf "$3.tar.bz2" -C "$SOURCES/$1"  >/dev/null
+			if [ $? -ne 0 ]; then 
+				error_c "Svn source :cannot restore from tar backup " "   project $1"
+			fi 
+			cd "$SOURCES/$1"
+			svn   update  $RPWD
+			if [ $? -ne 0 ]; then 
+				error_c "Svn Update error " "   project $1"
+			fi 
+			RES=1
+		fi
+		cd "$PWD"
+	fi	
+	if [  $RES -eq 0 ]; then
+		mkdir  -p "$SOURCES/$1"
+		svn   -q co $PNAME  $SOURCES/$1 $RPWD
+		if [ $? -ne 0 ]; then 
+			error_c "Svn Checkout error " "   project $1"
+		else
+			#create a backup tar on store to work offline and to untar + pull for  future
+			if [ -e "$STORE/$3.tar.bz2" ]; then
+				chmod 666 "$STORE/$3.tar.bz2"
+				chmod 666 "$STORE/$3.tar.bz2.md5"
+			fi
+			rm -rf "$STORE/$3.tar.bz2"
+			rm -rf "$STORE/$3.tar.bz2.md5"	
+			cd "$SOURCES"			
+			tar -cjvSf "$STORE/$3.tar.bz2"  "$1" >/dev/null
+			if [ $? -ne 0 ]; then 
+				error_c "Svn source :cannot create tar backup " "   project $1"
+			fi 
+			cd "$PWD"
+			md5sum "$STORE/$3.tar.bz22" > "$STORE/$3.tar.bz2.md5"				
+			chmod 444 "$STORE/$3.tar.bz2"
+			chmod 444 "$STORE/$3.tar.bz2.md5"
+		fi 
+	fi		
 else
 	if [ -d ".svn" ]; then 
 		local PWD=$(pwd)
@@ -2109,15 +2152,53 @@ fi
 # $2 link
 # $3 filename 
 function git_packet(){ #EX
-print_c "$GREEN_LIGHT" "   - Git pull source" "$YELLOW" $1
+local RES=0
+print_c "$GREEN_LIGHT" "   - Git  source" "$YELLOW" $1
 local PNAME="$2/$3"
 local PWD=$(pwd)
 if [ ! -d "$SOURCES/$1" ]; then 
-	mkdir  -p "$SOURCES/$1"
-	git   clone $PNAME  "$SOURCES/$1"
-	if [ $? -ne 0 ]; then 
-		error_c "Git clone error " "   project $1"
-	fi 
+	if [ -e "$STORE/$3.tar.bz2" ]; then
+	#exit in store a like packet
+		cd "$STORE"
+		md5sum  -c "$3.tar.bz2.md5" >  /dev/null 
+		if [ $? -eq 0 ]; then
+			tar -xvf "$3.tar.bz2" -C "$SOURCES" >/dev/null
+			if [ $? -ne 0 ]; then 
+				error_c "Git source :cannot restore from tar backup " "   project $1"
+			fi 
+			cd "$SOURCES/$1"
+			git pull origin master
+			if [ $? -ne 0 ]; then 
+				error_c "Git Update error " "   project $1"
+			fi 			
+			RES=1
+		fi
+		cd "$PWD"
+	fi	
+	if [  $RES -eq 0 ]; then	
+		mkdir  -p "$SOURCES/$1"
+		git   clone $PNAME  "$SOURCES/$1"
+		if [ $? -ne 0 ]; then 
+			error_c "Git clone error " "   project $1"
+		else
+			#create a backup tar on store to work offline and to untar + pull for  future
+			if [ -e "$STORE/$3.tar.bz2" ]; then
+				chmod 666 "$STORE/$3.tar.bz2"
+				chmod 666 "$STORE/$3.tar.bz2.md5"
+			fi
+			rm -rf "$STORE/$3.tar.bz2"
+			rm -rf "$STORE/$3.tar.bz2.md5"
+			cd "$SOURCES"
+			tar -cjvSf "$STORE/$3.tar.bz2"  "$1" >/dev/null
+			if [ $? -ne 0 ]; then 
+				error_c "Git source :cannot create tar backup " "   project $1"
+			fi 
+			cd "$PWD"
+			md5sum "$STORE/$3.tar.bz2" > "$STORE/$3.tar.bz2.md5"				
+			chmod 444 "$STORE/$3.tar.bz2"
+			chmod 444 "$STORE/$3.tar.bz2.md5"
+		fi
+	fi
 else
 	cd "$SOURCES/$1"
 	git pull origin master
@@ -2850,7 +2931,7 @@ local VALUE=""
 local VAR=""
 local NAMES="step_name info cc cxx as ld nm ar strip asflags cflags cppflags cxxflags \
 			ldflags libs cpath c_include_path cplus_include_path ld_library_path\
-			arch cross"
+			arch cross cross_compile"
 VV=$(getFileSize $REPO/conf.egg)
 if [ $VV -ne 0 ]; then
 	#set -x ; trap read debug
@@ -2878,6 +2959,7 @@ if [ $VV -ne 0 ]; then
 else
 	error_c "Missing conf.egg file " "on repo"
 fi
+NATIVE=$(gcc -dumpmachine)
 }
 
 
@@ -3136,8 +3218,6 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-local HAVE_BUILD=0
-local STATUS=0
 local ID=0 
 local V=""
 local PRI=""
@@ -3157,10 +3237,6 @@ while [ $ID -lt $MAX_STEP ] ; do
 			if [ $? -ne 0 ] ; then
 				error_c "configure step" " FAIL !!";
 			fi
-			STATUS=$(cat $BUILD/$PRJ/$NAME/status)
-			if [ $STATUS -ne 2 ]; then
-				HAVE_BUILD=1
-			fi
 			print_build_msg "$PRI" "$NAME" "$PRJ"
 			"$BUILD/$PRJ/$NAME/build_$PRI.sh"
 			if [ $? -ne 0 ] ; then
@@ -3172,9 +3248,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 	done
 	ID=$((ID+1))
 done
-if [ $HAVE_BUILD -ne 0 ]; then 
-	packetize_all
-fi	
+
 }
 
 #none
@@ -3186,8 +3260,6 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
-local HAVE_BUILD=0
-local STATUS=0
 local ID=0 
 local V=""
 local PRI=""
@@ -3232,8 +3304,6 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 #set -x; trap read debug
-local HAVE_BUILD=0
-local STATUS=0
 local ID=0 
 local V=""
 local PRI=""
@@ -3284,9 +3354,6 @@ local NAME=""
 local PRJ=""
 local STATUS=0
 local RESULT=0
-if [ $NOPKT -eq 1 ];then 
-	return 0
-fi
 while [ $ID -lt $MAX_STEP ] ; do
 	prepare_seq_priority "$ID" "$ALL_PACKETS"
 	for V in $SORTREQ; do
@@ -3349,8 +3416,6 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug	
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-local HAVE_BUILD=0
-local STATUS=0
 local ID=0 
 local V=""
 local PRI=""
@@ -3367,10 +3432,6 @@ while [ $ID -lt $MAX_STEP ] ; do
 		if [ -d "$BUILD/$PRJ/$NAME" ]; then
 			print_build_msg "$PRI" "$NAME" "$PRJ"
 			cd "$BUILD/$PRJ/$NAME"
-			STATUS=$(cat $BUILD/$PRJ/$NAME/status)
-			if [ $STATUS -ne 2 ]; then
-				HAVE_BUILD=1
-			fi
 			"$BUILD/$PRJ/$NAME/build_$PRI.sh"
 			if [ $? -ne 0 ] ; then
 				error_c "build step" " FAIL !!";
@@ -3378,10 +3439,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 		fi
 	done
 	ID=$((ID+1))
-done
-if [ $HAVE_BUILD -ne 0 ]; then 
-	packetize_all
-fi	
+done	
 }
 
 #none
@@ -4535,7 +4593,6 @@ fi
 function usage(){
 	print_c "$BLUE_LIGHT" "usage : ./egg <option> command  <args to pass subcommand>"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -D or --debug : set debug mode" 
-	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -Q or --nopacketize : dont craete output tar" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option +W or --warning : print also warnings" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -B or --break : break and debug function" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -X or --debug : break and debug functions into" 
@@ -4560,8 +4617,9 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "hot nn < step number> : set status to configure "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "help <command>: more info about command and repo"
 	print_c  "$PURPLE_LIGHT" "do help <command> for more info"
-	exit 1
 }
+
+
 
 function reset_all(){
 if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
@@ -4778,7 +4836,6 @@ help_c "command : source" \
 function help_options(){
 help_c "command : before any command you can set an option" \
 "option -D or --debug : set debug mode"  \
-"option -Q or --nopacketize : dont craete output tar"  \
 "option -S or --step :execute step by step script" \
 "option +W or --verbose : show more warning" \
 "option -B <function> or --break : break and set debug at function " \
@@ -4847,18 +4904,24 @@ print_c "$GREEN" "FOR A PARTICULAR PURPOSE."
 
 
 function iterative(){
+ITERATIVE=1
 local VV=$( ls -al repo | awk '{ print $11 }' )
 print_c "$WHITE" "Current repo : " "$YELLOW" "$VV"
-print_c "$GREEN" "quit for exit iterative mode"
+print_c "$GREEN" "quit/exit for exit iterative mode"
 
 while [ 1 -eq 1 ]; do
 echo -n -e $(echo $CYAN) "egg"$(echo $BLUE) "> "$(echo $REPLACE) 
-read -r
-if [ "$REPLY" == "quit" ]; then
+read -e
+if [ "$REPLY" == "quit" ] || [ "$REPLY" == "exit" ]; then
 	break;
 fi
-./egg $REPLY
+if [ "$REPLY" != "" ]; then 
+	./egg $REPLY
+else
+	usage
+fi
 done
+ITERATIVE=0
 }
 
 
@@ -4866,8 +4929,6 @@ done
 #$1 build id number
 function main(){
 local torun=default_do
-#non  zero no create final packet output
-NOPKT=0
 #non zero more verbose warning
 MOREWRN=0
 #non zero step by step debug from start
@@ -4890,11 +4951,6 @@ case $1 in
 	-D|--debug)
 	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 	set -x
-	shift
-	;;	
-	-Q|--nopacketize)
-	NOPKT=1
-	warning_c "quick mode , no packetize output..."
 	shift
 	;;	
 	+W|--verbose)
@@ -5024,9 +5080,9 @@ case $1 in
 	shift
 	break
 	;;	
-	*)
+	*)	
 	usage
-	error_c "Command line" " unknow option $i"
+	error_c "Command line" " unknow  $1"
 	;;
 esac
  done
@@ -5084,7 +5140,7 @@ get_max_step
 EGG_RES=0
 EGG_START_TIME=$(date  +%s)
 legal
-if [ $# -eq 0 ] ; then
+if [ $# -eq 0 ] ; then		
 	iterative
 else
 	if [ $# -eq 2 ] && [ "$1" == "-i" ]; then

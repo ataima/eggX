@@ -18,13 +18,13 @@
 		<step id="0">
 			<step_name>rpi2_image</step_name>
 			<info>create from scratch a rpi 2 image</info>
-			<cc>arm-none-eabi-gcc</cc>
-			<cxx>arm-none-eabi-g++</cxx>
-			<as>arm-none-eabi-as</as>
-			<ld>arm-none-eabi-ld</ld>
-			<nm>arm-none-eabi-nm</nm>
-			<ar>arm-none-eabi-ar</ar>
-			<strip>arm-none-eabi-strip</strip>
+			<cc>gcc</cc>
+			<cxx>g++</cxx>
+			<as>as</as>
+			<ld>ld</ld>
+			<nm>nm</nm>
+			<ar>ar</ar>
+			<strip>strip</strip>
 			<asflags>-mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve</asflags>
 			<cflags>-O3 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve -mtune=cortex-a7</cflags>
 			<cppflags>-O3 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve -mtune=cortex-a7</cppflags>
@@ -36,7 +36,8 @@
 			<cplus_include_path></cplus_include_path>
 			<ld_library_path>$ROOT/images/sysroot_x86_64/arm-none-eabi/lib</ld_library_path>
 			<arch>arm</arch>
-			<cross>arm-none-eabi</cross>
+			<cross>x86_64</cross>
+			<cross_compile>arm-none-eabi-</cross_compile>
 		</step>
 	</defaults>
 </egg>

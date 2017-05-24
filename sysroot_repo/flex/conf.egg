@@ -12,6 +12,12 @@
 			<step id="1">				
 				<silent>yes</silent>
 				<threads>8</threads>
+				<path>
+                                        <pre>
+                                                <add id="0">$DEPLOY/bin</add>
+                                                <add id="1">$DEPLOY/$CROSS/bin</add>
+                                        </pre>
+                                </path>
 				<configure>
 					<extra id="0">--prefix=$DEPLOY</extra>
 					<extra id="1">--target=$CROSS</extra>
