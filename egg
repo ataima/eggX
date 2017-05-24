@@ -2401,7 +2401,7 @@ local RES=0
 local KEYS=""
 #trap read debug
 if [ ! -f  $1.$4 ]; then 
-	wget  --show-progress -q "$2" -O "$1.$4"
+	wget   -q "$2" -O "$1.$4"
 	RES=$?
 	if [ $RES -eq 8 ]; then 
 	#file not found
@@ -2441,7 +2441,7 @@ return $RES
 function check_md5sum(){ #EX
 local RES=0
 if [ ! -f  $1.md5 ]; then 
-	wget  --show-progress -q "$2.md5" -O "$1.md5"
+	wget   -q "$2.md5" -O "$1.md5"
 	RES=$?
 	if [ $RES -eq 8 ]; then 
 	#file not found
@@ -2475,7 +2475,7 @@ return $RES
 function check_sha1sum(){ #EX
 local RES=0
 if [ ! -f  $1.sha1 ]; then
-	wget  --show-progress -q "$2.sha1" -O "$1.sha1"
+	wget   -q "$2.sha1" -O "$1.sha1"
 	RES=$?
 	if [ $RES -eq 8 ]; then 
 	#file not found
@@ -2603,7 +2603,7 @@ fi
 tmp=$(getFileSize "$FILEIN")
 if [ "$tmp" == "0" ]; then
 	rm -f "$FILEIN"
-	wget  --show-progress -q  "$PNAME" -O "$FILEIN"
+	wget   -q  "$PNAME" -O "$FILEIN"
 	RES=$?
 	if [ $RES -ne 0 ]; then
 		error_c  "Wget fail : error $RES " " file $PNAME project $1"

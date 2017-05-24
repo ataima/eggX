@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>textinfo</name>
+    <name>lbzip2</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>http://ftp.gnu.org/gnu/texinfo</url>
-      <file>texinfo-6.3.tar.xz</file>
+      <url>http://archive.lbzip2.org</url>
+      <file>lbzip2-2.5.tar.bz2</file>
     </remote>
     <build>
       <step id="1">
@@ -17,7 +17,7 @@
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>29</priority>
+          <priority>32</priority>
           <rule id="0">
             <name>all</name>
           </rule>
