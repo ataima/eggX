@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>libassuan</name>
+    <name>libnpth</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>https://www.gnupg.org/ftp/gcrypt/libassuan</url>
-      <file>libassuan-2.4.3.tar.bz2</file>
+      <url>ftp://ftp.gnupg.org/gcrypt/npth</url>
+      <file>npth-1.4.tar.bz2</file>
     </remote>
     <build>
       <step id="1">
@@ -17,7 +17,7 @@
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>36</priority>
+          <priority>38</priority>
           <rule id="0">
             <name>all</name>
           </rule>
