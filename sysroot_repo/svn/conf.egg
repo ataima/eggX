@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
 	<project>
-		<name>zlib</name>
+		<name>svn</name>
 		<download>check</download>		
 		<remote>
 			<method>wget</method>
-			<url>https://sourceforge.net/projects/libpng/files/zlib/1.2.11</url>
-			<file>zlib-1.2.11.tar.xz</file>
+			<url>http://it.apache.contactlab.it/subversion</url>
+			<file>subversion-1.9.5.tar.bz2</file>		
 		</remote>	
 		<build>
 			<step id="1">				
@@ -15,17 +15,13 @@
 				<configure>
 					<pre id="0">
 						<mode>code</mode>
-						<value>CC=$CROSS-gcc</value>
-					</pre>
-					<pre id="1">
-						<mode>code</mode>
-						<value>AR=ar</value>
+						<value>rm -f $BUILD/sqlite-amalgamation;ln -s $SOURCES/sqlite/sqlite-amalgamation-3071501 $BUILD/sqlite-amalgamation</value>
 					</pre>
 					<extra id="0">--prefix=$DEPLOY</extra>
-					<extra id="1">--64</extra>
+					<extra id="1">--target=$CROSS</extra>
 				</configure>
 				<make id="0">
-					<priority>31</priority>
+					<priority>46</priority>
 					<rule id="0">
 						<name>all</name> 
 					</rule>

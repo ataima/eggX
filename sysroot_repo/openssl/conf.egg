@@ -1,37 +1,37 @@
 <?xml version="1.0"?>
 <egg>
 	<project>
-		<name>zlib</name>
+		<name>openssl</name>
 		<download>check</download>		
 		<remote>
 			<method>wget</method>
-			<url>https://sourceforge.net/projects/libpng/files/zlib/1.2.11</url>
-			<file>zlib-1.2.11.tar.xz</file>
-		</remote>	
+			<url>https://www.openssl.org/source</url>
+			<file>openssl-1.1.0e.tar.gz</file>	
+		</remote>		
 		<build>
 			<step id="1">				
 				<silent>yes</silent>
 				<threads>8</threads>			
 				<configure>
-					<pre id="0">
-						<mode>code</mode>
-						<value>CC=$CROSS-gcc</value>
-					</pre>
-					<pre id="1">
-						<mode>code</mode>
-						<value>AR=ar</value>
-					</pre>
 					<extra id="0">--prefix=$DEPLOY</extra>
-					<extra id="1">--64</extra>
+					<extra id="1">linux-x86_64</extra>
 				</configure>
 				<make id="0">
-					<priority>31</priority>
+					<priority>40</priority>
 					<rule id="0">
 						<name>all</name> 
 					</rule>
 					<rule id="1">
 						<name>install</name> 
-						<thread>1</thread>						
+						<thread>1</thread>	
+						<post id="0">
+							<mode>code</mode>
+							<value>strip $DEPLOY/lib64/libcrypto.*</value>
+						</post>
+						<post id="1">
+							<mode>code</mode>
+							<value>strip $DEPLOY/lib64/libssl.*</value>
+						</post>
 					</rule>
 				</make>
 			</step>
