@@ -13,11 +13,10 @@
 				<silent>yes</silent>
 				<threads>8</threads>
 				<path>
-                                        <pre>
-                                                <add id="0">$DEPLOY/bin</add>
-                                                <add id="1">$DEPLOY/$CROSS/bin</add>
-                                        </pre>
-                                </path>
+					<pre>
+						<set id="0">$USER_PATH</set>
+					</pre>	
+				</path>
 				<make id="0">
 					<priority>26</priority>
 					<rule id="0">

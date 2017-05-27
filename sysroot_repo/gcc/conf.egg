@@ -12,6 +12,11 @@
 			<step id="0">
 				<silent>yes</silent>
 				<threads>8</threads>	
+				<path>
+					<pre>
+						<set id="0">$USER_PATH</set>
+					</pre>	
+				</path>
 				<configure>
 					<pre id="0">
 						<mode>code</mode>
@@ -95,7 +100,11 @@
 						<post id="0">
 							<mode>code</mode>		
 							<value> cd  $DEPLOY/bin; rm -f cc; ln -s gcc cc; </value>
-						</post>							
+						</post>	
+						<post id="1">
+							<mode>code</mode>		
+							<value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+						</post>						
 					</rule>										
 				</make>
 			</step>

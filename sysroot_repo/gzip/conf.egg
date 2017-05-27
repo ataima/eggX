@@ -14,6 +14,11 @@
 				<threads>8</threads>
 				<path>
 					<pre>
+						<set id="0">$USER_PATH</set>
+					</pre>	
+				</path>				
+				<path>
+					<pre>
 						<add id="0">$DEPLOY/bin</add>
 						<add id="1">$DEPLOY/$CROSS/bin</add>
 					</pre>

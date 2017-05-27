@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>expat</name>
+    <name>libffi</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>  https://sourceforge.net/projects/expat/files/expat/2.2.0</url>
-      <file>  expat-2.2.0.tar.bz2</file>
+      <url>  ftp://sourceware.org/pub/libffi</url>
+      <file> libffi-3.2.1.tar.gz</file>
     </remote>
     <build>
       <step id="1">
@@ -22,12 +22,12 @@
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>45</priority>
+          <priority>56</priority>
           <rule id="0">
             <name>all</name>
           </rule>
           <rule id="1">
-            <name>install</name>
+            <name>install-strip</name>
             <thread>1</thread>
           </rule>
         </make>

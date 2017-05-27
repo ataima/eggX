@@ -14,8 +14,7 @@
 				<threads>8</threads>
 				<path>
 					<pre>
-						<add id="0">$DEPLOY/bin</add>
-						<add id="1">$DEPLOY/x86_64-pc-linux-gnu/bin</add>	
+						<set id="0">$USER_PATH</set>
 					</pre>	
 				</path>
 				<configure>

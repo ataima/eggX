@@ -312,12 +312,14 @@ local ID=0
 NUM=$(xmlstarlet sel -t  -v "count(egg/conf/user_env)" -n $MAINFILE)
 if [ $NUM -ne 0 ]; then 
 	ID=0
+	#print_del_ita
 	while [ $ID -lt $NUM ]; do
 	local VV=$(xmlstarlet sel -t  -v egg/conf/user_env[@id=\"$ID\"]/name -n $MAINFILE)
 	local VALUE=$(xmlstarlet sel -t  -v egg/conf/user_env[@id=\"$ID\"]/value -n $MAINFILE)
 	if [ "$VV" != "" ] && [ "$VALUE" != "" ]; then
 		eval $VV="$VALUE"
 		export $VV
+		#print_s_ita "Add user env var" "$VV"   "$VALUE"
 	else
 		error_c "XML file $MAINFILE" "node user_env id=\"$ID\" fail, check xml"
 	fi
@@ -519,7 +521,7 @@ MYPATH="$NEW:"$MYPATH
 #$1 build name
 #$2 dir
 function set_path(){
-MYPATH="$2"
+eval MYPATH="$2"
 }
 
 #$1 project
@@ -643,27 +645,32 @@ if [ $? -eq 1 ]; then
 			if [ $NUM -ne 0 ]; then	
 				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path/pre"
 				NUM=$?
-				if [ $NUM -ne 0 ]; then 	
+				if [ $NUM -ne 0 ]; then 				
 					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/remove"
 					NUM=$?
 					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/add"
 					MAX=$?
 					if [ $NUM -gt $MAX ]; then
 						MAX=$NUM
-					fi										
+					fi		
+					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/set"
+					NUM=$?	
+					if [ $NUM -gt $MAX ]; then
+						MAX=$NUM
+					fi					
 					ID=0
 					while [ $ID -lt $MAX ]; do
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/remove[@id=\"$ID\"]")
 						if [ "$TPATH" != "" ]; then
-							remove_path $STEP_NAME $TPATH
+							remove_path $STEP_NAME "$TPATH"
 						fi
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/add[@id=\"$ID\"]")
 						if [ "$TPATH" != "" ]; then
-							add_path $STEP_NAME $TPATH
+							add_path $STEP_NAME "$TPATH"
 						fi
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/set")
 						if [ "$TPATH" != "" ]; then
-							set_path $STEP_NAME $TPATH
+							set_path $STEP_NAME "$TPATH"
 							break
 						fi
 						ID=$((ID+1))
@@ -4127,13 +4134,15 @@ if  [ "$1" != ""  ] ; then
 fi
 local ALL_FILES=$(get_priority_list "$1")
 local VV=""
-#cp "$OREPO/conf.egg" "$OREPO/conf.egg_$(date +%d-%m-%y_%H:%M:%S).backup"
+cp "$OREPO/conf.egg" "$OREPO/conf.egg_$(date +%s).backup"
+xmlstarlet fo -t "$OREPO/conf.egg_$(date +%s).backup" > "$OREPO/conf.egg"
 $EDITOR "$OREPO/conf.egg"
 for VV in $ALL_FILES;  do
 if [ "$VV" == "." ]; then continue; fi
 if [ "$VV" == ".." ]; then continue; fi
 if [ -d "$OREPO/$VV" ]; then 
-	cp "$OREPO/$VV/conf.egg" "$OREPO/$VV/conf.egg_$(date +%d-%m-%y_%H:%M:%S).backup"
+	cp "$OREPO/$VV/conf.egg" "$OREPO/$VV/conf.egg_$(date +%s).backup"
+	xmlstarlet fo -t "$OREPO/conf.egg_$(date +%s).backup" > "$OREPO/conf.egg"
 	$EDITOR "$OREPO/$VV/conf.egg" 
 fi
 done

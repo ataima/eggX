@@ -16,7 +16,7 @@
 					<pre>
 						<set id="0">$USER_PATH</set>
 					</pre>	
-				</path>				
+				</path>			
 				<configure>
 					<extra id="0">--prefix=$DEPLOY</extra>
 					<extra id="1">--target=$CROSS</extra>
