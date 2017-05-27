@@ -3239,7 +3239,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 		PRJ=$(echo $V | awk '{print $3}')
 		if [ -d "$BUILD/$PRJ/$NAME" ]; then
 			print_conf_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$PRJ/$NAME"		
+			cd "$BUILD/$PRJ/$NAME"					
 			"$BUILD/$PRJ/$NAME/bootstrap.sh"
 			if [ $? -ne 0 ] ; then
 				error_c "configure step" " FAIL !!";
@@ -3248,9 +3248,7 @@ while [ $ID -lt $MAX_STEP ] ; do
 			"$BUILD/$PRJ/$NAME/build_$PRI.sh"
 			if [ $? -ne 0 ] ; then
 				error_c "build step" " FAIL !!";
-			fi
-			
-			sync
+			fi			
 		fi	
 	done
 	ID=$((ID+1))
@@ -3639,7 +3637,6 @@ local PRJ=$3
 local PATH=$4
 print_build_msg "$PRI" "$NAME" "$PRJ"
 cd "$PATH"
-"$PATH/clean.sh"
 "$PATH/bootstrap.sh"
 if [ $? -ne 0 ] ; then
 	error_c "configure step" " FAIL !!";
