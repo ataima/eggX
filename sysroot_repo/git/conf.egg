@@ -10,28 +10,20 @@
 		</remote>		
 		<build>
 			<step id="1">				
-				<silent>yes</silent>
+				<silent>no</silent>
 				<threads>8</threads>			
 				<configure>
 					<pre id="0">
 						<mode>code</mode>
-						<value>cd  $SOURCE </value>
+						<value>cd  $BUILD_PATH; rm -rf  $BUILD; ln -s $SOURCE $BUILD; cd $BUILD</value>
 					</pre>
 					<extra id="0">--prefix=$DEPLOY</extra>
 					<extra id="1">--target=$CROSS</extra>
 					<extra id="2">--with-tcltk=no</extra>
-					<post id="0">
-						<mode>code</mode>
-						<value>cd  $BUILD_PATH</value>
-					</post>
 				</configure>
 				<make id="0">
-					<priority>45</priority>
-					<rule id="0">
-						<pre id="0">
-							<mode>code</mode>
-							<value>rm -rf  $BUILD; ln -s $SOURCE $BUILD; cd $BUILD</value>
-						</pre>
+					<priority>50</priority>
+					<rule id="0">						
 						<name>all</name> 
 						<thread>1</thread>
 						<post id="0">

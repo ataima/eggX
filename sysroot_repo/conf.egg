@@ -30,6 +30,7 @@
 			<cpath></cpath>
 			<c_include_path></c_include_path>
 			<cplus_include_path></cplus_include_path>
+			<ld_library_path></ld_library_path>
 			<arch>x86_64</arch>
 			<cross>x86_64-pc-linux-gnu</cross>
 		</step>
@@ -51,7 +52,8 @@
 			<libs></libs>
 			<cpath></cpath>
 			<c_include_path></c_include_path>
-			<cplus_include_path>$DEPLOY/lib64:$DEPLOY/lib</cplus_include_path>
+			<cplus_include_path></cplus_include_path>
+			<ld_library_path>$LD_LIBRARY_PATH:$DEPLOY/lib:$DEPLOY/lib64</ld_library_path>
 			<arch>x86_64</arch>
 			<cross>x86_64-pc-linux-gnu</cross>
 		</step>
@@ -74,6 +76,7 @@
 			<cpath></cpath>
 			<c_include_path></c_include_path>
 			<cplus_include_path></cplus_include_path>
+			<ld_library_path></ld_library_path>
 			<arch>x86_64</arch>
 			<cross>arm-none-eabi</cross>
 		</step>
@@ -96,6 +99,7 @@
 			<cpath></cpath>
 			<c_include_path></c_include_path>
 			<cplus_include_path></cplus_include_path>
+			<ld_library_path></ld_library_path>
 			<arch>x86_64</arch>
 			<cross>arm-linux-gnueabi</cross>
 		</step>
