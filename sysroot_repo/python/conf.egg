@@ -32,6 +32,10 @@
 						<post id="0">
 							<mode>code</mode>		
 							<value>cd $DEPLOY/bin;rm -f  python;ln -s python3.6 python</value>
+						</post>	
+						<post id="1">
+							<mode>code</mode>		
+							<value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
 						</post>							
 					</rule>
 				</make>

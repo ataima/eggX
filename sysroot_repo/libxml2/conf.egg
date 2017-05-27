@@ -28,7 +28,11 @@
 					</rule>
 					<rule id="1">
 						<name>install</name> 
-						<thread>1</thread>						
+						<thread>1</thread>	
+						<post id="0">
+							<mode>code</mode>		
+							<value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+						</post>							
 					</rule>
 				</make>
 			</step>
