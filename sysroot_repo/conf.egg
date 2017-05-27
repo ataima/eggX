@@ -14,8 +14,12 @@
 			<value>$ROOT/images/egg_sysroot/bin:$ROOT/images/egg_sysroot/x86_64-pc-linux-gnu/bin:/bin:/usr/bin</value>
 		</user_env>
 		<user_env id="1">
-			<name>PGKCONF</name>
+			<name>PKGCONF</name>
 			<value>$ROOT/images/egg_sysroot/bin/pkgconfig</value>
+		</user_env>
+		<user_env id="2">
+			<name>PKG_CONFIG_PATH</name>
+			<value>$PKGCONF</value>
 		</user_env>
 	</conf>
 	<defaults>
