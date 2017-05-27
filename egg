@@ -2053,6 +2053,7 @@ if [ -d "$3" ] ; then
 else
 	patch -s  --directory="$2"  --input="$3" > /dev/null
 	if [ $? -ne 0 ]; then
+		rm -rf "$3"
 		error_c "On apply patch " "$3 project $1"
 	else
 		print_c "$GREEN_LIGHT" "   - Apply patch $( basename "$3" ) OK" "$YELLOW" $1
@@ -2417,6 +2418,10 @@ if [  "$tmp" != "0"  ]; then
         if [ $RES -eq 0 ]; then
                 chmod 444 "$1"
                 chmod 444 "$1.$4"
+		#add md5sum to quick chek file after chek with gpg
+		md5sum "$1" >"$1.md5"
+		chmod 444 "$1.md5"
+		print_c "$GREEN_LIGHT" "   - Add MD5 to verified file to quickly check" "$YELLOW" $3
                 RES=1
         else
                 warning_c "gpg chek fail " "file  $2" "have to import the public key" "(gpg --recv-key <xxxxxxxx> )" "or bad sign" "project $3"
@@ -2449,22 +2454,20 @@ if [ ! -f  $1.md5 ]; then
 		return $RES
 	fi			
 fi	
-#	tmp=$( ls -al  "$1.md5"  |  awk  '{print $5}' )
-#	if [  $tmp -ne 0 ]; then
-		md5sum  -c "$1.md5" >  /dev/null 
-		if [ $? -eq 0 ]; then
-			chmod 444 "$1"
-			chmod 444 "$1.md5"
-			RES=1
-		else
-			print_c "$RED_LIGHT" "   - MD5 check source FAIL" "$YELLOW" $3	 
-			rm -f "$1.md5"
-			rm -f "$1"
-			RES=99
-		fi 
-#	else
-#		rm -f  "$1.md5"
-#	fi
+
+md5sum  -c "$1.md5" >  /dev/null 
+if [ $? -eq 0 ]; then
+	chmod 444 "$1"
+	chmod 444 "$1.md5"
+	RES=1
+else
+	print_c "$RED_LIGHT" "   - MD5 check source FAIL" "$YELLOW" $3	 
+	chmod 666 "$1"
+	chmod 666 "$1.md5"
+	rm -f "$1.md5"
+	rm -f "$1"
+	RES=99
+fi 
 return $RES
 } #EX
 
@@ -2508,7 +2511,7 @@ return $RES
 #$4 custom sign file name 
 function check_sign(){ #EX
 local RES=0
-local ASIGN="sig md5 sha1 sign asc"
+local ASIGN=" md5 sig sha1 sign asc"
 local i=""
 for i in $ASIGN; do
  case $i in
@@ -2832,7 +2835,7 @@ if [ $? -eq 1 ]; then
 					fi
 				else
 					if [ "$DEST_DIR" ] ; then
-						write_apply_patch "$4"  "$DEST_DIR" "$SOURCES/$1/$PACKET" "$1"
+						write_apply_patch "$4"  "$(getSourcePath $1)/$DEST_DIR" "$SOURCES/$1/$PACKET" "$1"
 					else
 						write_apply_patch "$4"  "$(getSourcePath $1)" "$SOURCES/$1/$PACKET" "$1"
 					fi
@@ -4925,7 +4928,7 @@ print_c "$WHITE" "Current repo : " "$YELLOW" "$VV"
 print_c "$GREEN" "quit/exit for exit iterative mode"
 
 echo -n -e $(echo $CYAN) "egg"$(echo $BLUE) "> "$(echo $REPLACE) 
-while IFS="" read -r -e -d $'\n'  LINE; do 
+while IFS="" read  -r -e -d $'\n'  LINE; do 
 history -s "$LINE"
 if [ "$LINE" == "quit" ] || [ "$LINE" == "exit" ]; then
 	break;

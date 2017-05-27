@@ -15,14 +15,19 @@
         <configure>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
+	  <extra id="2">--with-ssl=$DEPLOY</extra> 
+	  <extra id="3">--with-libexpat=$DEPLOY</extra>
         </configure>
         <make id="0">
           <priority>60</priority>
           <rule id="0">
             <name>all</name>
           </rule>
-          <rule id="1">
-            <name>install-strip</name>
+	 <rule id="1">
+            <name>strip</name>
+          </rule>
+          <rule id="2">
+            <name>install</name>
             <thread>1</thread>
           </rule>
         </make>

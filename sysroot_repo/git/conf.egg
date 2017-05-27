@@ -10,7 +10,7 @@
 		</remote>		
 		<build>
 			<step id="1">				
-				<silent>no</silent>
+				<silent>yes</silent>
 				<threads>8</threads>			
 				<configure>
 					<pre id="0">

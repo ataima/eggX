@@ -8,6 +8,12 @@
       <url> ftp://ftp.gnu.org/gnu/libtasn1 </url>
       <file> libtasn1-4.9.tar.gz  </file>
     </remote>
+    <patch id="0">
+		<method>file</method>
+		<url>$REPO/libasn1</url>
+		<file>set_some_ptr.patch</file>
+		<dest_dir>lib</dest_dir>	
+     </patch>    
     <build>
       <step id="1">
         <silent>yes</silent>
@@ -17,7 +23,7 @@
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>63</priority>
+          <priority>62</priority>
           <rule id="0">
             <name>all</name>
           </rule>

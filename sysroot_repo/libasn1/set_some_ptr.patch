@@ -1,0 +1,20 @@
+--- a/lib/decoding.c	2017-05-27 17:28:11.222620907 +0200
++++ b/lib/decoding.c	2017-05-27 17:29:39.235124171 +0200
+@@ -876,7 +876,7 @@
+   int tag_len;
+   int indefinite, result, total_len = *max_ider_len, ider_len = *max_ider_len;
+   int inner_tag_len;
+-  unsigned char *ptmp;
++  unsigned char *ptmp=NULL;
+   const unsigned char *ptag;
+   const unsigned char *der = ider;
+ 
+@@ -1180,7 +1180,7 @@
+                 }
+               else
+                 {
+-                  unsigned dflags = 0, vlen, ber_len;
++                  unsigned dflags = 0, vlen=0, ber_len;
+ 
+                   if (ptag[0] & ASN1_CLASS_STRUCTURED)
+                     dflags |= DECODE_FLAG_INDEFINITE;
