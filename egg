@@ -4919,21 +4919,23 @@ print_c "$GREEN" "FOR A PARTICULAR PURPOSE."
 
 function iterative(){
 ITERATIVE=1
+local LINE=""
 local VV=$( ls -al repo | awk '{ print $11 }' )
 print_c "$WHITE" "Current repo : " "$YELLOW" "$VV"
 print_c "$GREEN" "quit/exit for exit iterative mode"
 
-while [ 1 -eq 1 ]; do
 echo -n -e $(echo $CYAN) "egg"$(echo $BLUE) "> "$(echo $REPLACE) 
-read -e
-if [ "$REPLY" == "quit" ] || [ "$REPLY" == "exit" ]; then
+while IFS="" read -r -e -d $'\n'  LINE; do 
+history -s "$LINE"
+if [ "$LINE" == "quit" ] || [ "$LINE" == "exit" ]; then
 	break;
 fi
-if [ "$REPLY" != "" ]; then 
-	./egg $REPLY
+if [ "$LINE" != "" ]; then 
+	./egg   $LINE
 else
 	usage
 fi
+echo -n -e $(echo $CYAN) "egg"$(echo $BLUE) "> "$(echo $REPLACE) 
 done
 ITERATIVE=0
 }
