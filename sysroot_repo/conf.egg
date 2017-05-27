@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<egg>   
+<egg>
 	<conf>
 		<root>$HOME/ebuild</root>
 		<repo>$ROOT/repo</repo>
@@ -8,16 +8,16 @@
 		<images>$ROOT/images</images>
 		<build>$ROOT/build</build>
 		<editor>scite</editor>
-		<start_path>/bin:/usr/bin</start_path>
-		<user_env id="0"> 
+		<start_path>$ROOT/images/egg_sysroot/bin:/bin:/usr/bin</start_path>
+		<user_env id="0">
 			<name>USER_PATH</name>
 			<value>$ROOT/images/egg_sysroot/bin:$ROOT/images/egg_sysroot/x86_64-pc-linux-gnu/bin:/bin:/usr/bin</value>
 		</user_env>
-		<user_env id="1"> 
+		<user_env id="1">
 			<name>PGKCONF</name>
 			<value>$ROOT/images/egg_sysroot/bin/pkgconfig</value>
 		</user_env>
-	</conf>	
+	</conf>
 	<defaults>
 		<step id="0">
 			<step_name>egg_sysroot</step_name>
@@ -29,16 +29,16 @@
 			<nm>nm</nm>
 			<ar>ar</ar>
 			<strip>strip</strip>
-			<asflags></asflags>
+			<asflags/>
 			<cflags>-O3</cflags>
 			<cppflags>-O3</cppflags>
 			<cxxflags>-O3</cxxflags>
-			<ldflags></ldflags>
-			<libs></libs>
-			<cpath></cpath>
-			<c_include_path></c_include_path>
-			<cplus_include_path></cplus_include_path>
-			<ld_library_path></ld_library_path>
+			<ldflags/>
+			<libs/>
+			<cpath/>
+			<c_include_path/>
+			<cplus_include_path/>
+			<ld_library_path/>
 			<arch>x86_64</arch>
 			<cross>x86_64-pc-linux-gnu</cross>
 		</step>
@@ -52,15 +52,15 @@
 			<nm>nm</nm>
 			<ar>ar</ar>
 			<strip>strip</strip>
-			<asflags></asflags>
+			<asflags/>
 			<cflags>-O3 -fPIC -m64</cflags>
 			<cppflags>-O3   -fPIC -m64</cppflags>
 			<cxxflags>-O3  -fPIC -m64</cxxflags>
-			<ldflags></ldflags>
-			<libs></libs>
-			<cpath></cpath>
-			<c_include_path></c_include_path>
-			<cplus_include_path></cplus_include_path>
+			<ldflags/>
+			<libs/>
+			<cpath/>
+			<c_include_path/>
+			<cplus_include_path/>
 			<ld_library_path>$LD_LIBRARY_PATH:$DEPLOY/lib:$DEPLOY/lib64</ld_library_path>
 			<arch>x86_64</arch>
 			<cross>x86_64-pc-linux-gnu</cross>
@@ -75,20 +75,20 @@
 			<nm>nm</nm>
 			<ar>ar</ar>
 			<strip>strip</strip>
-			<asflags></asflags>
+			<asflags/>
 			<cflags>-O3</cflags>
 			<cppflags>-O3</cppflags>
 			<cxxflags>-O3</cxxflags>
-			<ldflags></ldflags>
-			<libs></libs>
-			<cpath></cpath>
-			<c_include_path></c_include_path>
-			<cplus_include_path></cplus_include_path>
-			<ld_library_path></ld_library_path>
+			<ldflags/>
+			<libs/>
+			<cpath/>
+			<c_include_path/>
+			<cplus_include_path/>
+			<ld_library_path/>
 			<arch>x86_64</arch>
 			<cross>arm-none-eabi</cross>
 		</step>
-			<step id="3">
+		<step id="3">
 			<step_name>egg_sysroot</step_name>
 			<info>build with new  compiler  x86_64 the arm gcc compiler gnu linux eabi</info>
 			<cc>gcc</cc>
@@ -98,16 +98,16 @@
 			<nm>nm</nm>
 			<ar>ar</ar>
 			<strip>strip</strip>
-			<asflags></asflags>
+			<asflags/>
 			<cflags>-O3</cflags>
 			<cppflags>-O3</cppflags>
 			<cxxflags>-O3</cxxflags>
-			<ldflags></ldflags>
-			<libs></libs>
-			<cpath></cpath>
-			<c_include_path></c_include_path>
-			<cplus_include_path></cplus_include_path>
-			<ld_library_path></ld_library_path>
+			<ldflags/>
+			<libs/>
+			<cpath/>
+			<c_include_path/>
+			<cplus_include_path/>
+			<ld_library_path/>
 			<arch>x86_64</arch>
 			<cross>arm-linux-gnueabi</cross>
 		</step>

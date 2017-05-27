@@ -312,6 +312,7 @@ local ID=0
 NUM=$(xmlstarlet sel -t  -v "count(egg/conf/user_env)" -n $MAINFILE)
 if [ $NUM -ne 0 ]; then 
 	ID=0
+	USER_ENV=""
 	#print_del_ita
 	while [ $ID -lt $NUM ]; do
 	local VV=$(xmlstarlet sel -t  -v egg/conf/user_env[@id=\"$ID\"]/name -n $MAINFILE)
@@ -319,6 +320,7 @@ if [ $NUM -ne 0 ]; then
 	if [ "$VV" != "" ] && [ "$VALUE" != "" ]; then
 		eval $VV="$VALUE"
 		export $VV
+		USER_ENV+="  $VV"		
 		#print_s_ita "Add user env var" "$VV"   "$VALUE"
 	else
 		error_c "XML file $MAINFILE" "node user_env id=\"$ID\" fail, check xml"
@@ -444,7 +446,7 @@ STRIP=""
 HW_ARCH=""
 CROSS_COMPILE=""
 ITERATIVE=0
-
+USER_ENV=""
 
 
    
@@ -886,7 +888,17 @@ fi
 	echo "export NATIVE=$NATIVE" >> "$3"
 	echo "#current cross compile  " >> "$3"
 	echo "export CROSS_COMPILE=$CROSS_COMPILE" >> "$3"
+	local VV=""
+	local TT=""
+	echo "#user defined env variables  " >> "$3"
+	for VV in $USER_ENV; do
+		eval TT=\$$VV
+		echo "export $VV=$TT" >> "$3"
+	done
 }
+
+
+
 
 #$1 project
 #$2 step
@@ -4211,8 +4223,8 @@ if [ $? -ne 0 ]; then
 else
 	case $1 in
 		self)
-		format_xml "$ROOT/egg"
-		$EDITOR "$ROOT/egg" > /dev/null  &
+		format_xml "$OROOT/egg"
+		$EDITOR "$OROOT/egg" > /dev/null  &
 		;;
 		self.conf)
 		format_xml "$OREPO/conf.egg"
@@ -4771,6 +4783,7 @@ help_c "command : edit" \
 "if name = self.conf edit current repo/conf.egg" \
 "if name = a name of a project in repo edit repo/name/conf.egg" \
 "if name = self.repo edit one by one all repo's conf.egg files" \
+"if name = --format format all conf.egg xml files" \
 "ex : ./egg edit binutils" \
 "the edit is defined in repo/conf.egg/<editor> fields, ex vim"
 }
@@ -5034,6 +5047,26 @@ xmlstarlet  ed --inplace -u "/egg/project/remote/file" -v "  " "$OREPO/$2/conf.e
 ./egg edit "$2"
 }
 
+
+function search_all_packet(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	set -x ; trap read debug
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1		
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+fi
+[ $STEP_STEP -eq 1 ] && trap read debug
+local ALL=$(ls -d $OROOT/repo/* )
+local VV=""
+ALL_PACKETS=""
+for VV in $ALL; do
+	if  [ -d "$VV" ]; then 
+		ALL_PACKETS+=" $(basename $VV )"
+	fi
+done 
+}
+
+
 #$1 build id number
 function main(){
 local torun=default_do
@@ -5233,7 +5266,8 @@ if [ ! -d $SOURCES ]; then
 fi
 
 #sort project in repo to bin search
-ALL_PACKETS=$(ls $OROOT/repo  | sed 's/conf.egg//g')
+
+search_all_packet
 
 unset MAP
 declare -A MAP    

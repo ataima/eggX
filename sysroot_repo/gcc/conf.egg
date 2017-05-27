@@ -2,20 +2,20 @@
 <egg>
 	<project>
 		<name>gcc</name>
-		<download>check</download>		
+		<download>check</download>
 		<remote>
 			<method>wget</method>
 			<url>ftp://ftp.gnu.org/gnu/gcc/gcc-6.3.0</url>
-			<file>gcc-6.3.0.tar.gz</file>			
-		</remote>	
+			<file>gcc-6.3.0.tar.gz</file>
+		</remote>
 		<build>
 			<step id="0">
-				<silent>yes</silent>
-				<threads>8</threads>	
+				<silent>no</silent>
+				<threads>8</threads>
 				<path>
 					<pre>
 						<set id="0">$USER_PATH</set>
-					</pre>	
+					</pre>
 				</path>
 				<configure>
 					<pre id="0">
@@ -69,126 +69,126 @@
 				</configure>
 				<make id="0">
 					<priority>3</priority>
-					<rule id="0">						
-						<name>all-gcc</name> 
+					<rule id="0">
+						<name>all-gcc</name>
 					</rule>
 					<rule id="1">
-						<name>install-gcc</name> 
-						<thread>1</thread>						
-						<post  id="0">
-							<mode>code</mode>		
+						<name>install-gcc</name>
+						<thread>1</thread>
+						<post id="0">
+							<mode>code</mode>
 							<value>$CROSS-gcc  -v</value>
-						</post >
-					</rule>														
-					<rule id="2">									
-						<name>all-target-libgcc</name> 
+						</post>
+					</rule>
+					<rule id="2">
+						<name>all-target-libgcc</name>
 					</rule>
 					<rule id="3">
-						<name>install-target-libgcc</name> 
-						<thread>1</thread>						
-					</rule>										
-					<rule id="4">	
+						<name>install-target-libgcc</name>
+						<thread>1</thread>
+					</rule>
+					<rule id="4">
 						<pre id="0">
-							<mode>code</mode>		
+							<mode>code</mode>
 							<value>rm $DEPLOY/$CROSS/lib/libc.so ; echo  'GROUP ( libc.so.6 libc_nonshared.a )' | tee  $DEPLOY/$CROSS/lib/libc.so</value>
-						</pre>	
-						<name>all</name> 
+						</pre>
+						<name>all</name>
 					</rule>
 					<rule id="5">
-						<name>install</name> 
-						<thread>1</thread>	
+						<name>install</name>
+						<thread>1</thread>
 						<post id="0">
-							<mode>code</mode>		
+							<mode>code</mode>
 							<value> cd  $DEPLOY/bin; rm -f cc; ln -s gcc cc; </value>
-						</post>	
+						</post>
 						<post id="1">
-							<mode>code</mode>		
+							<mode>code</mode>
 							<value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
-						</post>						
-					</rule>										
+						</post>
+					</rule>
 				</make>
 			</step>
 			<step id="2">
 				<silent>yes</silent>
-				<threads>8</threads>	
+				<threads>8</threads>
 				<path>
 					<pre>
 						<set id="0">$DEPLOY/bin</set>
-						<add id="0">$DEPLOY/x86_64-pc-linux-gnu/bin</add>	
-					</pre>	
-				</path>		
+						<add id="0">$DEPLOY/x86_64-pc-linux-gnu/bin</add>
+					</pre>
+				</path>
 				<configure>
-						<pre id="0">
-							<mode>code</mode>
-							<value>rm -rf $SOURCE/gmp</value>
-						</pre>
-						<pre id="1">
-							<mode>code</mode>
-							<value>rm -rf $SOURCE/mpc</value>
-						</pre>
-						<pre id="2">
-							<mode>code</mode>
-							<value>rm -rf $SOURCE/mpfr</value>
-						</pre>
-						<pre id="3">
-							<mode>code</mode>
-							<value>rm -rf $SOURCE/isl</value>
-						</pre>
-						<pre id="4">
-							<mode>code</mode>
-							<value>rm -rf $SOURCE/cloog</value>
-						</pre>
-						<pre id="5">
-							<mode>code</mode>
-							<value>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</value>
-						</pre>
-						<pre id="6">
-							<mode>code</mode>
-							<value>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</value>
-						</pre>
-						<pre id="7">
-							<mode>code</mode>
-							<value>A=$(ls -d $SOURCES/mpfr/*); ln -s $A $SOURCE/mpfr</value>
-						</pre>
-						<pre id="8">
-							<mode>code</mode>
-							<value>A=$(ls -d $SOURCES/isl/*); ln -s $A $SOURCE/isl</value>
-						</pre>
-						<pre id="9">
-							<mode>code</mode>
-							<value>A=$(ls -d $SOURCES/cloog/*); ln -s $A $SOURCE/cloog</value>
-						</pre>
-					<extra id="0">--build=$NATIVE</extra>	
+					<pre id="0">
+						<mode>code</mode>
+						<value>rm -rf $SOURCE/gmp</value>
+					</pre>
+					<pre id="1">
+						<mode>code</mode>
+						<value>rm -rf $SOURCE/mpc</value>
+					</pre>
+					<pre id="2">
+						<mode>code</mode>
+						<value>rm -rf $SOURCE/mpfr</value>
+					</pre>
+					<pre id="3">
+						<mode>code</mode>
+						<value>rm -rf $SOURCE/isl</value>
+					</pre>
+					<pre id="4">
+						<mode>code</mode>
+						<value>rm -rf $SOURCE/cloog</value>
+					</pre>
+					<pre id="5">
+						<mode>code</mode>
+						<value>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</value>
+					</pre>
+					<pre id="6">
+						<mode>code</mode>
+						<value>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</value>
+					</pre>
+					<pre id="7">
+						<mode>code</mode>
+						<value>A=$(ls -d $SOURCES/mpfr/*); ln -s $A $SOURCE/mpfr</value>
+					</pre>
+					<pre id="8">
+						<mode>code</mode>
+						<value>A=$(ls -d $SOURCES/isl/*); ln -s $A $SOURCE/isl</value>
+					</pre>
+					<pre id="9">
+						<mode>code</mode>
+						<value>A=$(ls -d $SOURCES/cloog/*); ln -s $A $SOURCE/cloog</value>
+					</pre>
+					<extra id="0">--build=$NATIVE</extra>
 					<extra id="1">--host=$NATIVE</extra>
 					<extra id="2">--target=$CROSS</extra>
 					<extra id="3">--prefix=$DEPLOY</extra>
-					<extra id="4">--enable-languages=c,c++</extra>					
-					<extra id="5">--disable-multilib</extra>										 
+					<extra id="4">--enable-languages=c,c++</extra>
+					<extra id="5">--disable-multilib</extra>
 				</configure>
 				<make id="0">
 					<priority>3</priority>
-					<rule id="0">						
-						<name>all-gcc</name> 
+					<rule id="0">
+						<name>all-gcc</name>
 					</rule>
 					<rule id="1">
-						<name>install-gcc</name> 
-						<thread>1</thread>						
-						<post  id="0">
-							<mode>code</mode>		
+						<name>install-gcc</name>
+						<thread>1</thread>
+						<post id="0">
+							<mode>code</mode>
 							<value>$CROSS-gcc  -v</value>
-						</post >
-					</rule>										
+						</post>
+					</rule>
 				</make>
 			</step>
 			<step id="3">
 				<silent>yes</silent>
-				<threads>8</threads>	
+				<threads>8</threads>
 				<path>
 					<pre>
 						<set id="0">$DEPLOY/bin</set>
-						<add id="0">$DEPLOY/x86_64-pc-linux-gnu/bin</add>	
-					</pre>	
-				</path>		
+						<add id="0">$DEPLOY/x86_64-pc-linux-gnu/bin</add>
+					</pre>
+				</path>
 				<configure>
 					<pre id="0">
 						<mode>code</mode>
@@ -237,43 +237,43 @@
 				</configure>
 				<make id="0">
 					<priority>3</priority>
-					<rule id="0">						
-						<name>all-gcc</name> 
+					<rule id="0">
+						<name>all-gcc</name>
 					</rule>
 					<rule id="1">
-						<name>install-gcc</name> 
-						<thread>1</thread>						
-						<post  id="0">
-							<mode>code</mode>		
+						<name>install-gcc</name>
+						<thread>1</thread>
+						<post id="0">
+							<mode>code</mode>
 							<value>$CROSS-gcc  -v</value>
-						</post >
-					</rule>										
+						</post>
+					</rule>
 				</make>
 				<make id="1">
 					<priority>5</priority>
-					<rule id="0">									
-						<name>all-target-libgcc</name> 
+					<rule id="0">
+						<name>all-target-libgcc</name>
 					</rule>
 					<rule id="1">
-						<name>install-target-libgcc</name> 
-						<thread>1</thread>						
-					</rule>										
+						<name>install-target-libgcc</name>
+						<thread>1</thread>
+					</rule>
 				</make>
 				<make id="2">
 					<priority>7</priority>
-					<rule id="0">	
+					<rule id="0">
 						<pre id="0">
-							<mode>code</mode>		
+							<mode>code</mode>
 							<value>rm $DEPLOY/$CROSS/lib/libc.so ; echo  'GROUP ( libc.so.6 libc_nonshared.a )' | tee  $DEPLOY/$CROSS/lib/libc.so</value>
-						</pre>	
-						<name>all</name> 
+						</pre>
+						<name>all</name>
 					</rule>
 					<rule id="1">
-						<name>install</name> 
-						<thread>1</thread>						
-					</rule>										
+						<name>install</name>
+						<thread>1</thread>
+					</rule>
 				</make>
 			</step>
-		</build>	
+		</build>
 	</project>
 </egg>
