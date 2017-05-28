@@ -399,6 +399,9 @@ if [ "$2" ]; then
 						print_c "$WHITE" "     >"  "$YELLOW" "$7"
 						if [ "$8" ]; then
 							print_c "$WHITE" "     >"  "$YELLOW" "$8"
+							if [ "$9" ]; then
+								print_c "$WHITE" "     >"  "$YELLOW" "$9"
+							fi
 						fi
                                         fi
                                 fi
@@ -562,7 +565,7 @@ if [ $? -eq 1 ]; then
 							error_c "Missing  build make id=$ID priority Phase $2" "project : $1"
 						fi						
 						#optional				
-						INDEX="$PRI%$1%$STEP_NAME"
+						INDEX="$PRI%$1%$STEP_NAME%$ID"
 						BSEQ[$INDEX]="$INDEX"
 						ID=$((ID+1))
 					done	
@@ -1932,7 +1935,7 @@ echo "print_s_ita \"       ... \"  \"done\"  \"\$total_time sec\" ">> "$C_FILE"
 end_script_generic  "$1"  "$2" "END CONFIGURE" "$C_FILE"
 chmod +x "$C_FILE" 
 add_build_script "$1" "$2"  "$C_BUILD"  "$STEP_NAME" "$SILENT" "$THREADS" 
-print_ita "STEP : $2 PRI : $3" "$1"  "configured done !"
+print_ita "STEP : $2 PRI : $3" "$1"  "created done !"
 }
 
 #$1 project
@@ -3007,7 +3010,7 @@ fi
 local V=""
 isNumber $1
 if [ $? -ne 0 ]; then
-	error_c "first input param must be the step number!" "configure_all <step x> <optional projets>"
+	error_c "first input param must be the step number!" "source <step x> <optional projets>"
 fi
 
 local ID=$1
@@ -3058,7 +3061,7 @@ fi
 local V=""
 isNumber $1
 if [ $? -ne 0 ]; then
-	error_c "first input param must be the step number!" "configure_all <step x> <optional projets>"
+	error_c "first input param must be the step number!" "patch <step x> <optional projets>"
 fi
 
 local ID=$1
@@ -3107,7 +3110,7 @@ fi
 local V=""
 isNumber $1
 if [ $? -ne 0 ]; then
-	error_c "first input param must be the step number!" "configure_all <step x> <optional projets>"
+	error_c "first input param must be the step number!" "gen <step x> <optional projets>"
 fi
 
 local ID=$1
@@ -4380,8 +4383,16 @@ local PRI=""
 local NAME=""
 local PRJ=""
 local STMIN=10000
+local PATTERN=""
+local ONESTEP=0
+isNumber $1
+if [ $? -eq 0 ]; then 
+	ID=$1
+	ONESTEP=1
+	shift
+fi
 #is $1 then chek if a var to list-> list deploy -> ls $DEPLOY
-if [ $# -ne 0 ] && [ "$1" != "" ]; then
+if [ $# -ne 0 ] && [ "$1" != "" ] && [ "$1" != "-" ]; then
 	V=$(echo $1  | tr '[:lower:]' '[:upper:]')	
 	PRI=$(env | grep $V)
 	if [ "$PRI" != "" ]; then 	
@@ -4406,29 +4417,53 @@ if [ $# -ne 0 ] && [ "$1" != "" ]; then
 		error_c "missing VAR" "Var $1 not in current env"
 	fi
 else
-V=$(ls -al $OROOT/repo | awk '{print $11}')
-print_ita "REPO" "$OROOT/repo" "$V"	
-while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority "$ID" "$ALL_PACKETS"
-	for V in $SORTREQ; do
-		V=$(echo $V  | sed -e 's/%/   /g')
-		PRI=$(echo $V | awk '{print $1}')
-		NAME=$(echo $V | awk '{print $2}')"_$ID"
-		PRJ=$(echo $V | awk '{print $3}')
-		ST=$(getFileSize $BUILD/$PRJ/$NAME/status)
-		if [ $ST -eq 0 ]; then 
-			ST=1000
-		else	
-			ST=$( cat $BUILD/$PRJ/$NAME/status)
-		fi	
-		if [ $ST -lt $STMIN ]; then STMIN=$ST; fi
-		ST=$(getStatusString $ST)
-		print_ita "STEP : $ID" "$PRI - $ST" "$NAME"
+	if [ "$1" == "-" ] && [ "$2" != "" ]; then
+	PATTERN="$2"
+	fi
+	V=$(ls -al $OROOT/repo | awk '{print $11}')
+	print_ita "REPO" "$OROOT/repo" "$V"	
+	while [ $ID -lt $MAX_STEP ] ; do
+		prepare_seq_priority "$ID" "$ALL_PACKETS"
+		for V in $SORTREQ; do
+			V=$(echo $V  | sed -e 's/%/   /g')
+			if [ "$PATTERN" == "" ]; then
+				PRI=$(echo $V | awk '{print $1}')
+				NAME=$(echo $V | awk '{print $2}')"_$ID"
+				PRJ=$(echo $V | awk '{print $3}')
+				ST=$(getFileSize $BUILD/$PRJ/$NAME/status)
+				if [ $ST -eq 0 ]; then 
+					ST=1000
+				else	
+					ST=$( cat $BUILD/$PRJ/$NAME/status)
+				fi	
+				if [ $ST -lt $STMIN ]; then STMIN=$ST; fi
+				ST=$(getStatusString $ST)
+				print_ita "STEP : $ID" "$PRI - $ST" "$NAME"
+			else
+				NAME=$(echo $V | awk '{print $2}')
+				if [ "$PATTERN" == "$NAME" ]; then
+					PRI=$(echo $V | awk '{print $1}')
+					NAME=$(echo $V | awk '{print $2}')"_$ID"
+					PRJ=$(echo $V | awk '{print $3}')
+					ST=$(getFileSize $BUILD/$PRJ/$NAME/status)
+					if [ $ST -eq 0 ]; then 
+						ST=1000
+					else	
+						ST=$( cat $BUILD/$PRJ/$NAME/status)
+					fi	
+					if [ $ST -lt $STMIN ]; then STMIN=$ST; fi
+					ST=$(getStatusString $ST)
+					print_ita "STEP : $ID" "$PRI - $ST" "$NAME"
+				fi
+			fi	
+		done
+		ID=$((ID+1))
+		if [ $ONESTEP -eq 1 ]; then
+			break;
+		fi
 	done
-	ID=$((ID+1))
-done
-ST=$(getStatusString $STMIN)
-print_ita "STATUS" "$ST" "$PRJ"
+	ST=$(getStatusString $STMIN)
+	print_ita "STATUS" "$ST" "$PRJ"
 fi
 }
 
@@ -4537,10 +4572,106 @@ if [ $# -eq 0 ];  then
 while [ $FNUM -lt $MAX_STEP ] ; do
 	freeze_step $FNUM
 	FNUM=$((FNUM+1))
-done
-	
+done	
 else
 	freeze_step $1 $2
+fi
+}
+
+
+#$1 step
+#$2 ...  ARGV
+function pri_project(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
+[ $STEP_STEP -eq 1 ] && trap read debug
+local ID=0
+local CMD=""
+local START=0
+local STOP=0
+local OFFSET=0
+local V=""
+local PRJS=""
+local PRI=0
+isNumber $1
+if [ $? -ne 0 ]; then
+	error_c "first input param must be the step number!" "pri <step x> <optional projets>"
+fi
+ID=$1
+shift
+CMD=$(echo $1 |  tr '[:lower:]' '[:upper:]')
+shift
+if [ "$CMD" == "MOVE" ];then
+	isNumber $1
+	if [ $? -ne 0 ]; then
+		error_c "start priority" "$1 missing start priority to move"
+	fi
+	START=$1
+	shift
+	isNumber $1
+	if [ $? -ne 0 ]; then
+		error_c "stop priority" "$1 missing stop priority to move"
+	fi
+	STOP=$1
+	shift
+	isNumber $1
+	if [ $? -ne 0 ]; then
+		error_c "offset priority" "$1 missing offset priority to move"
+	fi
+	OFFSET=$1
+	prepare_seq_priority "$ID" "$ALL_PACKETS"
+	for V in $SORTREQ; do
+		PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
+		PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')	
+		MAKE=$(echo -n $V | sed 's/%/ /g' | awk '{print $4}')
+		if   [ $PRI -lt $START ]; then
+			continue
+		fi
+		if [ $PRI -ge $START ] && [ $PRI -le $STOP ]; then
+			PRI=$((PRI+OFFSET))						
+			xmlstarlet ed --inplace -u "/egg/project/build/step[@id=\"$ID\"]/make[@id=\"$MAKE\"]/priority"  -v "$PRI" "$OREPO/$PRJS/conf.egg"			
+		fi	
+		if [ $PRI -gt $STOP ]; then
+			break
+		fi
+	done
+else
+	if [ "$CMD" == "SWAP" ];then
+	isNumber $1
+	if [ $? -ne 0 ]; then
+		error_c "start priority" "$1 missing start priority to move"
+	fi
+	START=$1
+	shift
+	isNumber $1
+	if [ $? -ne 0 ]; then
+		error_c "stop priority" "$1 missing stop priority to move"
+	fi
+	STOP=$1
+	if [  $START -ne $STOP ]; then 
+		shift
+		prepare_seq_priority "$ID" "$ALL_PACKETS"
+		for V in $SORTREQ; do
+			PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
+			PRI=$(echo -n $V | sed 's/%/ /g' | awk '{print $1}')	
+			MAKE=$(echo -n $V | sed 's/%/ /g' | awk '{print $4}')
+			if   [ $PRI -eq $START ]; then
+				xmlstarlet ed --inplace -u "/egg/project/build/step[@id=\"$ID\"]/make[@id=\"$MAKE\"]/priority"  -v "$STOP" "$OREPO/$PRJS/conf.egg"
+			fi
+			if [ $PRI -eq $STOP ]; then
+				xmlstarlet ed --inplace -u "/egg/project/build/step[@id=\"$ID\"]/make[@id=\"$MAKE\"]/priority"  -v "$START" "$OREPO/$PRJS/conf.egg"
+			fi
+		done
+	else
+		error_c "Input param " "Cannot swap priority of projects" "with the same priority !" "in this case priority " "is from project name"
+	fi		
+	else
+	help_pri
+	fi
 fi
 }
 
@@ -4694,10 +4825,10 @@ function usage(){
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -S or --step : debug functions into step by step" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -T or --test : call direct a function and debug step by step"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "cat project : print project/conf.egg"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : download all sources from repo projects"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure repo projects "
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure and build repo projects"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "build : build repo projects "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : generate bash dwload scripts and dwload all repo sources"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "gen : generate bash build scripts repo projects "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : exec configure and build repo projects"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "build : only build no configure repo projects "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : re - do - all "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "cd <step xx> <project nn> : open a shell of project nn"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "clean <option step xx> <option project nn> : clean "	
@@ -4705,13 +4836,14 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "edit <project nn>: edit conf.egg file of project nn"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "reset : remove \$ROOT/build, \$ROOT/image, \$ROOT/repo, \$ROOT/source "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "info : show program info..."
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "packetize : create a tar of the output "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "pack : create a tar of the output "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "multi <file.egg list of repos >: sequence building of projects"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "list : list work repo "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "list : list work repo (... more)"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "setrepo <path with new repo> : set a new work repo and list  "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "freeze nn < step number> : set status stable "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "hot nn < step number> : set status to configure "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "clone <src> <new> : clone an existing prj to a new prj"
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "pri <step> <....> : move swap project priority"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "help <command>: more info about command and repo"
 	print_c  "$PURPLE_LIGHT" "do help <command> for more info"
 }
@@ -4789,15 +4921,15 @@ help_c "command : cd" \
 }
 
 #$1 command to explains
-function help_configure(){
-help_c "command : configure" \
+function help_gen(){
+help_c "command : gen" \
 "\$1 : step number : optional " \
 "\$2... : project-s     : optional" \
 "with no param generate all bash scripts for all step and projects" \
 "if only \$1 is specified generate all bash scripts for step \$1" \
 "else generate all bash scripts for step \$1 project \$2,..\$n" \
-"ex : ./egg configure or ./egg configure 1 or" \
-"./egg configure 1 binutilis"
+"ex : ./egg gen or ./egg gen 1 or" \
+"./egg gen 1 binutilis"
 }
 
 function help_edit(){
@@ -4883,23 +5015,26 @@ help_c "command : redoall" \
 "ex ./egg redoall"
 }
 
-function help_packetize(){
-help_c "command : packetize" \
+function help_pack(){
+help_c "command : pack" \
 "if all repo is 'stable' (all build successfull ended and install ok)"  \
 "the \$DEPLOY path was compressed by tar and all build " \
 "directory was cleaned" \
 "note : after a redoall/do/build in case of success " \
-"packetize is auto called " \
-"ex ./egg packetize"
+"pack is auto called " \
+"ex ./egg pack"
 }
 
 function help_list(){
 help_c "command : list" \
-"\$1 : env variable : optional " \
-"list all repo step-project in build ordered sequence" \
-"the last line show the all project status...." \
+"\$1 ,\$2,\$3: optional " \
+"mode 1 : list all repo projects in build ordered sequence" \
+"mode 1 : list <\$1=step NN> list only step NN repo projects" \
+"mode 1 : list <\$1='-'>  <\$2=name> find if name projects is in repo" \
+"mode 1 : list <\$1=step NN > <\$2='-'> <\$3=name> find only in step NN" \
+"mode 2 : if \$1 not in repo projects name , check if is in env and " \
 "if \$1 is present do tree -L 1 \$1" \
-"ex ./egg list or ./egg list IMAGES"
+"ex ./egg list 1 or ./egg list IMAGES"
 }
 
 function help_setrepo(){
@@ -4934,7 +5069,9 @@ help_c "command : source" \
 
 function help_cat(){
 help_c "command : cat " \
-"cat of conf.egg projects"
+"cat of conf.egg projects" \
+"\$1 : project name " \
+" ex. cat binutils"
 }
 
 function help_clone(){
@@ -4943,6 +5080,18 @@ help_c "command : source" \
 "\$2 : new project"\
 "clone an existing project to a new project" \
 "ex ./egg source"
+}
+
+
+#$1 command to explains
+function help_pri(){
+help_c "command : pri manage projects priority" \
+"\$1 : step number " \
+"\$2... : argv" \
+"if \$2=move -> start stop offset" \
+"if \$2=swap -> src dest " \
+"./egg pri 1 mode 25 30 5" \
+"./egg pri 1 swap 25 30 " 
 }
 
 function help_options(){
@@ -4965,10 +5114,10 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local OK=0
-local -a COMMANDS=('source' 'cd' 'configure' 'edit' 'build' 'reset' \
+local -a COMMANDS=('source' 'cd' 'gen' 'edit' 'build' 'reset' \
 					'clean' 'multi' 'distclean' 'do' 'redoall' \
-					'packetize' 'list' 'setrepo' 'freeze' \
-					'hot' 'clone' 'cat' 'options')
+					'pack' 'list' 'setrepo' 'freeze' \
+					'hot' 'clone' 'cat' 'pri' 'options')
 local VV=""
 local torun=""
 if [ $# -eq 0 ]; then
@@ -5000,7 +5149,8 @@ if [ $OK -eq 0 ]; then
 	"${COMMANDS[4]} ${COMMANDS[5]} ${COMMANDS[6]} ${COMMANDS[7]}" \
 	"${COMMANDS[8]} ${COMMANDS[9]} ${COMMANDS[10]} ${COMMANDS[11]}" \
 	"${COMMANDS[12]} ${COMMANDS[13]} ${COMMANDS[14]} ${COMMANDS[15]}" \
-	"${COMMANDS[16]} ${COMMANDS[17]} ${COMMANDS[18]} ${COMMANDS[19]}"	
+	"${COMMANDS[16]} ${COMMANDS[17]} ${COMMANDS[18]} ${COMMANDS[19]}" \
+	"${COMMANDS[20]}"	
 fi
 
 }
@@ -5178,7 +5328,7 @@ case $1 in
 	shift
 	break
 	;;	
-	configure)
+	gen)
 	torun=config_all_step
 	shift
 	break
@@ -5227,7 +5377,7 @@ case $1 in
 	torun=show_info		
 	break
 	;;	
-	packetize)
+	pack)
 	torun=packetize_all		
 	break
 	;;	
@@ -5253,6 +5403,11 @@ case $1 in
 	;;
 	clone)
 	torun=clone_project		
+	shift
+	break
+	;;
+	pri)
+	torun=pri_project		
 	shift
 	break
 	;;
