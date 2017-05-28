@@ -1,45 +1,45 @@
 <?xml version="1.0"?>
 <egg>
-	<project>
-		<name>bash</name>
-		<download>check</download>		
-		<remote>
-			<method>wget</method>
-			<url>ftp://ftp.gnu.org/gnu/bash</url>
-			<file>bash-4.3.tar.gz</file>		
-		</remote>	
-		<build>
-			<step id="1">				
-				<silent>yes</silent>
-				<threads>8</threads>
-				<path>
-					<pre>
-						<set id="0">$USER_PATH</set>
-					</pre>	
-				</path>				
-				<configure>
-					<pre id="0">
-						<mode>code</mode>
-						<value>check_version $CROSS-gcc  6.3.0 </value>
-					</pre>					
-					<extra id="0">--prefix=$DEPLOY</extra>
-					<extra id="1">--target=$CROSS</extra>
-				</configure>
-				<make id="0">
-					<priority>6</priority>
-					<rule id="0">
-						<name>all</name> 
-					</rule>
-					<rule id="1">
-						<name>install</name> 
-						<thread>1</thread>	
-						<post id="0">
-							<mode>code</mode>
-							<value>ln -s $DEPLOY/bin/bash $DEPLOY/bin/sh</value>
-						</post>
-					</rule>
-				</make>
-			</step>
-		</build>
-	</project>
+  <project>
+    <name>bash</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url>ftp://ftp.gnu.org/gnu/bash</url>
+      <file>bash-4.3.tar.gz</file>
+    </remote>
+    <build>
+      <step id="1">
+        <silent>yes</silent>
+        <threads>8</threads>
+        <path>
+          <pre>
+            <set id="0">$USER_PATH</set>
+          </pre>
+        </path>
+        <configure>
+          <pre id="0">
+            <mode>code</mode>
+            <value>check_version $CROSS-gcc  6.3.0 </value>
+          </pre>
+          <extra id="0">--prefix=$DEPLOY</extra>
+          <extra id="1">--target=$CROSS</extra>
+        </configure>
+        <make id="0">
+          <priority>6</priority>
+          <rule id="0">
+            <name>all</name>
+          </rule>
+          <rule id="1">
+            <name>install</name>
+            <thread>1</thread>
+            <post id="0">
+              <mode>code</mode>
+              <value>ln -s $DEPLOY/bin/bash $DEPLOY/bin/sh</value>
+            </post>
+          </rule>
+        </make>
+      </step>
+    </build>
+  </project>
 </egg>

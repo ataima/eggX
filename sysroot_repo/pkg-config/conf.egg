@@ -1,28 +1,24 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>libgpg-error</name>
+    <name>pkg-config</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>https://www.gnupg.org/ftp/gcrypt/libgpg-error</url>
-      <file>libgpg-error-1.27.tar.bz2</file>
+      <url>  https://pkg-config.freedesktop.org/releases</url>
+      <file>pkg-config-0.29.2.tar.gz  </file>
     </remote>
     <build>
       <step id="1">
         <silent>yes</silent>
         <threads>8</threads>
-        <path>
-          <pre>
-            <set id="0">$USER_PATH</set>
-          </pre>
-        </path>
         <configure>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
+	  <extra id="2">--with-internal-glib</extra>
         </configure>
         <make id="0">
-          <priority>33</priority>
+          <priority>47</priority>
           <rule id="0">
             <name>all</name>
           </rule>

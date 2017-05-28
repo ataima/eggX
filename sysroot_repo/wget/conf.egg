@@ -10,24 +10,24 @@
     </remote>
     <build>
       <step id="1">
-        <silent>yes</silent>
+        <silent>no</silent>
         <threads>8</threads>
-				<path>
-					<pre>
-						<set id="0">$USER_PATH</set>
-					</pre>	
-				</path>	
+        <path>
+          <pre>
+            <set id="0">$USER_PATH</set>
+          </pre>
+        </path>
         <configure>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>67</priority>
+          <priority>68</priority>
           <rule id="0">
             <name>all</name>
           </rule>
           <rule id="1">
-            <name>install</name>
+            <name>install-strip</name>
             <thread>1</thread>
           </rule>
         </make>

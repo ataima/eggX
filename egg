@@ -4135,7 +4135,7 @@ local BK=""
 BK="$1_$(date +%s).backup"
 cp "$1" "$BK"
 if [ $? -eq 0 ]; then
-	xmlstarlet fo -t "$BK" > "$1.temp"
+	xmlstarlet fo  "$BK" > "$1.temp"
 	if [ $? -eq 0 ]; then
 		rm -rf $1
 		mv "$1.temp" "$1"
@@ -4240,6 +4240,28 @@ else
 		error_c "Missing project in $OREPO " "project : $1"
 		;;
 	esac	
+fi
+}
+
+
+function cat_project(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug	
+fi
+[ $STEP_STEP -eq 1 ] && trap read debug
+
+if [ ! "$1" ]; then
+	error_c "Missing Input project "
+fi
+check_project "$1"
+if [ $? -ne 0 ]; then
+	format_xml "$OREPO/$1/conf.egg"
+	cat "$OREPO/$1/conf.egg"
+else
+error_c "Missing project in $OREPO " "project : $1"
 fi
 }
 
@@ -4671,12 +4693,13 @@ function usage(){
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -X or --debug : break and debug functions into" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -S or --step : debug functions into step by step" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -T or --test : call direct a function and debug step by step"
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "cat project : print project/conf.egg"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "source : download all sources from repo projects"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "configure : configure repo projects "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "do : configure and build repo projects"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "build : build repo projects "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "redoall : re - do - all "
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "shell <step xx> <project nn> : open a shell of project nn"	
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "cd <step xx> <project nn> : open a shell of project nn"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "clean <option step xx> <option project nn> : clean "	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "distclean <option step xx> <option project nn> : remove all builds"	
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "edit <project nn>: edit conf.egg file of project nn"	
@@ -4755,13 +4778,14 @@ function default_do(){
 
 
 #$1 command to explains
-function help_shell(){
-help_c "command : shell" \
+function help_cd(){
+help_c "command : cd" \
 "\$1 : step number : required " \
 "\$2 : project     : optional" \
 "if only \$1 is specified open a shell on the build/step_name path" \
 "else open a shell on build/step_name/build_step_num" \
-"ex : ./egg shell 1 binutils "
+"Warning : $PATH is of calling process. to switch on egg env do source setenv.sh" \
+"ex : ./egg cd 1 binutils "
 }
 
 #$1 command to explains
@@ -4908,6 +4932,11 @@ help_c "command : source" \
 "ex ./egg source"
 }
 
+function help_cat(){
+help_c "command : cat " \
+"cat of conf.egg projects"
+}
+
 function help_clone(){
 help_c "command : source" \
 "\$1 : source project to clone"\
@@ -4936,9 +4965,10 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local OK=0
-local -a COMMANDS=('source' 'shell' 'configure' 'edit' 'build' 'reset' \
+local -a COMMANDS=('source' 'cd' 'configure' 'edit' 'build' 'reset' \
 					'clean' 'multi' 'distclean' 'do' 'redoall' \
-					'packetize' 'list' 'setrepo' 'freeze' 'hot' 'clone' 'options')
+					'packetize' 'list' 'setrepo' 'freeze' \
+					'hot' 'clone' 'cat' 'options')
 local VV=""
 local torun=""
 if [ $# -eq 0 ]; then
@@ -4970,7 +5000,7 @@ if [ $OK -eq 0 ]; then
 	"${COMMANDS[4]} ${COMMANDS[5]} ${COMMANDS[6]} ${COMMANDS[7]}" \
 	"${COMMANDS[8]} ${COMMANDS[9]} ${COMMANDS[10]} ${COMMANDS[11]}" \
 	"${COMMANDS[12]} ${COMMANDS[13]} ${COMMANDS[14]} ${COMMANDS[15]}" \
-	"${COMMANDS[16]} ${COMMANDS[17]}"	
+	"${COMMANDS[16]} ${COMMANDS[17]} ${COMMANDS[18]} ${COMMANDS[19]}"	
 fi
 
 }
@@ -5132,13 +5162,18 @@ case $1 in
 	warning_c "Set debug breakpoint" "At function $BREAK_FUNCTION"
 	torun="$BREAK_FUNCTION"
 	break
+	;;
+	cat)
+	torun=cat_project
+	shift
+	break
 	;;	
 	source)
 	torun=source_download
 	shift
 	break
 	;;
-	shell)
+	cd)
 	torun=shell_packet
 	shift
 	break

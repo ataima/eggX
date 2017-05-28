@@ -1,45 +1,49 @@
 <?xml version="1.0"?>
 <egg>
-	<project>
-		<name>openssl</name>
-		<download>check</download>		
-		<remote>
-			<method>wget</method>
-			<url>https://www.openssl.org/source</url>
-			<file>openssl-1.1.0e.tar.gz</file>	
-		</remote>		
-		<build>
-			<step id="1">				
-				<silent>yes</silent>
-				<threads>8</threads>
-				<path>
-					<pre>
-						<set id="0">$USER_PATH</set>
-					</pre>	
-				</path>
-				<configure>
-					<extra id="0">--prefix=$DEPLOY</extra>
-					<extra id="1">linux-x86_64</extra>
-				</configure>
-				<make id="0">
-					<priority>40</priority>
-					<rule id="0">
-						<name>all</name> 
-					</rule>
-					<rule id="1">
-						<name>install</name> 
-						<thread>1</thread>	
-						<post id="0">
-							<mode>code</mode>
-							<value>strip $DEPLOY/lib64/libcrypto.*</value>
-						</post>
-						<post id="1">
-							<mode>code</mode>
-							<value>strip $DEPLOY/lib64/libssl.*</value>
-						</post>
-					</rule>
-				</make>
-			</step>
-		</build>
-	</project>
+  <project>
+    <name>openssl</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url>https://www.openssl.org/source</url>
+      <file>openssl-1.1.0e.tar.gz</file>
+    </remote>
+    <build>
+      <step id="1">
+        <silent>yes</silent>
+        <threads>8</threads>
+        <path>
+          <pre>
+            <set id="0">$USER_PATH</set>
+          </pre>
+        </path>
+        <configure>
+          <extra id="0">--prefix=$DEPLOY</extra>
+          <extra id="1">linux-x86_64</extra>
+        </configure>
+        <make id="0">
+          <priority>40</priority>
+          <rule id="0">
+            <name>all</name>
+          </rule>
+          <rule id="1">
+            <name>install</name>
+            <thread>1</thread>
+            <post id="0">
+              <mode>code</mode>
+              <value>strip $DEPLOY/lib64/libcrypto.*</value>
+            </post>
+            <post id="1">
+              <mode>code</mode>
+              <value>strip $DEPLOY/lib64/libssl.*</value>
+            </post>
+           <post id="2">
+              <mode>code</mode>
+              <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+            </post>	    
+          </rule>
+        </make>
+      </step>
+    </build>
+  </project>
 </egg>

@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>libgpg-error</name>
+    <name>libunistring</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>https://www.gnupg.org/ftp/gcrypt/libgpg-error</url>
-      <file>libgpg-error-1.27.tar.bz2</file>
+      <url> http://ftp.gnu.org/gnu/libunistring</url>
+      <file>  libunistring-0.9.7.tar.xz </file>
     </remote>
     <build>
       <step id="1">
@@ -22,7 +22,7 @@
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>33</priority>
+          <priority>66</priority>
           <rule id="0">
             <name>all</name>
           </rule>
