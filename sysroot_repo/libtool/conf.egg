@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>libffi</name>
+    <name>libtool</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>  ftp://sourceware.org/pub/libffi</url>
-      <file> libffi-3.2.1.tar.gz</file>
+      <url> ftp://ftp.gnu.org/gnu/libtool </url>
+      <file> libtool-2.4.tar.xz </file>
     </remote>
     <build>
       <step id="1">
@@ -22,21 +22,13 @@
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>56</priority>
+          <priority>46</priority>
           <rule id="0">
             <name>all</name>
           </rule>
           <rule id="1">
-            <name>install-strip</name>
-            <thread>1</thread>
-            <post id="0">
-              <mode>code</mode>
-              <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
-            </post>
-            <post id="1">
-              <mode>code</mode>
-              <value> cp $DEPLOY/lib/libffi-*/include/*.h $DEPLOY/include/.</value>
-            </post>
+            <name>install</name>
+            <thread>1</thread>            
           </rule>
         </make>
       </step>

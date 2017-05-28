@@ -15,10 +15,10 @@
         <configure>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
-	  <extra id="2">--with-internal-glib</extra>
+          <extra id="2">--with-internal-glib</extra>
         </configure>
         <make id="0">
-          <priority>47</priority>
+          <priority>22</priority>
           <rule id="0">
             <name>all</name>
           </rule>

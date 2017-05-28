@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>libffi</name>
+    <name>libatomic-ops</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>  ftp://sourceware.org/pub/libffi</url>
-      <file> libffi-3.2.1.tar.gz</file>
+      <url> https://github.com/ivmai/libatomic_ops/releases/download/v7.4.6</url>
+      <file> libatomic_ops-7.4.6.tar.gz  </file>
     </remote>
     <build>
       <step id="1">
@@ -22,20 +22,16 @@
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>56</priority>
+          <priority>47</priority>
           <rule id="0">
             <name>all</name>
           </rule>
           <rule id="1">
-            <name>install-strip</name>
+            <name>install</name>
             <thread>1</thread>
             <post id="0">
               <mode>code</mode>
               <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
-            </post>
-            <post id="1">
-              <mode>code</mode>
-              <value> cp $DEPLOY/lib/libffi-*/include/*.h $DEPLOY/include/.</value>
             </post>
           </rule>
         </make>
