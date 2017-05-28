@@ -10,7 +10,7 @@
     </remote>
     <build>
       <step id="1">
-        <silent>no</silent>
+        <silent>yes</silent>
         <threads>8</threads>
         <path>
           <pre>
@@ -29,7 +29,7 @@
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>51</priority>
+          <priority>55</priority>
           <rule id="0">
             <name>all</name>
           </rule>
@@ -39,6 +39,10 @@
             <post id="0">
               <mode>code</mode>
               <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+            </post>
+            <post id="1">
+              <mode>code</mode>
+              <value>cp $BUILD/agen5/autogen $DEPLOY/bin/.</value>
             </post>
           </rule>
         </make>

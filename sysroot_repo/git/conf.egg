@@ -27,7 +27,7 @@
           <extra id="2">--with-tcltk=no</extra>
         </configure>
         <make id="0">
-          <priority>53</priority>
+          <priority>57</priority>
           <rule id="0">
             <name>all</name>
             <thread>1</thread>

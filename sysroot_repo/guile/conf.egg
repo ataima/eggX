@@ -17,7 +17,7 @@
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>49</priority>
+          <priority>53</priority>
           <rule id="0">
             <name>all</name>
           </rule>
@@ -27,7 +27,7 @@
             <post id="0">
               <mode>code</mode>
               <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
-            </post>	    
+            </post>
           </rule>
         </make>
       </step>
