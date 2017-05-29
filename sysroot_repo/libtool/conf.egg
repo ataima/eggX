@@ -22,13 +22,13 @@
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>46</priority>
+          <priority>50</priority>
           <rule id="0">
             <name>all</name>
           </rule>
           <rule id="1">
             <name>install</name>
-            <thread>1</thread>            
+            <thread>1</thread>
           </rule>
         </make>
       </step>

@@ -22,7 +22,7 @@
           <extra id="1">linux-x86_64</extra>
         </configure>
         <make id="0">
-          <priority>40</priority>
+          <priority>44</priority>
           <rule id="0">
             <name>all</name>
           </rule>
@@ -37,10 +37,10 @@
               <mode>code</mode>
               <value>strip $DEPLOY/lib64/libssl.*</value>
             </post>
-           <post id="2">
+            <post id="2">
               <mode>code</mode>
               <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
-            </post>	    
+            </post>
           </rule>
         </make>
       </step>

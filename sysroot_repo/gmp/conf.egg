@@ -8,5 +8,9 @@
       <url>ftp://ftp.gnu.org/gnu/gmp</url>
       <file>gmp-6.1.2.tar.bz2</file>
     </remote>
+    <build>
+      <step id="0">
+      </step>
+    </build>
   </project>
 </egg>
