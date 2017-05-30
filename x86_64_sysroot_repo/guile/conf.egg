@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<egg>
+  <project>
+    <name>guile</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url> https://ftp.gnu.org/gnu/guile </url>
+      <file>guile-2.2.2.tar.xz </file>
+    </remote>
+    <build>
+      <step id="1">
+        <silent>yes</silent>
+        <threads>8</threads>
+        <configure>
+          <extra id="0">--prefix=$DEPLOY</extra>
+          <extra id="1">--target=$CROSS</extra>
+        </configure>
+        <make id="0">
+          <priority>255</priority>
+          <rule id="0">
+            <name>all</name>
+          </rule>
+          <rule id="1">
+            <name>install-strip</name>
+            <thread>1</thread>
+            <post id="0">
+              <mode>code</mode>
+              <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+            </post>
+          </rule>
+        </make>
+      </step>
+    </build>
+  </project>
+</egg>

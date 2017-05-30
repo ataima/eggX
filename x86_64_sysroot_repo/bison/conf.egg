@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<egg>
+  <project>
+    <name>bison</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url>ftp://ftp.gnu.org/gnu/bison/</url>
+      <file>bison-3.0.tar.xz</file>
+    </remote>
+    <build>
+      <step id="1">
+        <silent>yes</silent>
+        <threads>8</threads>
+        <path>
+          <pre>
+            <set id="0">$USER_PATH</set>
+          </pre>
+        </path>
+        <configure>
+          <extra id="0">--prefix=$DEPLOY</extra>
+          <extra id="1">--target=$CROSS</extra>
+        </configure>
+        <make id="0">
+          <priority>40</priority>
+          <rule id="0">
+            <name>all</name>
+          </rule>
+          <rule id="1">
+            <name>install</name>
+            <thread>1</thread>
+          </rule>
+        </make>
+      </step>
+    </build>
+  </project>
+</egg>

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<egg>
+  <project>
+    <name>perl</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url>http://www.cpan.org/src/5.0</url>
+      <file>perl-5.24.1.tar.gz</file>
+    </remote>
+    <build>
+      <step id="1">
+        <silent>yes</silent>
+        <threads>8</threads>
+        <path>
+          <pre>
+            <set id="0">$USER_PATH</set>
+          </pre>
+        </path>
+        <configure>
+          <pre id="0">
+            <mode>code</mode>
+            <value>cd $PWD;rm -rf $BUILD; ln -s $SOURCE $BUILD;cd $BUILD</value>
+          </pre>
+          <extra id="0">-D prefix=$DEPLOY</extra>
+          <extra id="1">-D target=$CROSS</extra>
+          <extra id="2">-des</extra>
+        </configure>
+        <make id="0">
+          <priority>30</priority>
+          <rule id="0">
+            <name>all</name>
+          </rule>
+          <rule id="1">
+            <name>install</name>
+            <thread>1</thread>
+          </rule>
+        </make>
+      </step>
+    </build>
+  </project>
+</egg>

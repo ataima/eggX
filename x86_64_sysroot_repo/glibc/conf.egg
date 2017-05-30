@@ -71,7 +71,7 @@
         <threads>8</threads>
         <path>
           <pre>
-            <set id="0">$U_1_2_PATH</set>
+            <set id="0">$USER_PATH</set>
           </pre>
         </path>
         <configure>
@@ -85,8 +85,8 @@
           </pre>
           <extra id="0">--prefix=$DEPLOY/$CROSS</extra>
           <extra id="1"> --build=$NATIVE</extra>
-          <extra id="2">--target=$CROSS</extra>
-	  <extra id="3"> --host=$CROSS</extra>
+          <extra id="2"> --host=$CROSS</extra>
+          <extra id="3">--target=$CROSS</extra>
           <extra id="4">--with-headers=$DEPLOY/$CROSS/include</extra>
           <extra id="5"> --disable-multilib</extra>
           <extra id="6"> libc_cv_forced_unwind=yes</extra>

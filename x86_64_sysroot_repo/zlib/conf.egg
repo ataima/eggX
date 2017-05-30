@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<egg>
+  <project>
+    <name>zlib</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url>https://sourceforge.net/projects/libpng/files/zlib/1.2.11</url>
+      <file>zlib-1.2.11.tar.xz</file>
+    </remote>
+    <build>
+      <step id="1">
+        <silent>yes</silent>
+        <threads>8</threads>
+        <path>
+          <pre>
+            <set id="0">$USER_PATH</set>
+          </pre>
+        </path>
+        <configure>
+          <pre id="0">
+            <mode>code</mode>
+            <value>CC=$CROSS-gcc</value>
+          </pre>
+          <pre id="1">
+            <mode>code</mode>
+            <value>AR=ar</value>
+          </pre>
+          <extra id="0">--prefix=$DEPLOY</extra>
+          <extra id="1">--64</extra>
+        </configure>
+        <make id="0">
+          <priority>155</priority>
+          <rule id="0">
+            <name>all</name>
+          </rule>
+          <rule id="1">
+            <name>install</name>
+            <thread>1</thread>
+            <post id="0">
+              <mode>code</mode>
+              <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+            </post>
+          </rule>
+        </make>
+      </step>
+    </build>
+  </project>
+</egg>

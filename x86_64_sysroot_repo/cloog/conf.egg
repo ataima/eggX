@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<egg>
+  <project>
+    <name>cloog</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url>ftp://gcc.gnu.org/pub/gcc/infrastructure</url>
+      <file>cloog-0.18.1.tar.gz</file>
+    </remote>
+    <build>
+      <step id="0">
+      </step>
+    </build>    
+  </project>
+</egg>

@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<egg>
+  <project>
+    <name>binutils</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url>ftp://ftp.gnu.org/gnu/binutils</url>
+      <file>binutils-2.28.tar.bz2</file>
+    </remote>
+    <build>
+      <step id="0">
+        <silent>yes</silent>
+        <threads>8</threads>
+        <path>
+          <pre>
+            <set id="0">$USER_PATH</set>
+          </pre>
+        </path>
+        <configure>
+          <extra id="0">--prefix=$DEPLOY</extra>
+          <extra id="1">--target=$CROSS</extra>
+          <extra id="2">--disable-multilib</extra>
+        </configure>
+        <make id="0">
+          <priority>0</priority>
+          <rule id="0">
+            <name>all</name>
+          </rule>
+          <rule id="1">
+            <name>install</name>
+            <thread>1</thread>
+          </rule>
+        </make>
+      </step>
+      <step id="2">
+        <silent>no</silent>
+        <threads>8</threads>
+        <path>
+          <pre>
+            <set id="0">$U_1_2_PATH</set>
+          </pre>
+        </path>
+        <configure>
+          <extra id="0">--prefix=$DEPLOY</extra>
+          <extra id="1">--target=$CROSS</extra>
+          <extra id="2">--build=$NATIVE</extra>
+          <extra id="3">--host=$NATIVE</extra>
+          <extra id="4">--disable-multilib</extra>
+        </configure>
+        <make id="0">
+          <priority>1</priority>
+          <rule id="0">
+            <name>all</name>
+          </rule>
+          <rule id="1">
+            <name>install</name>
+            <thread>1</thread>
+          </rule>
+        </make>
+      </step>
+      <step id="3">
+        <silent>yes</silent>
+        <threads>8</threads>
+        <path>
+          <pre>
+            <set id="0">$U_1_2_PATH</set>
+          </pre>
+        </path>
+        <configure>
+          <extra id="0">--prefix=$DEPLOY</extra>
+          <extra id="1">--target=$CROSS</extra>
+          <extra id="2">--build=$NATIVE</extra>
+          <extra id="3">--host=$NATIVE</extra>
+          <extra id="4">--disable-multilib</extra>
+        </configure>
+        <make id="0">
+          <priority>1</priority>
+          <rule id="0">
+            <name>all</name>
+          </rule>
+          <rule id="1">
+            <name>install</name>
+            <thread>1</thread>
+          </rule>
+        </make>
+      </step>
+    </build>
+  </project>
+</egg>

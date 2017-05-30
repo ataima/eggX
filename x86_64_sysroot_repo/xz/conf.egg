@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<egg>
+  <project>
+    <name>xz</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url>https://tukaani.org/xz</url>
+      <file>xz-5.2.3.tar.xz</file>
+    </remote>
+    <build>
+      <step id="1">
+        <silent>yes</silent>
+        <threads>8</threads>
+        <path>
+          <pre>
+            <set id="0">$USER_PATH</set>
+          </pre>
+        </path>
+        <configure>
+          <extra id="0">--prefix=$DEPLOY</extra>
+          <extra id="1">--target=$CROSS</extra>
+        </configure>
+        <make id="0">
+          <priority>65</priority>
+          <rule id="0">
+            <name>all</name>
+          </rule>
+          <rule id="1">
+            <name>install</name>
+            <thread>1</thread>
+            <post id="0">
+              <mode>code</mode>
+              <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+            </post>
+          </rule>
+        </make>
+      </step>
+    </build>
+  </project>
+</egg>
