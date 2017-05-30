@@ -611,7 +611,7 @@ if [ $? -eq 1 ]; then
 			xml_count $1 "/egg/project/build/step[@id=\"$2\"]"
 			NUM=$?
 			if [ $NUM -ne 0 ]; then			
-			#optional				
+			#optional		
 			INDEX="$2%$1%$STEP_NAME"
 			BSEQ[$INDEX]="$INDEX"
 			fi
