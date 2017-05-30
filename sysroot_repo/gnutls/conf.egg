@@ -23,7 +23,7 @@
           <extra id="2">--with-trousers-lib=$DEPLOY</extra>
         </configure>
         <make id="0">
-          <priority>67</priority>
+          <priority>69</priority>
           <rule id="0">
             <name>all</name>
           </rule>
@@ -33,7 +33,7 @@
             <post id="0">
               <mode>code</mode>
               <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
-            </post>	    
+            </post>
           </rule>
         </make>
       </step>
