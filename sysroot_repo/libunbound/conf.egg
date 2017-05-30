@@ -24,7 +24,7 @@
           <extra id="3">--with-libexpat=$DEPLOY</extra>
         </configure>
         <make id="0">
-          <priority>64</priority>
+          <priority>285</priority>
           <rule id="0">
             <name>all</name>
           </rule>

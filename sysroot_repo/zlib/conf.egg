@@ -30,7 +30,7 @@
           <extra id="1">--64</extra>
         </configure>
         <make id="0">
-          <priority>35</priority>
+          <priority>155</priority>
           <rule id="0">
             <name>all</name>
           </rule>

@@ -22,7 +22,7 @@
           </pre>
         </path>
         <make id="0">
-          <priority>2</priority>
+          <priority>5</priority>
           <rule id="0">
             <name> mrproper</name>
             <thread> 1 </thread>
@@ -50,8 +50,7 @@
         <threads>8</threads>
         <path>
           <pre>
-            <set id="0">$DEPLOY/bin</set>
-            <add id="0">$DEPLOY/x86_64-pc-linux-gnu/bin</add>
+            <set id="0">$U_1_2_PATH</set>
           </pre>
         </path>
         <make id="0">
@@ -79,8 +78,7 @@
         <threads>8</threads>
         <path>
           <pre>
-            <set id="0">$DEPLOY/bin</set>
-            <add id="0">$DEPLOY/x86_64-pc-linux-gnu/bin</add>
+            <set id="0">$U_1_2_PATH</set>
           </pre>
         </path>
         <make id="0">

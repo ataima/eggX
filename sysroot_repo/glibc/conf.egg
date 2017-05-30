@@ -37,7 +37,7 @@
           <extra id="8">libc_cv_ctors_header=yes</extra>
         </configure>
         <make id="0">
-          <priority>4</priority>
+          <priority>15</priority>
           <rule id="0">
             <name>install-bootstrap-headers=yes install-headers</name>
             <thread>1 </thread>

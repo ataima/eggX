@@ -27,7 +27,7 @@
           <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>24</priority>
+          <priority>100</priority>
           <rule id="0">
             <name>all</name>
           </rule>
