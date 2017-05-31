@@ -20,6 +20,7 @@
           <priority>150</priority>
           <rule id="0">
             <name>all</name>
+            <thread>1</thread>
           </rule>
           <rule id="1">
             <name>install-strip</name>

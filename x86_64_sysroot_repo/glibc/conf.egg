@@ -92,7 +92,7 @@
           <extra id="6"> libc_cv_forced_unwind=yes</extra>
         </configure>
         <make id="0">
-          <priority>4</priority>
+          <priority>15</priority>
           <rule id="0">
             <name>install-bootstrap-headers=yes install-headers</name>
             <thread>1 </thread>
@@ -114,7 +114,7 @@
           </rule>
         </make>
         <make id="1">
-          <priority>6</priority>
+          <priority>25</priority>
           <rule id="0">
             <name/>
           </rule>

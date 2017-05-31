@@ -24,7 +24,7 @@
   </conf>
   <defaults>
     <step id="0">
-      <step_name>egg_sysroot</step_name>
+      <step_name>x86_64_sysroot</step_name>
       <info>First step to create a gcc native at last version to build all packets</info>
       <cc>gcc</cc>
       <cxx>g++</cxx>
@@ -47,7 +47,7 @@
       <cross>x86_64-pc-linux-gnu</cross>
     </step>
     <step id="1">
-      <step_name>egg_sysroot</step_name>
+      <step_name>x86_64_sysroot</step_name>
       <info>build with new  compiler some basics utilities</info>
       <cc>gcc</cc>
       <cxx>g++</cxx>
@@ -57,7 +57,7 @@
       <ar>ar</ar>
       <strip>strip</strip>
       <asflags/>
-      <cflags>-O3 -fPIC -m64</cflags>
+      <cflags>-O3 -fPIC -m64</cflags> 
       <cppflags>-O3   -fPIC -m64</cppflags>
       <cxxflags>-O3  -fPIC -m64</cxxflags>
       <ldflags/>
@@ -68,7 +68,7 @@
       <cross>x86_64-pc-linux-gnu</cross>
     </step>
     <step id="2">
-      <step_name>egg_sysroot</step_name>
+      <step_name>x86_64_sysroot</step_name>
       <info>build with new  compiler x86_64 the arm gcc compiler none eabi</info>
       <cc>gcc</cc>
       <cxx>g++</cxx>
@@ -78,9 +78,9 @@
       <ar>ar</ar>
       <strip>strip</strip>
       <asflags/>
-      <cflags>-O3</cflags>
-      <cppflags>-O3</cppflags>
-      <cxxflags>-O3</cxxflags>
+      <cflags>-O3 -fPIC -m64</cflags>
+      <cppflags>-O3 -fPIC -m64</cppflags>
+      <cxxflags>-O3 -fPIC -m64</cxxflags>
       <ldflags/>
       <libs/>
       <cpath/>
@@ -91,7 +91,7 @@
       <cross>arm-none-eabi</cross>
     </step>
     <step id="3">
-      <step_name>egg_sysroot</step_name>
+      <step_name>x86_64_sysroot</step_name>
       <info>build with new  compiler  x86_64 the arm gcc compiler gnu linux eabi</info>
       <cc>gcc</cc>
       <cxx>g++</cxx>
@@ -101,9 +101,9 @@
       <ar>ar</ar>
       <strip>strip</strip>
       <asflags/>
-      <cflags>-O3</cflags>
-      <cppflags>-O3</cppflags>
-      <cxxflags>-O3</cxxflags>
+      <cflags>-O3 -fPIC -m64</cflags>
+      <cppflags>-O3 -fPIC -m64</cppflags>
+      <cxxflags>-O3 -fPIC -m64</cxxflags>
       <ldflags/>
       <libs/>
       <cpath/>

@@ -165,7 +165,7 @@
           <extra id="5">--disable-multilib</extra>
         </configure>
         <make id="0">
-          <priority>3</priority>
+          <priority>10</priority>
           <rule id="0">
             <name>all-gcc</name>
           </rule>
@@ -234,7 +234,7 @@
           <extra id="3">--disable-multilib</extra>
         </configure>
         <make id="0">
-          <priority>3</priority>
+          <priority>10</priority>
           <rule id="0">
             <name>all-gcc</name>
           </rule>
@@ -248,7 +248,7 @@
           </rule>
         </make>
         <make id="1">
-          <priority>5</priority>
+          <priority>20</priority>
           <rule id="0">
             <name>all-target-libgcc</name>
           </rule>
@@ -258,7 +258,7 @@
           </rule>
         </make>
         <make id="2">
-          <priority>7</priority>
+          <priority>30</priority>
           <rule id="0">
             <pre id="0">
               <mode>code</mode>

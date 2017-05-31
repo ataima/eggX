@@ -54,7 +54,7 @@
           </pre>
         </path>
         <make id="0">
-          <priority>2</priority>
+          <priority>5</priority>
           <rule id="0">
             <name> mrproper</name>
             <thread> 1 </thread>
@@ -82,7 +82,7 @@
           </pre>
         </path>
         <make id="0">
-          <priority>2</priority>
+          <priority>5</priority>
           <rule id="0">
             <name> mrproper</name>
             <thread> 1 </thread>
