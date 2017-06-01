@@ -57,7 +57,7 @@
       <ar>ar</ar>
       <strip>strip</strip>
       <asflags/>
-      <cflags>-O3 -fPIC -m64</cflags> 
+      <cflags>-O3 -fPIC -m64</cflags>
       <cppflags>-O3   -fPIC -m64</cppflags>
       <cxxflags>-O3  -fPIC -m64</cxxflags>
       <ldflags/>

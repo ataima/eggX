@@ -8,5 +8,10 @@
 			<url>ftp://gcc.gnu.org/pub/gcc/infrastructure</url>
 			<file>isl-0.16.1.tar.bz2</file>
 		</remote>			
-	</project>
+
+	 <build>
+      <step id="0">
+          </step>
+    </build>	
+    	</project>
 </egg>

@@ -8,5 +8,10 @@
 			<url>ftp://gcc.gnu.org/pub/gcc/infrastructure</url>
 			<file>cloog-0.18.1.tar.gz</file>
 		</remote>			
-	</project>
+
+	 <build>
+      <step id="0">
+          </step>
+    </build>
+    	</project>
 </egg>

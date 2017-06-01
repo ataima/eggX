@@ -1,35 +1,29 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>binutils</name>
+    <name>vim</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>ftp://ftp.gnu.org/gnu/binutils</url>
-      <file>binutils-2.28.tar.bz2</file>
+      <url>ftp://ftp.vim.org/pub/vim/unix</url>
+      <file>vim-7.4.tar.bz2</file>
     </remote>
     <build>
       <step id="0">
-        <name>arm-linux-tools</name>
         <silent>yes</silent>
         <threads>8</threads>
-        <path>
-          <pre>
-            <set> $USER_PATH:$DEPLOY/bin</set>
-          </pre>
-        </path>
         <configure>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
-          <extra id="2">--disable-multilib</extra>
         </configure>
         <make id="0">
-          <priority>1</priority>
+          <priority>1000</priority>
           <rule id="0">
             <name>all</name>
+            <thread>1</thread>
           </rule>
           <rule id="1">
-            <name>install</name>
+            <name>install-strip</name>
             <thread>1</thread>
           </rule>
         </make>

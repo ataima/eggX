@@ -105,9 +105,9 @@
       <ar>ar</ar>
       <strip>strip</strip>
       <asflags/>
-      <cflags>-O3</cflags>
-      <cppflags>-O3</cppflags>
-      <cxxflags>-O3</cxxflags>
+      <cflags>-O3 -fPIC -m64</cflags>
+      <cppflags>-O3 -fPIC -m64</cppflags>
+      <cxxflags>-O3 -fPIC -m64</cxxflags>
       <ldflags/>
       <libs/>
       <cpath/>

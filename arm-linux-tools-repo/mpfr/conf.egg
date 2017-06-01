@@ -8,5 +8,10 @@
 			<url>http://mpfr.loria.fr/mpfr-current</url>
 			<file>mpfr-3.1.5.tar.xz</file>
 		</remote>	
-	</project>
+
+	 <build>
+      <step id="0">
+          </step>
+    </build>	
+    	</project>
 </egg>

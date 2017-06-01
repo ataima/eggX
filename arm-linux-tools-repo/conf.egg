@@ -8,7 +8,7 @@
     <images>$ROOT/images</images>
     <build>$ROOT/build</build>
     <editor>scite</editor>
-    <start_path>$ROOT/images/egg_sysroot/bin:/bin:/usr/bin</start_path>
+    <start_path>$ROOT/images/egg_sysroot/bin;</start_path>
     <user_env id="0">
       <name>USER_PATH</name>
       <value>$ROOT/images/egg_sysroot/bin:$ROOT/images/egg_sysroot/x86_64-pc-linux-gnu/bin</value>
@@ -24,15 +24,15 @@
   </conf>
   <defaults>
     <step id="0">
-      <step_name>egg_sysroot</step_name>
+      <step_name>arm-linux-gnueabi</step_name>
       <info>build with new  compiler  x86_64 the arm gcc compiler gnu linux eabi</info>
-      <cc></cc>
-      <cxx></cxx>
-      <as></as>
-      <ld></ld>
-      <nm></nm>
-      <ar></ar>
-      <strip></strip>
+      <cc/>
+      <cxx/>
+      <as/>
+      <ld/>
+      <nm/>
+      <ar/>
+      <strip/>
       <asflags/>
       <cflags>-O3 -fPIC -m64</cflags>
       <cppflags>-O3 -fPIC -m64</cppflags>

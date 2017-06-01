@@ -8,5 +8,10 @@
 			<url>ftp://ftp.gnu.org/gnu/mpc</url>
 			<file>mpc-1.0.3.tar.gz</file>		
 		</remote>		
-	</project>
+
+	 <build>
+      <step id="0">
+          </step>
+    </build>	
+    	</project>
 </egg>
