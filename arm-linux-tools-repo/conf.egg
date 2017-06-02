@@ -24,7 +24,7 @@
   </conf>
   <defaults>
     <step id="0">
-      <step_name>arm-linux-gnueabi</step_name>
+      <step_name>egg_sysroot</step_name>
       <info>build with new  compiler  x86_64 the arm gcc compiler gnu linux eabi</info>
       <cc/>
       <cxx/>
@@ -34,9 +34,9 @@
       <ar/>
       <strip/>
       <asflags/>
-      <cflags>-O3 -fPIC -m64</cflags>
-      <cppflags>-O3 -fPIC -m64</cppflags>
-      <cxxflags>-O3 -fPIC -m64</cxxflags>
+      <cflags>-O3 -fPIC </cflags>
+      <cppflags>-O3 -fPIC </cppflags>
+      <cxxflags>-O3 -fPIC </cxxflags>
       <ldflags/>
       <libs/>
       <cpath/>

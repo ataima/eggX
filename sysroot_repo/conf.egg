@@ -74,17 +74,17 @@
     <step id="2">
       <step_name>egg_sysroot</step_name>
       <info>build with new  compiler x86_64 the arm gcc compiler none eabi</info>
-      <cc>gcc</cc>
-      <cxx>g++</cxx>
-      <as>as</as>
-      <ld>ld</ld>
-      <nm>nm</nm>
-      <ar>ar</ar>
-      <strip>strip</strip>
+      <cc></cc>
+      <cxx></cxx>
+      <as></as>
+      <ld></ld>
+      <nm></nm>
+      <ar></ar>
+      <strip></strip>
       <asflags/>
-      <cflags>-O3</cflags>
-      <cppflags>-O3</cppflags>
-      <cxxflags>-O3</cxxflags>
+      <cflags>-O3 -fPIC -m64</cflags>
+      <cppflags>-O3 -fPIC -m64</cppflags>
+      <cxxflags>-O3 -fPIC -m64</cxxflags>
       <ldflags/>
       <libs/>
       <cpath/>
@@ -97,13 +97,13 @@
     <step id="3">
       <step_name>egg_sysroot</step_name>
       <info>build with new  compiler  x86_64 the arm gcc compiler gnu linux eabi</info>
-      <cc>gcc</cc>
-      <cxx>g++</cxx>
-      <as>as</as>
-      <ld>ld</ld>
-      <nm>nm</nm>
-      <ar>ar</ar>
-      <strip>strip</strip>
+      <cc/>
+      <cxx/>
+      <as/>
+      <ld/>
+      <nm/>
+      <ar/>
+      <strip/>
       <asflags/>
       <cflags>-O3 -fPIC -m64</cflags>
       <cppflags>-O3 -fPIC -m64</cppflags>

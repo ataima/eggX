@@ -11,7 +11,7 @@
     <build>
       <step id="0">
         <name>arm-linux-tools</name>
-        <silent>yes</silent>
+        <silent>no</silent>
         <threads>8</threads>
         <path>
           <pre>
@@ -26,14 +26,6 @@
           <pre id="1">
             <mode>code</mode>
             <value>mkdir -p $DEPLOY/$CROSS/include</value>
-          </pre>
-          <pre id="2">
-            <mode>code</mode>
-            <value>export CFLAGS="-O3 -fPIC"</value>
-          </pre>
-          <pre id="3">
-            <mode>code</mode>
-            <value> export CPPFLAGS="-O3 -fPIC"</value>
           </pre>
           <extra id="0">--prefix=$DEPLOY/$CROSS</extra>
           <extra id="1"> --build=$NATIVE</extra>

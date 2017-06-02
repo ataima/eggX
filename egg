@@ -669,18 +669,17 @@ if [ $? -eq 1 ]; then
 					fi					
 					ID=0
 					while [ $ID -lt $MAX ]; do
-						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/remove[@id=\"$ID\"]")
+						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/set")
 						if [ "$TPATH" != "" ]; then
-							remove_path $STEP_NAME "$TPATH"
+							set_path $STEP_NAME "$TPATH"
 						fi
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/add[@id=\"$ID\"]")
 						if [ "$TPATH" != "" ]; then
 							add_path $STEP_NAME "$TPATH"
 						fi
-						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/set")
+						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/pre/remove[@id=\"$ID\"]")
 						if [ "$TPATH" != "" ]; then
-							set_path $STEP_NAME "$TPATH"
-							break
+							remove_path $STEP_NAME "$TPATH"
 						fi
 						ID=$((ID+1))
 					done 
@@ -734,18 +733,17 @@ if [ $? -eq 1 ]; then
 					fi					
 					ID=0
 					while [ $ID -lt $MAX ]; do
-						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/post/remove[@id=\"$ID\"]")
-						if [  "$TPATH"  !=  ""  ]; then
-							remove_path $STEP_NAME $TPATH
+						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/post/set")
+						if [ "$TPATH" != "" ]; then
+							set_path $STEP_NAME $TPATH
 						fi
 						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/post/add[@id=\"$ID\"]")
 						if [  "$TPATH"  !=  ""  ]; then
 							add_path $STEP_NAME $TPATH
 						fi
-						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/post/set")
-						if [ "$TPATH" != "" ]; then
-							set_path $STEP_NAME $TPATH
-							break
+						TPATH=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/path/post/remove[@id=\"$ID\"]")
+						if [  "$TPATH"  !=  ""  ]; then
+							remove_path $STEP_NAME $TPATH
 						fi
 						ID=$((ID+1))
 					done 
@@ -1897,6 +1895,7 @@ if [ "$EXTSI" != "YES" ]; then
 	echo "set -x ">> $C_FILE
 fi
 if [ -e $SRC/configure ]; then
+	rm -rf  "$C_BUILD/build"
 	mkdir -p "$C_BUILD/build"
 	echo -n "$SRC/configure ">> $C_FILE
 	add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
