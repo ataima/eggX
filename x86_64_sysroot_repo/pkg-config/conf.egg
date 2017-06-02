@@ -18,7 +18,7 @@
           <extra id="2">--with-internal-glib</extra>
         </configure>
         <make id="0">
-          <priority>110</priority>
+          <priority>120</priority>
           <rule id="0">
             <name>all</name>
           </rule>

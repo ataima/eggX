@@ -83,7 +83,7 @@
             <mode>code</mode>
             <value>mkdir -p $DEPLOY/$CROSS/include</value>
           </pre>
-	            <pre id="2">
+          <pre id="2">
             <mode>code</mode>
             <value>export CFLAGS="-O3 -fPIC"</value>
           </pre>

@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>expat</name>
+    <name>unzip</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>  https://sourceforge.net/projects/expat/files/expat/2.2.0</url>
-      <file>  expat-2.2.0.tar.bz2</file>
+      <url>http://downloads.sourceforge.net/infozip</url>
+      <file>unzip60.tar.gz</file>
     </remote>
     <build>
       <step id="1">
@@ -17,21 +17,21 @@
             <set id="0">$USER_PATH</set>
           </pre>
         </path>
-        <configure>
-          <extra id="0">--prefix=$DEPLOY</extra>
-          <extra id="1">--target=$CROSS</extra>
-        </configure>
         <make id="0">
-          <priority>240</priority>
+          <priority>150</priority>
           <rule id="0">
-            <name>all</name>
+            <pre id="0">
+              <mode>code</mode>
+              <value>rm -rf $BUILD ; ln -s $SOURCE $BUILD</value>
+            </pre>
+            <name>-f unix/Makefile generic</name>
           </rule>
           <rule id="1">
-            <name>install</name>
+            <name>prefix=$DEPLOY MANDIR=$DEPLOY/share/man/man1  -f unix/Makefile install</name>
             <thread>1</thread>
             <post id="0">
               <mode>code</mode>
-              <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+              <value>strip $DEPLOY/bin/unzip</value>
             </post>
           </rule>
         </make>

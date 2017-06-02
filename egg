@@ -785,11 +785,42 @@ if [ "$RES" ==  "" ]; then
 		CSOURCE=$(ls -d $CSOURCE/*/)
 	fi
 	for VV in $TEST ; do
-	if [ -e $CSOURCE$VV ]; then
-		RES=$CSOURCE
-		break;
-	fi	
+		if [ -e $CSOURCE$VV ]; then
+			RES=$CSOURCE
+			break;
+		fi	
 	done
+	if [ "$RES" == "" ]; then 
+		cd $CSOURCE
+		# chech unix  to configure
+		VV=$(ls -d $CSOURCE/*/ | tr '[:lower:]' '[:upper:]' | grep UNIX ) 
+		if [ "$VV" ]; then
+			for VV in $TEST ; do
+			if [ -e $CSOURCE/unix/$VV ]; then
+				RES=$CSOURCE
+				break;
+			fi	
+			if [ -e $CSOURCE/Unix/$VV ]; then
+				RES=$CSOURCE
+				break;
+			fi	
+			done	
+		fi	
+		# chech linux   to configure
+		VV=$(ls -d $CSOURCE/*/ | tr '[:lower:]' '[:upper:]' | grep LINUX ) 
+		if [ "$VV" ]; then
+			for VV in $TEST ; do
+			if [ -e $CSOURCE/linux/$VV ]; then
+				RES=$CSOURCE
+				break;
+			fi	
+			if [ -e $CSOURCE/Linux/$VV ]; then
+				RES=$CSOURCE
+				break;
+			fi	
+			done	
+		fi		
+	fi
 fi
 echo $RES
 }
@@ -1920,7 +1951,7 @@ else
 					ln -s  "$SRC" "$C_BUILD/build"
 					echo  "#no configure is needed .... ">> $C_FILE
 			else
-				error_c "Configure script or Makefile missing" "$SRC - project : $1"
+				warning_c "Configure / Makefile missing" "Addjust path in the conf.egg"
 			fi							
 		fi		
 	fi	
@@ -4103,14 +4134,11 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 while [ $RE_NUM -lt $MAX_STEP ]; do 
-		echo "--->"$RE_NUM
 		source_download	 $RE_NUM
 		config_all_step	 $RE_NUM
 		build_all_packet	 $RE_NUM
 		RE_NUM=$((RE_NUM+1))
 done	
-	rm -rf $SOURCES
-	rm -rf $BUILD
 }
 
 #$1 staus 0,1,2,...?
@@ -4553,6 +4581,7 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
+local PWDM=""
 local RES=""
 local NUMM=0
 local IDM=0
@@ -4605,18 +4634,33 @@ read -r
 RES=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
 if [ "$RES" == "S" ]; then 
 	IDM=0
+	PWDM=$(pwd)
 	while [  $IDM -lt $NUMM ]; do
-		cd "$OROOT"
+		cd "$PWDM"
+		rm -rf $SOURCES
+		sync
+		rm -rf $REPO
+		sync
+		rm -rf $BUILD
+		sync
 		FILE=$(xml_multi_repo_value "$1" "/multi/repo[@id=\"$IDM\"]")
 		rm -f $OROOT/repo
+		sync
 		ln -s $FILE $OROOT/repo
+		sync
 		main redoall		
 		if [ $? -ne 0 ] ; then 
 			error_c "multi step " " $FILE FAIL !!";
 		fi		
 		IDM=$((IDM+1))	
 	done
-	cd "$OROOT"
+	cd "$PWDM"
+	rm -rf $SOURCES
+	sync
+	rm -rf $REPO
+	sync
+	rm -rf $BUILD
+	sync
 	return 0
 else
 	return 1

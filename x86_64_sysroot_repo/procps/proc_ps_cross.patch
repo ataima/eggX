@@ -1,0 +1,77 @@
+--- Makefile	2017-06-02 18:37:34.510698471 +0200
++++ /home/angelo/eggX/Makefile	2017-06-02 18:34:16.953616911 +0200
+@@ -24,24 +24,24 @@
+ ############ vars
+ 
+ # so you can disable them or choose alternates
+-ldconfig := ldconfig
++ldconfig := 
+ ln_f     := ln -f
+ ln_sf    := ln -sf
+-install  := install -D --owner 0 --group 0
++install  := install 
+ 
+ # Lame x86-64 /lib64 and /usr/lib64 abomination:
+ lib64    := lib$(shell [ -d /lib64 ] && echo 64)
+ 
+-usr/bin                  := $(DESTDIR)/usr/bin/
+-bin                      := $(DESTDIR)/bin/
+-sbin                     := $(DESTDIR)/sbin/
+-usr/proc/bin             := $(DESTDIR)/usr/bin/
+-man1                     := $(DESTDIR)/usr/share/man/man1/
+-man5                     := $(DESTDIR)/usr/share/man/man5/
+-man8                     := $(DESTDIR)/usr/share/man/man8/
+-lib                      := $(DESTDIR)/$(lib64)/
+-usr/lib                  := $(DESTDIR)/usr/$(lib64)/
+-usr/include              := $(DESTDIR)/usr/include/
++usr/bin                  := $(DEPLOY)/bin/
++bin                      := $(DEPLOY)/bin/
++sbin                     := $(DEPLOY)/sbin/
++usr/proc/bin             := $(DEPLOY)/bin/
++man1                     := $(DEPLOY)/share/man/man1/
++man5                     := $(DEPLOY)/share/man/man5/
++man8                     := $(DEPLOY)/share/man/man8/
++lib                      := $(DEPLOY)/$(lib64)/
++usr/lib                  := $(DEPLOY)/$(lib64)/
++usr/include              := $(DEPLOY)/include/
+ 
+ #SKIP     := $(bin)kill $(man1)kill.1
+ 
+@@ -82,7 +82,7 @@
+ 
+ # Preprocessor flags.
+ PKG_CPPFLAGS := -D_GNU_SOURCE -I proc
+-CPPFLAGS     := -I/usr/include/ncurses
++CPPFLAGS     := -I$(DEPLOY)/include/ncurses
+ ALL_CPPFLAGS := $(PKG_CPPFLAGS) $(CPPFLAGS)
+ 
+ # Left out -Wconversion due to noise in glibc headers.
+@@ -106,7 +106,7 @@
+ ALL_CFLAGS   := $(PKG_CFLAGS) $(CFLAGS)
+ 
+ PKG_LDFLAGS  := -Wl,-warn-common
+-LDFLAGS      :=
++LDFLAGS      := -L$(DEPLOY)/lib
+ ALL_LDFLAGS  := $(PKG_LDFLAGS) $(LDFLAGS)
+ 
+ ############ Add some extra flags if gcc allows
+@@ -174,7 +174,9 @@
+ # want this rule first, use := on ALL, and ALL not filled in yet
+ all: do_all
+ 
+--include */module.mk
++-include proc/module.mk
++-include ps/module.mk
++
+ 
+ do_all:    $(ALL)
+ 
+@@ -227,7 +229,7 @@
+ $(MANFILES) : all
+ 	$(install) --mode a=r $(notdir $@) $@
+ 
+-install: $(filter-out $(SKIP) $(addprefix $(DESTDIR),$(SKIP)),$(INSTALL))
++install: $(filter-out $(SKIP) $(addprefix $(DEPLOY),$(SKIP)),$(INSTALL))
+ 	cd $(usr/bin) && $(ln_f) skill snice
+ 	cd $(usr/proc/bin) && $(ln_f) pgrep pkill
+ 

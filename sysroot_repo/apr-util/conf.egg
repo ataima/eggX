@@ -23,7 +23,7 @@
           <extra id="2">--with-apr=$DEPLOY/bin</extra>
         </configure>
         <make id="0">
-          <priority>230</priority>
+          <priority>235</priority>
           <rule id="0">
             <name>all</name>
           </rule>
