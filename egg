@@ -4104,12 +4104,9 @@ fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 while [ $RE_NUM -lt $MAX_STEP ]; do 
 		echo "--->"$RE_NUM
-		bash ./egg source	 $RE_NUM
-		[ $? -ne 0 ] && break
-		bash ./egg gen	 $RE_NUM
-		[ $? -ne 0 ] && break
-		bash ./egg do	 $RE_NUM
-		[ $? -ne 0 ] && break
+		source_download	 $RE_NUM
+		config_all_step	 $RE_NUM
+		build_all_packet	 $RE_NUM
 		RE_NUM=$((RE_NUM+1))
 done	
 }
@@ -5346,11 +5343,7 @@ legal
 if [ $# -eq 0 ] ; then		
 	iterative
 else
-	if [ $# -eq 2 ] && [ "$1" == "-i" ]; then
-		iterative
-	else
-		main "$@"
-	fi	
+	main "$@"
 fi
 EGG_RES=$?
 EGG_STOP_TIME=$(date  +%s)

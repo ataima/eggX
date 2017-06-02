@@ -96,10 +96,6 @@
             <mode>code</mode>
             <value>export CPPFLAGS="-O3 -fPIC"</value>
           </pre>
-          <pre id="5">
-            <mode>code</mode>
-            <value>echo " $DEPLOY :$CROSS : $ARCH : $PATH"</value>
-          </pre>
           <extra id="0">--prefix=$DEPLOY/$CROSS</extra>
           <extra id="1"> --build=$NATIVE</extra>
           <extra id="2">--target=$CROSS</extra>
