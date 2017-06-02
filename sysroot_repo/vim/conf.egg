@@ -25,7 +25,7 @@
           </post>
         </configure>
         <make id="0">
-          <priority>325</priority>
+          <priority>330</priority>
           <rule id="0">
             <name>all</name>
             <thread>1</thread>

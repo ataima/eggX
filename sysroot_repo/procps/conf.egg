@@ -8,7 +8,7 @@
       <url>http://procps.sourceforge.net </url>
       <file> procps-3.2.8.tar.gz </file>
     </remote>
-        <patch id="0">
+    <patch id="0">
       <method>file</method>
       <url>$REPO/procps</url>
       <file> proc_ps_cross.patch</file>

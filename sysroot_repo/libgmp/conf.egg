@@ -22,7 +22,7 @@
           <extra id="1">--build=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>250</priority>
+          <priority>255</priority>
           <rule id="0">
             <name>all</name>
           </rule>
