@@ -67,7 +67,7 @@
         </make>
       </step>
       <step id="3">
-        <silent>no</silent>
+        <silent>yes</silent>
         <threads>8</threads>
         <path>
           <pre>

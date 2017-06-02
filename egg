@@ -460,7 +460,7 @@ declare -i MAX_STEP=0
 
 
 function forcestop(){
-	error_c "User Interrupt" " warning work not complete! "
+	erro_c "User Interrupt" " warning work not complete! "
 }
 
 trap "forcestop" SIGHUP SIGINT SIGTERM
@@ -1133,8 +1133,8 @@ echo "" >> "$3"
 echo "ex_input_param \$@">> "$3"
 echo "" >> "$3"
 echo "cd \$BUILD" >> "$3"
-echo "" >> "$4"
-echo "" >> "$4"
+echo "" >> "$3"
+echo "" >> "$3"
 }
 
 
@@ -3241,124 +3241,6 @@ function print_patch_msg(){
 print_ita  "PATCH: $1"  "$2"  "$3"
 } 
 
-#none
-function build_all(){
-if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
-	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
-	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
-	set -x ; trap read debug 
-fi
-[ $STEP_STEP -eq 1 ] && trap read debug
-local ID=0 
-local V=""
-local PRI=""
-local NAME=""
-local PRJ=""
-while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority "$ID" "$ALL_PACKETS"
-	for V in $SORTREQ; do
-		V=$(echo $V  | sed -e 's/%/   /g')
-		PRI=$(echo $V | awk '{print $1}')
-		NAME=$(echo $V | awk '{print $2}')"_$ID"
-		PRJ=$(echo $V | awk '{print $3}')
-		if [ -d "$BUILD/$PRJ/$NAME" ]; then
-			print_conf_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$PRJ/$NAME"					
-			"$BUILD/$PRJ/$NAME/bootstrap.sh"
-			if [ $? -ne 0 ] ; then
-				error_c "configure step" " FAIL !!";
-			fi
-			print_build_msg "$PRI" "$NAME" "$PRJ"
-			"$BUILD/$PRJ/$NAME/build_$PRI.sh"
-			if [ $? -ne 0 ] ; then
-				error_c "build step" " FAIL !!";
-			fi			
-		fi	
-	done
-	ID=$((ID+1))
-done
-
-}
-
-#none
-function download_all(){
-if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
-	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
-	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
-	set -x ; trap read debug 
-fi
-[ $STEP_STEP -eq 1 ] && trap read debug
-#set -x; trap read debug
-local ID=0 
-local V=""
-local PRI=""
-local NAME=""
-local PRJ=""
-local LPWD=$(pwd)
-while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_download "$ID" "$ALL_PACKETS"
-	for V in $SORTREQ; do
-		V=$(echo $V  | sed -e 's/%/   /g')
-		PRI=$(echo $V | awk '{print $1}')
-		NAME=$(echo $V | awk '{print $2}')
-		PRJ=$(echo $V | awk '{print $3}')		
-		V="$NAME""_$ID"
-		if [ -d "$BUILD/$PRJ/$V" ]; then
-			print_download_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$PRJ/$V"
-			"$BUILD/$PRJ/$V/download.sh"
-			if [ $? -ne 0 ] ; then
-				error_c "download step" " FAIL !!";
-			fi	
-		fi
-	done
-	ID=$((ID+1))
-done	
-cd "$LPWD"
-
-}
-
-#none
-function patch_all(){
-if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
-	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
-	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
-	set -x ; trap read debug 
-fi
-[ $STEP_STEP -eq 1 ] && trap read debug
-#set -x; trap read debug
-local ID=0 
-local V=""
-local PRI=""
-local NAME=""
-local PRJ=""
-local PPWD=$(pwd)
-while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_download "$ID" "$ALL_PACKETS"
-	for V in $SORTREQ; do
-		V=$(echo $V  | sed -e 's/%/   /g')
-		PRI=$(echo $V | awk '{print $1}')
-		NAME=$(echo $V | awk '{print $2}')
-		PRJ=$(echo $V | awk '{print $3}')		
-		V="$NAME""_$ID"
-		if [ -d "$BUILD/$PRJ/$V" ]; then
-			print_patch_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$PRJ/$V"
-			"$BUILD/$PRJ/$V/patch.sh"
-			if [ $? -ne 0 ] ; then
-				error_c "patch step" " FAIL !!";
-			fi	
-			ALL[$NAME]="$NAME"
-		fi
-	done
-	ID=$((ID+1))
-done	
-cd "$PPWD"
-}
-
 
 #none
 function packetize_all(){
@@ -3429,107 +3311,7 @@ fi
 print_del_ita
 }
 
-#none
-function compile_all(){
-if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
-	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
-	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
-	set -x ; trap read debug 
-fi
-[ $STEP_STEP -eq 1 ] && trap read debug
-local ID=0 
-local V=""
-local PRI=""
-local NAME=""
-local PRJ=""
-while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority "$ID" "$ALL_PACKETS"
-	for V in $SORTREQ; do
-		V=$(echo $V  | sed -e 's/%/   /g')
-		PRI=$(echo $V | awk '{print $1}')
-		NAME=$(echo $V | awk '{print $2}')"_$ID"
-		PRJ=$(echo $V | awk '{print $3}')
-		if [ -d "$BUILD/$PRJ/$NAME" ]; then
-			print_build_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$PRJ/$NAME"
-			"$BUILD/$PRJ/$NAME/build_$PRI.sh"
-			if [ $? -ne 0 ] ; then
-				error_c "build step" " FAIL !!";
-			fi
-		fi
-	done
-	ID=$((ID+1))
-done	
-}
 
-#none
-function clean_all(){
-if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
-	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
-	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
-	set -x ; trap read debug 
-fi
-[ $STEP_STEP -eq 1 ] && trap read debug
-local ID=0 
-local V=""
-local PRI=""
-local NAME=""
-local PRJ=""
-while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority "$ID" "$ALL_PACKETS"
-	for V in $SORTREQ; do
-		V=$(echo $V  | sed -e 's/%/   /g')
-		PRI=$(echo $V | awk '{print $1}')
-		NAME=$(echo $V | awk '{print $2}')"_$ID"
-		PRJ=$(echo $V | awk '{print $3}')
-		if [ -d "$BUILD/$PRJ/$NAME" ]; then
-			print_clean_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$PRJ/$NAME"
-			"$BUILD/$PRJ/$NAME/clean.sh"
-			if [ $? -ne 0 ] ; then
-				error_c "clean step" " FAIL !!";
-			fi
-		fi
-	done
-	ID=$((ID+1))
-done
-}
-
-#none
-function distclean_all(){
-if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
-	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
-	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
-	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
-	set -x ; trap read debug 
-fi
-[ $STEP_STEP -eq 1 ] && trap read debug
-local ID=0 
-local V=""
-local PRI=""
-local NAME=""
-local PRJ=""
-while [ $ID -lt $MAX_STEP ] ; do
-	prepare_seq_priority "$ID" "$ALL_PACKETS"
-	for V in $SORTREQ; do
-		V=$(echo $V  | sed -e 's/%/   /g')
-		PRI=$(echo $V | awk '{print $1}')
-		NAME=$(echo $V | awk '{print $2}')"_$ID"
-		PRJ=$(echo $V | awk '{print $3}')
-		if [ -d "$BUILD/$PRJ/$NAME" ]; then
-			print_clean_msg "$PRI" "$NAME" "$PRJ"
-			cd "$BUILD/$PRJ/$NAME"
-			"$BUILD/$PRJ/$NAME/distclean.sh"
-			if [ $? -ne 0 ] ; then
-				error_c "distclean  step" " FAIL !!";
-			fi
-		fi
-	done
-	ID=$((ID+1))
-done
-}
 
 #$1 function to execute
 #$2 ID step build
@@ -3660,6 +3442,7 @@ fi
 if [ $? -ne 0 ] ; then
 	error_c "build step" " FAIL !!";
 fi
+cd $OROOT
 }
 
 #$@ from argv build.sh
@@ -3695,6 +3478,7 @@ cd "$PATH"
 if [ $? -ne 0 ] ; then
 	error_c "download step" " FAIL !!";
 fi
+cd $OROOT
 }
 
 #$@ from argv build.sh
@@ -3729,6 +3513,7 @@ cd "$PATH"
 if [ $? -ne 0 ] ; then
 	error_c "patch step" " FAIL !!";
 fi
+cd $OROOT
 }
 
 #$@ from argv build.sh
@@ -3762,6 +3547,7 @@ cd "$PATH"
 if [ $? -ne 0 ] ; then
 	error_c "build step" " FAIL !!";
 fi
+cd $OROOT
 }
 
 #$@ from argv build.sh
@@ -3796,6 +3582,7 @@ cd "$PATH"
 if [ $? -ne 0 ] ; then
 	error_c "clean step" " FAIL !!";
 fi
+cd $OROOT
 }
 
 #$@ from argv build.sh
@@ -3829,6 +3616,7 @@ cd "$PATH"
 if [ $? -ne 0 ] ; then
 	error_c "distclean step" " FAIL !!";
 fi
+cd $OROOT
 }
 
 #$@ from argv build.sh
@@ -3854,10 +3642,17 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-if [ "$1" == "" ]; then
-	build_all
+if [ $# -eq 0 ]; then
+	error_c "Missing Param " "insert step number please"
 else
-	build_single $@
+	isNumber $1
+	if [ $? -eq 0 ]; then	
+		local -i CONF_NUM=$1
+		shift
+		build_single $CONF_NUM $@
+	else
+		error_c " Missing step number " "usage ./egg configure 0<-- step "
+	fi
 fi
 print_del_ita
 }
@@ -3871,10 +3666,17 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-if [ "$1" == "" ]; then
-	download_all
+if [ $# -eq 0 ]; then
+	error_c "Missing Param " "insert step number please"
 else
-	download_single $@
+	isNumber $1
+	if [ $? -eq 0 ]; then	
+		local -i CONF_NUM=$1
+		shift
+		download_single $CONF_NUM $@
+	else
+		error_c " Missing step number " "usage ./egg configure 0<-- step "
+	fi
 fi
 print_del_ita
 }
@@ -3888,10 +3690,17 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-if [ "$1" == "" ]; then
-	patch_all
+if [ $# -eq 0 ]; then
+	error_c "Missing Param " "insert step number please"
 else
-	patch_single $@
+	isNumber $1
+	if [ $? -eq 0 ]; then	
+		local -i CONF_NUM=$1
+		shift
+		patch_single $CONF_NUM $@
+	else
+		error_c " Missing step number " "usage ./egg configure 0<-- step "
+	fi
 fi
 print_del_ita
 }
@@ -3905,10 +3714,17 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-if [ "$1" == "" ]; then
-	compile_all
+if [ $# -eq 0 ]; then
+	error_c "Missing Param " "insert step number please"
 else
-	compile_single $@
+	isNumber $1
+	if [ $? -eq 0 ]; then	
+		local -i CONF_NUM=$1
+		shift
+		compile_single $CONF_NUM $@
+	else
+		error_c " Missing step number " "usage ./egg configure 0<-- step "
+	fi
 fi
 print_del_ita
 }
@@ -3922,10 +3738,17 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-if [ "$1" == "" ]; then
-	clean_all
+if [ $# -eq 0 ]; then
+	error_c "Missing Param " "insert step number please"
 else
-	clean_single $@
+	isNumber $1
+	if [ $? -eq 0 ]; then	
+		local -i CONF_NUM=$1
+		shift
+		clean_signle $CONF_NUM $@
+	else
+		error_c " Missing step number " "usage ./egg configure 0<-- step "
+	fi
 fi
 print_del_ita
 }
@@ -3939,11 +3762,18 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-if [ "$1" == "" ]; then
-	distclean_all
+if [ $# -eq 0 ]; then
+	error_c "Missing Param " "insert step number please"
 else
-	distclean_single $@
-fi
+	isNumber $1
+	if [ $? -eq 0 ]; then	
+		local -i CONF_NUM=$1
+		shift
+		distclean_single $CONF_NUM $@
+	else
+		error_c " Missing step number " "usage ./egg configure 0<-- step "
+	fi
+fi	
 print_del_ita
 }
 
@@ -3960,17 +3790,11 @@ fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local -i CONF_NUM=0
 if [ $# -eq 0 ]; then
-	while [ $CONF_NUM -lt $MAX_STEP ]; do 
-		configure_all_packet  $CONF_NUM $@
-		if [ $? -ne 0 ]; then 
-			error_c "configure step $CONF_NUM " " FAIL !!";
-		fi
-		CONF_NUM=$((CONF_NUM+1))
-	done
+	error_c "Missing Param " "insert step number please"
 else
 	isNumber $1
 	if [ $? -eq 0 ]; then	
-		CONF_NUM=$1
+		local -i CONF_NUM=$1
 		shift
 		configure_all_packet $CONF_NUM $@
 		if [ $? -ne 0 ]; then 
@@ -3994,13 +3818,7 @@ fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local -i DW_NUM=0
 if [ $# -eq 0 ]; then
-	while [ $DW_NUM -lt $MAX_STEP ]; do 
-		conf_download_all  $DW_NUM $@
-		if [ $? -ne 0 ]; then 
-			error_c "configure download step $DW_NUM " " FAIL !!";
-		fi
-		DW_NUM=$((DW_NUM+1))
-	done
+	error_c "Missing Param " "insert step number please"
 else
 	isNumber $1
 	if [ $? -eq 0 ]; then	
@@ -4028,13 +3846,7 @@ fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local -i DW_NUM=0
 if [ $# -eq 0 ]; then
-	while [ $DW_NUM -lt $MAX_STEP ]; do 
-		conf_patch_all  $DW_NUM $@
-		if [ $? -ne 0 ]; then 
-			error_c "configure patch step $DW_NUM " " FAIL !!";
-		fi
-		DW_NUM=$((DW_NUM+1))
-	done
+	error_c "Missing Param " "insert step number please"
 else
 	isNumber $1
 	if [ $? -eq 0 ]; then	
@@ -4273,13 +4085,16 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
+rm -rf $SOURCES
+rm -rf $BUILD
 conf_download_all_step $@
 download_all_packet $@
 conf_patch_all_step $@
 patch_all_packet $@
 }
 #$ARGV
-function redoall(){	
+function redoall(){
+local RE_NUM=0
 if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
@@ -4287,9 +4102,16 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-source_download	
-config_all_step	
-build_all_packet	
+while [ $RE_NUM -lt $MAX_STEP ]; do 
+		echo "--->"$RE_NUM
+		bash ./egg source	 $RE_NUM
+		[ $? -ne 0 ] && break
+		bash ./egg gen	 $RE_NUM
+		[ $? -ne 0 ] && break
+		bash ./egg do	 $RE_NUM
+		[ $? -ne 0 ] && break
+		RE_NUM=$((RE_NUM+1))
+done	
 }
 
 #$1 staus 0,1,2,...?
@@ -5164,10 +4986,14 @@ fi
 
 
 function legal(){
+local VV=$(ps -a | grep egg | awk '{print $4}')
+local II=${#VV[@]}
+if [ $II -eq 1 ]; then 
 print_c "$WHITE" "Copyright (C) 2017 Angelo Coppi. <angelogkcop@hotmail.com>"
 print_c "$GREEN" "This is free software; see the LICENSE file for copying conditions."
 print_c "$GREEN" "There is NO warranty; not even for MERCHANTABILITY or FITNESS "
 print_c "$GREEN" "FOR A PARTICULAR PURPOSE."
+fi
 }
 
 
@@ -5250,6 +5076,42 @@ for VV in $ALL; do
 done 
 }
 
+
+
+function man_select_repo(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1		
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug 	
+fi
+[ $STEP_STEP -eq 1 ] && trap read debug
+local LS=$(ls $OROOT)
+local VV=""
+local ID=1
+local RES=0
+local -a DIRS=""
+warning_c "No repo set " "Please select one from the following repository"
+for VV in $LS; do
+	if [  -d "$OROOT/$VV" ] && [ -f "$OROOT/$VV/conf.egg" ]; then 
+		print_c "$CYAN" "$ID) - " "$WHITE" "$VV"
+		DIRS[$ID]=$VV
+		ID=$((ID+1))
+	fi
+done 
+while [ 1 -eq 1 ] ; do
+read -r
+RES=$(echo $REPLY )
+if [ $RES -gt 0 ] && [ $RES -lt $ID ]; then 
+      rm -rf "$OROOT/repo"
+      ln -s "$OROOT/${DIRS[$RES]}" "$OROOT/repo" 	
+     break
+else
+	print_c "$RED" "Invalid selection!"
+fi
+
+done 
+}
 
 #$1 build id number
 function main(){
@@ -5436,8 +5298,8 @@ if [ -d  $OREPO ]; then
 # sync repo file to build path 
 rsync -ry $OREPO $REPO
 else
-    error_c "missing link a repo path" "have to do ln -s <your repo> repo" \
-    "ex: ln -s sysroot_repo repo" "and continue with ./egg <commands>"
+    man_select_repo
+    rsync -ry $OREPO $REPO
 fi
 
 xml_get_env 

@@ -74,13 +74,13 @@
     <step id="2">
       <step_name>egg_sysroot</step_name>
       <info>build with new  compiler x86_64 the arm gcc compiler none eabi</info>
-      <cc></cc>
-      <cxx></cxx>
-      <as></as>
-      <ld></ld>
-      <nm></nm>
-      <ar></ar>
-      <strip></strip>
+      <cc/>
+      <cxx/>
+      <as/>
+      <ld/>
+      <nm/>
+      <ar/>
+      <strip/>
       <asflags/>
       <cflags>-O3 -fPIC -m64</cflags>
       <cppflags>-O3 -fPIC -m64</cppflags>
