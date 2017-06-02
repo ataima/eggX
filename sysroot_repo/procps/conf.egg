@@ -1,13 +1,18 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>zlib</name>
+    <name>procps</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>https://sourceforge.net/projects/libpng/files/zlib/1.2.11</url>
-      <file>zlib-1.2.11.tar.xz</file>
+      <url>http://procps.sourceforge.net </url>
+      <file> procps-3.2.8.tar.gz </file>
     </remote>
+        <patch id="0">
+      <method>file</method>
+      <url>$REPO/procps</url>
+      <file> proc_ps_cross.patch</file>
+    </patch>
     <build>
       <step id="1">
         <silent>yes</silent>
@@ -18,29 +23,17 @@
           </pre>
         </path>
         <configure>
-          <pre id="0">
-            <mode>code</mode>
-            <value>CC=$CROSS-gcc</value>
-          </pre>
-          <pre id="1">
-            <mode>code</mode>
-            <value>AR=ar</value>
-          </pre>
           <extra id="0">--prefix=$DEPLOY</extra>
-          <extra id="1">--64</extra>
+          <extra id="1">--target=$CROSS</extra>
         </configure>
         <make id="0">
-          <priority>160</priority>
+          <priority>10</priority>
           <rule id="0">
             <name>all</name>
           </rule>
           <rule id="1">
             <name>install</name>
             <thread>1</thread>
-            <post id="0">
-              <mode>code</mode>
-              <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
-            </post>
           </rule>
         </make>
       </step>

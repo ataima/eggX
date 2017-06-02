@@ -75,7 +75,7 @@
           <extra id="4">--disable-multilib</extra>
         </configure>
         <make id="0">
-          <priority>1</priority>
+          <priority>0</priority>
           <rule id="0">
             <name>all</name>
           </rule>

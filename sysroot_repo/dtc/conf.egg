@@ -18,7 +18,7 @@
           </pre>
         </path>
         <make id="0">
-          <priority>130</priority>
+          <priority>135</priority>
           <rule id="0">
             <name>clean</name>
           </rule>
