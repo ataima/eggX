@@ -4117,7 +4117,6 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 rm -rf $SOURCES
-rm -rf $BUILD
 conf_download_all_step $@
 download_all_packet $@
 conf_patch_all_step $@
@@ -4638,11 +4637,8 @@ if [ "$RES" == "S" ]; then
 	while [  $IDM -lt $NUMM ]; do
 		cd "$PWDM"
 		rm -rf $SOURCES
-		sync
 		rm -rf $REPO
-		sync
 		rm -rf $BUILD
-		sync
 		FILE=$(xml_multi_repo_value "$1" "/multi/repo[@id=\"$IDM\"]")
 		rm -f $OROOT/repo
 		sync
@@ -4656,11 +4652,8 @@ if [ "$RES" == "S" ]; then
 	done
 	cd "$PWDM"
 	rm -rf $SOURCES
-	sync
 	rm -rf $REPO
-	sync
 	rm -rf $BUILD
-	sync
 	return 0
 else
 	return 1
