@@ -1,42 +1,42 @@
 <?xml version="1.0"?>
 <egg>
-	<project>
-		<name>linux</name>
-		<download>check</download>		
-		<remote>
-			<method>wget</method>
-			<url>https://cdn.kernel.org/pub/linux/kernel/v4.x</url>
-			<file>linux-4.10.9.tar.xz</file>	
-			<key>
-				<url>https://cdn.kernel.org/pub/linux/kernel/v4.x</url>
-				<file>linux-4.10.9.tar.sign</file>			
-			</key>
-		</remote>	
-		<build>
-			<step id="0">
-				<name>arm-none-tools</name>
-				<silent>yes</silent>
-				<threads>8</threads>			
-				<make id="0">
-					<priority>2</priority>
-					<rule id="0">
-						<name> mrproper</name>
-						<thread> 1 </thread>
-					</rule>					
-					<rule id="1">
-						<name> ARCH=arm bcm2835_defconfig</name>
-						<thread> 1 </thread>
-					</rule>
-					<rule id="2">
-						<name> ARCH=arm headers_check</name>
-						<thread> 1 </thread>
-					</rule>
-					<rule id="3">						
-						<name> ARCH=arm INSTALL_HDR_PATH=$DEPLOY/$CROSS headers_install</name>
-						<thread> 1 </thread>							
-					</rule>
-				</make>
-			</step>
-		</build>
-	</project>
+  <project>
+    <name>linux</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url>https://cdn.kernel.org/pub/linux/kernel/v4.x</url>
+      <file>linux-4.10.9.tar.xz</file>
+      <key>
+        <url>https://cdn.kernel.org/pub/linux/kernel/v4.x</url>
+        <file>linux-4.10.9.tar.sign</file>
+      </key>
+    </remote>
+    <build>
+      <step id="0">
+        <name>arm-none-tools</name>
+        <silent>yes</silent>
+        <threads>8</threads>
+        <make id="0">
+          <priority>2</priority>
+          <rule id="0">
+            <name> mrproper</name>
+            <thread> 1 </thread>
+          </rule>
+          <rule id="1">
+            <name> ARCH=arm bcm2835_defconfig</name>
+            <thread> 1 </thread>
+          </rule>
+          <rule id="2">
+            <name> ARCH=arm headers_check</name>
+            <thread> 1 </thread>
+          </rule>
+          <rule id="3">
+            <name> ARCH=arm INSTALL_HDR_PATH=$DEPLOY/$CROSS headers_install</name>
+            <thread> 1 </thread>
+          </rule>
+        </make>
+      </step>
+    </build>
+  </project>
 </egg>

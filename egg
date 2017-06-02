@@ -4109,6 +4109,8 @@ while [ $RE_NUM -lt $MAX_STEP ]; do
 		build_all_packet	 $RE_NUM
 		RE_NUM=$((RE_NUM+1))
 done	
+	rm -rf $SOURCES
+	rm -rf $BUILD
 }
 
 #$1 staus 0,1,2,...?
@@ -4551,7 +4553,6 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-local PWDM=""
 local RES=""
 local NUMM=0
 local IDM=0
@@ -4604,33 +4605,18 @@ read -r
 RES=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
 if [ "$RES" == "S" ]; then 
 	IDM=0
-	PWDM=$(pwd)
 	while [  $IDM -lt $NUMM ]; do
-		cd "$PWDM"
-		rm -rf $SOURCES
-		sync
-		rm -rf $REPO
-		sync
-		rm -rf $BUILD
-		sync
+		cd "$OROOT"
 		FILE=$(xml_multi_repo_value "$1" "/multi/repo[@id=\"$IDM\"]")
 		rm -f $OROOT/repo
-		sync
 		ln -s $FILE $OROOT/repo
-		sync
 		main redoall		
 		if [ $? -ne 0 ] ; then 
 			error_c "multi step " " $FILE FAIL !!";
 		fi		
 		IDM=$((IDM+1))	
 	done
-	cd "$PWDM"
-	rm -rf $SOURCES
-	sync
-	rm -rf $REPO
-	sync
-	rm -rf $BUILD
-	sync
+	cd "$OROOT"
 	return 0
 else
 	return 1

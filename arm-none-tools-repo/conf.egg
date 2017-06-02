@@ -1,31 +1,31 @@
 <?xml version="1.0"?>
-<egg>   
-	<conf>
-		<root>$HOME/ebuild</root>
-		<logfile>$ROOT/log_$(date +%d-%m-%y).txt</logfile>
-		<repo>$ROOT/repo</repo>
-		<sources>$ROOT/sources</sources>
-		<images>$ROOT/images</images>
-		<store>$ROOT/store</store>
-		<build>$ROOT/build</build>
-		<editor>scite</editor>
-		<start_path>/usr/bin:/sbin:/bin</start_path>
-	</conf>	
-	<defaults>
-		<step id="0">
-			<step_name>arm-none-tools</step_name>
-			<cc></cc>
-			<cxx></cxx>
-			<cflags>-O3</cflags>
-			<cppflags>-O3</cppflags>
-			<cxxflags>-O3</cxxflags>
-			<ldflags></ldflags>
-			<libs></libs>
-			<cpath></cpath>
-			<c_include_path></c_include_path>
-			<cplus_include_path></cplus_include_path>
-			<arch>x86_64</arch>
-			<cross>arm-none-eabi</cross>
-		</step>
-	</defaults>
+<egg>
+  <conf>
+    <root>$HOME/ebuild</root>
+    <logfile>$ROOT/log_$(date +%d-%m-%y).txt</logfile>
+    <repo>$ROOT/repo</repo>
+    <sources>$ROOT/sources</sources>
+    <images>$ROOT/images</images>
+    <store>$ROOT/store</store>
+    <build>$ROOT/build</build>
+    <editor>scite</editor>
+    <start_path>/usr/bin:/sbin:/bin</start_path>
+  </conf>
+  <defaults>
+    <step id="0">
+      <step_name>arm-none-tools</step_name>
+      <cc/>
+      <cxx/>
+      <cflags>-O3</cflags>
+      <cppflags>-O3</cppflags>
+      <cxxflags>-O3</cxxflags>
+      <ldflags/>
+      <libs/>
+      <cpath/>
+      <c_include_path/>
+      <cplus_include_path/>
+      <arch>x86_64</arch>
+      <cross>arm-none-eabi</cross>
+    </step>
+  </defaults>
 </egg>
