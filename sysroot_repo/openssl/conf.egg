@@ -22,7 +22,7 @@
           <extra id="1">linux-x86_64</extra>
         </configure>
         <make id="0">
-          <priority>215</priority>
+          <priority>220</priority>
           <rule id="0">
             <name>all</name>
           </rule>

@@ -3337,7 +3337,7 @@ if [ $RESULT -eq 0 ]; then
 	total_time=$((stop_time-start_time))
 	print_ita "$PRJ.tar.bz2"  "$(getFileSize $IMAGES/$PRJ.tar.bz2 ) Bytes"  "$total_time sec"
 else
-	error_c "$PRJ contain packeges not in ready to packetize " "project : $NAME" 
+	error_c "$PRJ contain packages not ready to packetize " "project : $NAME" 
 fi
 print_del_ita
 }

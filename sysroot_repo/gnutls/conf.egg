@@ -23,7 +23,7 @@
           <extra id="2">--with-trousers-lib=$DEPLOY</extra>
         </configure>
         <make id="0">
-          <priority>325</priority>
+          <priority>330</priority>
           <rule id="0">
             <name>all</name>
           </rule>

@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>libgpg-error</name>
+    <name>bzip</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>https://www.gnupg.org/ftp/gcrypt/libgpg-error</url>
-      <file>libgpg-error-1.27.tar.bz2</file>
+      <url> http://www.bzip.org/1.0.6</url>
+      <file> bzip2-1.0.6.tar.gz </file>
     </remote>
     <build>
       <step id="1">
@@ -17,18 +17,22 @@
             <set id="0">$USER_PATH</set>
           </pre>
         </path>
-        <configure>
-          <extra id="0">--prefix=$DEPLOY</extra>
-          <extra id="1">--target=$CROSS</extra>
-        </configure>
         <make id="0">
-          <priority>185</priority>
+          <priority>150</priority>
           <rule id="0">
             <name>all</name>
           </rule>
           <rule id="1">
-            <name>install-strip</name>
+            <pre id="0">
+              <mode>code</mode>
+              <value>sed -i "s#PREFIX=/usr/local#PREFIX=$DEPLOY#g" $BUILD/Makefile</value>
+            </pre>
+            <name>install</name>
             <thread>1</thread>
+            <post id="0">
+              <mode>code</mode>
+              <value>strip $DEPLOY/bin/bzip2</value>
+            </post>
           </rule>
         </make>
       </step>
