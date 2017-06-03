@@ -2221,6 +2221,9 @@ local PWD=$(pwd)
 if [ ! -d "$SOURCES/$1" ]; then 
 	if [ -e "$STORE/$3.tar.bz2" ]; then
 	#exit in store a like packet
+		if [ ! -d "$SOURCES" ]; then 
+			mkdir -p "$SOURCES"
+		fi
 		cd "$STORE"
 		md5sum  -c "$3.tar.bz2.md5" >  /dev/null 
 		if [ $? -eq 0 ]; then

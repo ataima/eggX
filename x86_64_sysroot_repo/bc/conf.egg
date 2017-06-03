@@ -5,8 +5,8 @@
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>ftp://ftp.gnu.org/gnu/bc</url>
-      <file>bc-1.07.tar.gz</file>
+      <url>http://ftp.gnu.org/gnu/bc</url>
+      <file>bc-1.07.1.tar.gz</file>
     </remote>
     <build>
       <step id="1">
@@ -15,6 +15,7 @@
         <configure>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
+	  <extra id="2">--with-readline</extra>
         </configure>
         <make id="0">
           <priority>170</priority>
