@@ -460,7 +460,7 @@ declare -i MAX_STEP=0
 
 
 function forcestop(){
-	erro_c "User Interrupt" " warning work not complete! "
+	error_c "User Interrupt" " warning work not complete! "
 }
 
 trap "forcestop" SIGHUP SIGINT SIGTERM
@@ -4116,7 +4116,13 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-rm -rf $SOURCES
+#if source 1 remove all sources folder else skip remove for souce 1 lzip
+if [ $# -eq 1 ]; then
+	isNumber $1
+	if [ $? -eq 0 ]; then	
+		rm -rf $SOURCES
+	fi
+fi	
 conf_download_all_step $@
 download_all_packet $@
 conf_patch_all_step $@
@@ -4306,8 +4312,9 @@ fi
 
 
 
-#$1 step nn 
-#$2 optional prj
+#$1 step nn  -> freeze all step -> freeze 1
+#$2 optional prj -> freeze a project on sten n -> freeze 1 lzip
+#$3 optional pri -> freeze projects with pri < nn ->freeze 1 < 90
 function freeze_step(){
 if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
@@ -4322,6 +4329,15 @@ local PRI=""
 local NAME=""
 local PRJ=""
 local RNAME="$2_$1"
+if [ $# -eq 3 ] && [ "$2" != "<" ]; then 
+	error_c "bad input" " in case of 3 parameter must be :freeze <step nn> '<' <pri nn_max>"
+fi
+if [ $# -eq 3 ] && [ "$2" == "<" ]; then
+	isNumber $3
+	if [ $? -ne 0 ]; then 
+	error_c "bad input" " in case of 3 parameter must be :freeze <step nn> '<' <pri nn_max>"
+	fi
+fi
 prepare_seq_priority "$ID" "$ALL_PACKETS" 
 	for V in $SORTREQ; do
 		V=$(echo $V  | sed -e 's/%/   /g')
@@ -4330,8 +4346,7 @@ prepare_seq_priority "$ID" "$ALL_PACKETS"
 		PRJ=$(echo $V | awk '{print $3}')
 		V=$( getFileSize $BUILD/$PRJ/$NAME/status)
 		if [ $V -ne 0 ]; then 
-			if [ $# -eq 1 ]; then
-				
+			if [ $# -eq 1 ]; then				
 					chmod +w "$BUILD/$PRJ/$NAME/status"
 					echo 2 > "$BUILD/$PRJ/$NAME/status"
 					chmod -w "$BUILD/$PRJ/$NAME/status"
@@ -4343,6 +4358,12 @@ prepare_seq_priority "$ID" "$ALL_PACKETS"
 					chmod -w "$BUILD/$PRJ/$NAME/status"
 					print_ita "STEP : $ID" "PRI : $PRI" "$NAME -> set as stable"
 					break
+			fi
+			if [ $# -eq 3 ] && [  $PRI -lt $3 ]; then
+					chmod +w "$BUILD/$PRJ/$NAME/status"
+					echo 2 > "$BUILD/$PRJ/$NAME/status"
+					chmod -w "$BUILD/$PRJ/$NAME/status"
+					print_ita "STEP : $ID" "PRI : $PRI" "$NAME -> set as stable"
 			fi
 		fi				
 	done
@@ -4408,7 +4429,7 @@ while [ $FNUM -lt $MAX_STEP ] ; do
 	FNUM=$((FNUM+1))
 done	
 else
-	freeze_step $1 $2
+	freeze_step $1 $2 $3
 fi
 }
 

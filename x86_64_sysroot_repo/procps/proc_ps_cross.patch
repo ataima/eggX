@@ -26,7 +26,7 @@
 -usr/include              := $(DESTDIR)/usr/include/
 +usr/bin                  := $(DEPLOY)/bin/
 +bin                      := $(DEPLOY)/bin/
-+sbin                     := $(DEPLOY)/sbin/
++sbin                     := $(DEPLOY)/bin/
 +usr/proc/bin             := $(DEPLOY)/bin/
 +man1                     := $(DEPLOY)/share/man/man1/
 +man5                     := $(DEPLOY)/share/man/man5/
