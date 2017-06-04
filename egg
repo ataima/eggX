@@ -310,6 +310,9 @@ local NUM=0
 local ID=0
 #load user defined variable globals
 NUM=$(xmlstarlet sel -t  -v "count(egg/conf/user_env)" -n $MAINFILE)
+if [ "$NUM" == "" ]; then
+	error_c "XML file $MAINFILE" "check xml file"
+fi
 if [ $NUM -ne 0 ]; then 
 	ID=0
 	USER_ENV=""
@@ -321,7 +324,7 @@ if [ $NUM -ne 0 ]; then
 		eval $VV="$VALUE"
 		export $VV
 		USER_ENV+="  $VV"		
-		print_s_ita "Add user env var" "$VV"   "$VALUE"
+		#print_s_ita "Add user env var" "$VV"   "$VALUE"
 	else
 		error_c "XML file $MAINFILE" "node user_env id=\"$ID\" fail, check xml"
 	fi
@@ -2326,7 +2329,7 @@ if [ ! -d "$SOURCES/$1" ]; then
 				error_c "Git source :cannot restore from tar backup " "   project $1"
 			fi 
 			cd "$SOURCES/$1"
-			git pull origin master
+			git pull --no-edit --commit origin master
 			if [ $? -ne 0 ]; then 
 				error_c "Git Update error " "   project $1"
 			fi 			

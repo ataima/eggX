@@ -30,8 +30,11 @@
             <name> CROSS_COMPILE=$CROSS_COMPILE  install </name>
             <thread> 1 </thread>
             <post id="0">
-              
-              <code>cp -a $BUILD/tmp_install/* $DEPLOY/.</code>
+			<code>
+			cp -a $BUILD/tmp_install/* $DEPLOY/.;
+			cp $REPO/busybox_init $DEPLOY/init;
+			chmod +rx  $DEPLOY/init;
+			</code>
             </post>
           </rule>
         </make>

@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# Create all the busybox symbolic links
+/bin/busybox --install -s
+
+# Create base directories
+[ -d /dev ] || mkdir -m 0755 /dev
+[ -d /root ] || mkdir --mode=0700 /root
+[ -d /sys ] || mkdir /sys
+[ -d /proc ] || mkdir /proc
+[ -d /tmp ] || mkdir /tmp
+mkdir -p /var/lock
+
+# Mount essential filesystems
+mount -t sysfs none /sys -onodev,noexec,nosuid
+mount -t proc none /proc -onodev,noexec,nosuid
+
+# Create essential filesystem nodes
+mknod /dev/zero c 1 5
+mknod /dev/null c 1 3
+
+mknod /dev/tty c 5 0
+mknod /dev/console c 5 1
+mknod /dev/ptmx c 5 2
+
+mknod /dev/tty0 c 4 0
+mknod /dev/tty1 c 4 1
+
+echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+
+echo "Creating devices"
+/sbin/mdev -s
+
+exec /bin/sh
