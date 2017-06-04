@@ -19,8 +19,8 @@
         </path>
         <configure>
           <pre id="0">
-            <mode>code</mode>
-            <value>rm -f $BUILD/sqlite-amalgamation;ln -s $SOURCES/sqlite/sqlite-amalgamation-3071501 $BUILD/sqlite-amalgamation</value>
+            
+            <code>rm -f $BUILD/sqlite-amalgamation;ln -s $SOURCES/sqlite/sqlite-amalgamation-3071501 $BUILD/sqlite-amalgamation</code>
           </pre>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
@@ -34,8 +34,8 @@
             <name>install</name>
             <thread>1</thread>
             <post id="0">
-              <mode>code</mode>
-              <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+              
+              <code> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</code>
             </post>
           </rule>
         </make>

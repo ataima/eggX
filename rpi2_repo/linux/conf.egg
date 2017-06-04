@@ -26,8 +26,8 @@
           </rule>
           <rule id="1">
             <pre id="0">
-              <mode>code</mode>
-              <value>export KERNEL=kernel7</value>
+              
+              <code>export KERNEL=kernel7</code>
             </pre>
             <name> bcm2709_defconfig </name>
             <thread> 1 </thread>
@@ -46,16 +46,16 @@
             <name>  modules_install INSTALL_MOD_PATH=$DEPLOY/lib/modules</name>
             <thread> 1 </thread>
             <post id="0">
-              <mode>code</mode>
-              <value>install arch/arm/boot/dts/*.dtb $DEPLOY/boot/.</value>
+              
+              <code>install arch/arm/boot/dts/*.dtb $DEPLOY/boot/.</code>
             </post>
             <post id="1">
-              <mode>code</mode>
-              <value>mkdir $DEPLOY/boot/overlays;install arch/arm/boot/dts/overlays/*.dtb* $DEPLOY/boot/overlays/.</value>
+              
+              <code>mkdir $DEPLOY/boot/overlays;install arch/arm/boot/dts/overlays/*.dtb* $DEPLOY/boot/overlays/.</code>
             </post>
             <post id="2">
-              <mode>code</mode>
-              <value>install arch/arm/boot/zImage $DEPLOY/boot/zImage</value>
+              
+              <code>install arch/arm/boot/zImage $DEPLOY/boot/zImage</code>
             </post>
           </rule>
         </make>

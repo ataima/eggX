@@ -19,8 +19,7 @@
         </path>
         <configure>
           <pre id="0">
-            <mode>code</mode>
-            <value>export CPPFLAGS="-P"</value>
+            <code>export CPPFLAGS="-P"</code>
           </pre>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>

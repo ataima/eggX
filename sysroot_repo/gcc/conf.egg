@@ -19,44 +19,34 @@
         </path>
         <configure>
           <pre id="0">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/gmp</value>
+            <code>rm -rf $SOURCE/gmp</code>
           </pre>
           <pre id="1">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/mpc</value>
+            <code>rm -rf $SOURCE/mpc</code>
           </pre>
           <pre id="2">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/mpfr</value>
+            <code>rm -rf $SOURCE/mpfr</code>
           </pre>
           <pre id="3">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/isl</value>
+            <code>rm -rf $SOURCE/isl</code>
           </pre>
           <pre id="4">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/cloog</value>
+            <code>rm -rf $SOURCE/cloog</code>
           </pre>
           <pre id="5">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</value>
+            <code>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</code>
           </pre>
           <pre id="6">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</value>
+            <code>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</code>
           </pre>
           <pre id="7">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/mpfr/*); ln -s $A $SOURCE/mpfr</value>
+            <code>A=$(ls -d $SOURCES/mpfr/*); ln -s $A $SOURCE/mpfr</code>
           </pre>
           <pre id="8">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/isl/*); ln -s $A $SOURCE/isl</value>
+            <code>A=$(ls -d $SOURCES/isl/*); ln -s $A $SOURCE/isl</code>
           </pre>
           <pre id="9">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/cloog/*); ln -s $A $SOURCE/cloog</value>
+            <code>A=$(ls -d $SOURCES/cloog/*); ln -s $A $SOURCE/cloog</code>
           </pre>
           <extra id="0">--target=$CROSS</extra>
           <extra id="1">--prefix=$DEPLOY</extra>
@@ -76,8 +66,7 @@
             <name>install-gcc</name>
             <thread>1</thread>
             <post id="0">
-              <mode>code</mode>
-              <value>$CROSS-gcc  -v</value>
+              <code>$CROSS-gcc  -v</code>
             </post>
           </rule>
           <rule id="2">
@@ -89,8 +78,7 @@
           </rule>
           <rule id="4">
             <pre id="0">
-              <mode>code</mode>
-              <value>rm $DEPLOY/$CROSS/lib/libc.so ; echo  'GROUP ( libc.so.6 libc_nonshared.a )' | tee  $DEPLOY/$CROSS/lib/libc.so</value>
+              <code>rm $DEPLOY/$CROSS/lib/libc.so ; echo  'GROUP ( libc.so.6 libc_nonshared.a )' | tee  $DEPLOY/$CROSS/lib/libc.so</code>
             </pre>
             <name>all</name>
           </rule>
@@ -98,12 +86,10 @@
             <name>install</name>
             <thread>1</thread>
             <post id="0">
-              <mode>code</mode>
-              <value> cd  $DEPLOY/bin; rm -f cc; ln -s gcc cc; </value>
+              <code> cd  $DEPLOY/bin; rm -f cc; ln -s gcc cc; </code>
             </post>
             <post id="1">
-              <mode>code</mode>
-              <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+              <code> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</code>
             </post>
           </rule>
         </make>
@@ -118,44 +104,34 @@
         </path>
         <configure>
           <pre id="0">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/gmp</value>
+            <code>rm -rf $SOURCE/gmp</code>
           </pre>
           <pre id="1">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/mpc</value>
+            <code>rm -rf $SOURCE/mpc</code>
           </pre>
           <pre id="2">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/mpfr</value>
+            <code>rm -rf $SOURCE/mpfr</code>
           </pre>
           <pre id="3">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/isl</value>
+            <code>rm -rf $SOURCE/isl</code>
           </pre>
           <pre id="4">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/cloog</value>
+            <code>rm -rf $SOURCE/cloog</code>
           </pre>
           <pre id="5">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</value>
+            <code>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</code>
           </pre>
           <pre id="6">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</value>
+            <code>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</code>
           </pre>
           <pre id="7">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/mpfr/*); ln -s $A $SOURCE/mpfr</value>
+            <code>A=$(ls -d $SOURCES/mpfr/*); ln -s $A $SOURCE/mpfr</code>
           </pre>
           <pre id="8">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/isl/*); ln -s $A $SOURCE/isl</value>
+            <code>A=$(ls -d $SOURCES/isl/*); ln -s $A $SOURCE/isl</code>
           </pre>
           <pre id="9">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/cloog/*); ln -s $A $SOURCE/cloog</value>
+            <code>A=$(ls -d $SOURCES/cloog/*); ln -s $A $SOURCE/cloog</code>
           </pre>
           <extra id="0">--build=$NATIVE</extra>
           <extra id="1">--host=$NATIVE</extra>
@@ -173,8 +149,7 @@
             <name>install-gcc</name>
             <thread>1</thread>
             <post id="0">
-              <mode>code</mode>
-              <value>$CROSS-gcc  -v</value>
+              <code>$CROSS-gcc  -v</code>
             </post>
           </rule>
         </make>
@@ -189,44 +164,34 @@
         </path>
         <configure>
           <pre id="0">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/gmp</value>
+            <code>rm -rf $SOURCE/gmp</code>
           </pre>
           <pre id="1">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/mpc</value>
+            <code>rm -rf $SOURCE/mpc</code>
           </pre>
           <pre id="2">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/mpfr</value>
+            <code>rm -rf $SOURCE/mpfr</code>
           </pre>
           <pre id="3">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/isl</value>
+            <code>rm -rf $SOURCE/isl</code>
           </pre>
-          <pre id="4">
-            <mode>code</mode>
-            <value>rm -rf $SOURCE/cloog</value>
+          <pre id="4">           
+            <code>rm -rf $SOURCE/cloog</code>
           </pre>
-          <pre id="5">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</value>
+          <pre id="5">           
+            <code>A=$(ls -d $SOURCES/gmp/*); ln -s $A $SOURCE/gmp</code>
           </pre>
-          <pre id="6">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</value>
+          <pre id="6">           
+            <code>A=$(ls -d $SOURCES/mpc/*); ln -s $A $SOURCE/mpc</code>
           </pre>
-          <pre id="7">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/mpfr/*); ln -s $A $SOURCE/mpfr</value>
+          <pre id="7">           
+            <code>A=$(ls -d $SOURCES/mpfr/*); ln -s $A $SOURCE/mpfr</code>
           </pre>
-          <pre id="8">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/isl/*); ln -s $A $SOURCE/isl</value>
+          <pre id="8">           
+            <code>A=$(ls -d $SOURCES/isl/*); ln -s $A $SOURCE/isl</code>
           </pre>
-          <pre id="9">
-            <mode>code</mode>
-            <value>A=$(ls -d $SOURCES/cloog/*); ln -s $A $SOURCE/cloog</value>
+          <pre id="9">           
+            <code>A=$(ls -d $SOURCES/cloog/*); ln -s $A $SOURCE/cloog</code>
           </pre>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
@@ -241,9 +206,8 @@
           <rule id="1">
             <name>install-gcc</name>
             <thread>1</thread>
-            <post id="0">
-              <mode>code</mode>
-              <value>$CROSS-gcc  -v</value>
+            <post id="0">             
+              <code>$CROSS-gcc  -v</code>
             </post>
           </rule>
         </make>
@@ -261,8 +225,7 @@
           <priority>30</priority>
           <rule id="0">
             <pre id="0">
-              <mode>code</mode>
-              <value>rm $DEPLOY/$CROSS/lib/libc.so ; echo  'GROUP ( libc.so.6 libc_nonshared.a )' | tee  $DEPLOY/$CROSS/lib/libc.so</value>
+              <code>rm $DEPLOY/$CROSS/lib/libc.so ; echo  'GROUP ( libc.so.6 libc_nonshared.a )' | tee  $DEPLOY/$CROSS/lib/libc.so</code>
             </pre>
             <name>all</name>
           </rule>

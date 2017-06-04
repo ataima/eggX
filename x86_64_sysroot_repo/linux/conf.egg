@@ -29,8 +29,8 @@
           </rule>
           <rule id="1">
             <pre id="0">
-              <mode>code</mode>
-              <value>cp /boot/$(echo config-$(uname -a | awk '{print $3}')) $BUILD/.config</value>
+              
+              <code>cp /boot/$(echo config-$(uname -a | awk '{print $3}')) $BUILD/.config</code>
             </pre>
             <name>  olddefconfig</name>
             <thread> 1 </thread>

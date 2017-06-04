@@ -24,18 +24,18 @@
 				<make>
 					<rule id="0">
 						<pre id="0">
-							<mode>code</mode>
-							<value>mkdir -p $BUILDS/$PROJECT/temp</value>
+							
+							<code>mkdir -p $BUILDS/$PROJECT/temp</code>
 						</pre>
 						<name> INSTALL_HDR_PATH=$BUILDS/$PROJECT/temp headers_install</name>
 						<thread> 1 </thread>
 						<post id="0">
-							<mode>code</mode>
-							<value>cp -r $BUILDS/$PROJECT/temp/include/* $DEPLOY/include </value>
+							
+							<code>cp -r $BUILDS/$PROJECT/temp/include/* $DEPLOY/include </code>
 						</post>						
 						<post id="1">
-							<mode>code</mode>
-							<value>rm -rf  $BUILDS/$PROJECT/temp </value>
+							
+							<code>rm -rf  $BUILDS/$PROJECT/temp </code>
 						</post>						
 					</rule>
 				</make>

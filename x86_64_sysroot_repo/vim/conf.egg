@@ -14,14 +14,14 @@
         <threads>8</threads>
         <configure>
           <pre id="0">
-            <mode>code</mode>
-            <value>cd $SOURCE;make distclean; sed -i 's#cd src#cd $SOURCE/src#g' $SOURCE/configure; cd $BUILD_PATH</value>
+            
+            <code>cd $SOURCE;make distclean; sed -i 's#cd src#cd $SOURCE/src#g' $SOURCE/configure; cd $BUILD_PATH</code>
           </pre>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
           <post id="0">
-            <mode>code</mode>
-            <value>cd $PWD ; rm -rf $BUILD; ln -s $SOURCE build; cd $BUILD</value>
+            
+            <code>cd $PWD ; rm -rf $BUILD; ln -s $SOURCE build; cd $BUILD</code>
           </post>
         </configure>
         <make id="0">

@@ -30,8 +30,7 @@
             <name>install</name>
             <thread>1</thread>
             <post id="0">
-              <mode>code</mode>
-              <value>cp $REPO/lesspipe $DEPLOY/bin/.</value>
+              <code>cp $REPO/lesspipe $DEPLOY/bin/.</code>
             </post>
           </rule>
         </make>

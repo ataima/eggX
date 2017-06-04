@@ -19,16 +19,16 @@
 				<threads>8</threads>	
 				<configure>
 					<pre id="0">
-						<mode>code</mode>		
-						<value>export CC=$DEPLOY/bin/gcc</value>
+								
+						<code>export CC=$DEPLOY/bin/gcc</code>
 					</pre>
 					<pre id="1">
-						<mode>code</mode>		
-						<value>export CXX=$DEPLOY/bin/g++</value>
+								
+						<code>export CXX=$DEPLOY/bin/g++</code>
 					</pre>
 					<pre id="2">
-						<mode>code</mode>		
-						<value>export LDFLAGS=$DEPLOY/lib</value>
+								
+						<code>export LDFLAGS=$DEPLOY/lib</code>
 					</pre>
 					<extra id="0">--with-sysroot=$DEPLOYS</extra>
 					<extra id="1"> --build=$(../scripts/config.guess)</extra>
@@ -42,12 +42,12 @@
 					<rule id="0">
 						<name>all</name> 
 						<pre id="0">
-							<mode>code</mode>		
-							<value>export CC=$DEPLOY/bin/gcc</value>
+									
+							<code>export CC=$DEPLOY/bin/gcc</code>
 						</pre>
 						<pre id="1">
-							<mode>code</mode>		
-							<value>export CXX=$DEPLOY/bin/g++</value>
+									
+							<code>export CXX=$DEPLOY/bin/g++</code>
 						</pre>
 					</rule>
 					<rule id="1">

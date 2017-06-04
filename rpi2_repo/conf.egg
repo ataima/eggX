@@ -7,7 +7,7 @@
     <store>$ROOT/store</store>
     <images>$ROOT/images</images>
     <build>$ROOT/build</build>
-    <editor>vim</editor>
+    <editor>scite</editor>
     <path>$USER_PATH</path>
     <ld_library_path>$USER_LIB_PATH</ld_library_path>
     <user_env id="0">
@@ -46,13 +46,13 @@
     <step id="1">
       <step_name>rpi2_image</step_name>
       <info>build all for rpi 2 image</info>
-      <cc></cc>
-      <cxx></cxx>
-      <as></as>
-      <ld></ld>
-      <nm></nm>
-      <ar></ar>
-      <strip></strip>
+      <cc/>
+      <cxx/>
+      <as/>
+      <ld/>
+      <nm/>
+      <ar/>
+      <strip/>
       <asflags>-mfpu=neon-vfpv4  -march=armv7ve</asflags>
       <cflags>-O3 -mfpu=neon-vfpv4  -march=armv7ve -mtune=cortex-a7</cflags>
       <cppflags>-O3 -mfpu=neon-vfpv4  -march=armv7ve -mtune=cortex-a7</cppflags>

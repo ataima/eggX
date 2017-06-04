@@ -20,8 +20,8 @@
           <priority>20</priority>
           <rule id="0">
             <pre id="0">
-              <mode>code</mode>
-              <value>sed -i 's#/usr#$(DEPLOY)#g' Makefile</value>
+              
+              <code>sed -i 's#/usr#$(DEPLOY)#g' Makefile</code>
             </pre>
             <name>all</name>
           </rule>
@@ -29,8 +29,8 @@
             <name>install</name>
             <thread>1</thread>
             <post id="0">
-              <mode>code</mode>
-              <value>strip $DEPLOY/bin/tree</value>
+              
+              <code>strip $DEPLOY/bin/tree</code>
             </post>
           </rule>
         </make>

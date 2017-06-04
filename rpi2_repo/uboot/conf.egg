@@ -25,12 +25,12 @@
           <rule id="1">
             <name>DEVICE_TREE=bcm2836-rpi-2-b  all</name>
             <post id="0">
-              <mode>code</mode>
-              <value>
+              
+              <code>
 		mkdir -p $DEPLOY/boot; 
 		install $BUILD/u-boot.bin $BUILD/u-boot-*.bin $DEPLOY/boot;
 		ln -s $DEPLOY/u-boot.bin $DEPLOY/kernel7.img;
-		</value>
+		</code>
             </post>
           </rule>
         </make>

@@ -31,12 +31,12 @@
             <name>install-strip</name>
             <thread>1</thread>
             <post id="0">
-              <mode>code</mode>
-              <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+              
+              <code> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</code>
             </post>
 	    <post id="1">
-              <mode>code</mode>
-              <value> ln -s $DEPLOY/bin/gpg2 $DEPLOY/bin/gpg</value>
+              
+              <code> ln -s $DEPLOY/bin/gpg2 $DEPLOY/bin/gpg</code>
             </post>
           </rule>
         </make>

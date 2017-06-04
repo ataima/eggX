@@ -52,12 +52,12 @@
 						<name>install</name> 
 						<thread>1</thread>						
 						<post  id="0">
-							<mode>code</mode>		
-							<value>echo $PATH; which gcc</value>
+									
+							<code>echo $PATH; which gcc</code>
 						</post >
 						<post  id="1">
-							<mode>code</mode>		
-							<value>gcc -fsyntax-only -xc -v -H </value>
+									
+							<code>gcc -fsyntax-only -xc -v -H </code>
 						</post >
 					</rule>
 				</make>

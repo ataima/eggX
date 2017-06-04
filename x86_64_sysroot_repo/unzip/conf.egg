@@ -21,8 +21,8 @@
           <priority>155</priority>
           <rule id="0">
             <pre id="0">
-              <mode>code</mode>
-              <value>rm -rf $BUILD ; ln -s $SOURCE $BUILD</value>
+              
+              <code>rm -rf $BUILD ; ln -s $SOURCE $BUILD</code>
             </pre>
             <name>-f unix/Makefile generic</name>
           </rule>
@@ -30,8 +30,8 @@
             <name>prefix=$DEPLOY MANDIR=$DEPLOY/share/man/man1  -f unix/Makefile install</name>
             <thread>1</thread>
             <post id="0">
-              <mode>code</mode>
-              <value>strip $DEPLOY/bin/unzip</value>
+              
+              <code>strip $DEPLOY/bin/unzip</code>
             </post>
           </rule>
         </make>

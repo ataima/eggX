@@ -19,8 +19,7 @@
         </path>
         <configure>
           <pre id="0">
-            <mode>code</mode>
-            <value>check_version $CROSS-gcc  6.3.0 </value>
+            <code>check_version $CROSS-gcc  6.3.0 </code>
           </pre>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
@@ -34,8 +33,7 @@
             <name>install</name>
             <thread>1</thread>
             <post id="0">
-              <mode>code</mode>
-              <value>ln -s $DEPLOY/bin/bash $DEPLOY/bin/sh</value>
+              <code>ln -s $DEPLOY/bin/bash $DEPLOY/bin/sh</code>
             </post>
           </rule>
         </make>

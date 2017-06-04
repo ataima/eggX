@@ -24,14 +24,14 @@
           </rule>
           <rule id="1">
             <pre id="0">
-              <mode>code</mode>
-              <value>sed -i "s#PREFIX=/usr/local#PREFIX=$DEPLOY#g" $BUILD/Makefile</value>
+              
+              <code>sed -i "s#PREFIX=/usr/local#PREFIX=$DEPLOY#g" $BUILD/Makefile</code>
             </pre>
             <name>install</name>
             <thread>1</thread>
             <post id="0">
-              <mode>code</mode>
-              <value>strip $DEPLOY/bin/bzip2</value>
+              
+              <code>strip $DEPLOY/bin/bzip2</code>
             </post>
           </rule>
         </make>

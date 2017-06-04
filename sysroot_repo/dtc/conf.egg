@@ -27,24 +27,19 @@
           </rule>
           <rule id="2">
             <pre id="0">
-              <mode>code</mode>
-              <value>strip $BUILD/dtc; strip $BUILD/fdtput; strip $BUILD/fdtget;strip $BUILD/fdtdump;strip $BUILD/convert-dtsv0;strip $BUILD/libfdt/libfdt-1.4.4.so</value>
+              <code>strip $BUILD/dtc; strip $BUILD/fdtput; strip $BUILD/fdtget;strip $BUILD/fdtdump;strip $BUILD/convert-dtsv0;strip $BUILD/libfdt/libfdt-1.4.4.so</code>
             </pre>
             <pre id="1">
-              <mode>code</mode>
-              <value>cd $BUILD; install convert-dtsv0 dtc fdtdump fdtget fdtput dtdiff $DEPLOY/bin</value>
+              <code>cd $BUILD; install convert-dtsv0 dtc fdtdump fdtget fdtput dtdiff $DEPLOY/bin</code>
             </pre>
             <pre id="2">
-              <mode>code</mode>
-              <value>cd $BUILD; install libfdt/libfdt-1.4.4.so  $DEPLOY/lib; ln -sf $DEPLOY/lib/libfdt-1.4.4.so $DEPLOY/lib/libfdt.so.1; ln -sf $DEPLOY/lib/libfdt-1.4.4.so $DEPLOY/lib/libfdt.so;</value>
+              <code>cd $BUILD; install libfdt/libfdt-1.4.4.so  $DEPLOY/lib; ln -sf $DEPLOY/lib/libfdt-1.4.4.so $DEPLOY/lib/libfdt.so.1; ln -sf $DEPLOY/lib/libfdt-1.4.4.so $DEPLOY/lib/libfdt.so;</code>
             </pre>
             <pre id="3">
-              <mode>code</mode>
-              <value>cd $BUILD;install -m 644 libfdt/libfdt.a $DEPLOY/lib</value>
+              <code>cd $BUILD;install -m 644 libfdt/libfdt.a $DEPLOY/lib</code>
             </pre>
             <pre id="4">
-              <mode>code</mode>
-              <value>cd $BUILD;install -m 644 libfdt/fdt.h libfdt/libfdt.h libfdt/libfdt_env.h $DEPLOY/include</value>
+              <code>cd $BUILD;install -m 644 libfdt/fdt.h libfdt/libfdt.h libfdt/libfdt_env.h $DEPLOY/include</code>
             </pre>
             <name/>
             <thread>1</thread>

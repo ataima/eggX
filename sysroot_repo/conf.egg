@@ -8,7 +8,8 @@
     <images>$ROOT/images</images>
     <build>$ROOT/build</build>
     <editor>scite</editor>
-    <start_path>$ROOT/images/egg_sysroot/bin:/bin:/usr/bin</start_path>
+    <path>$ROOT/images/egg_sysroot/bin:/bin:/usr/bin</path>
+    <ld_library_path>$LD_LIBRARY_PATH:$ROOT/images/egg_sysroot/lib:$ROOT/images/egg_sysroot/lib64</ld_library_path>
     <user_env id="0">
       <name>USER_PATH</name>
       <value>$ROOT/images/egg_sysroot/bin:$ROOT/images/egg_sysroot/x86_64-pc-linux-gnu/bin:/bin:/usr/bin</value>
@@ -46,7 +47,6 @@
       <cpath/>
       <c_include_path/>
       <cplus_include_path/>
-      <ld_library_path/>
       <arch>x86_64</arch>
       <cross>x86_64-pc-linux-gnu</cross>
     </step>
@@ -67,7 +67,6 @@
       <ldflags/>
       <libs/>
       <cpath>$DEPLOY/include</cpath>
-      <ld_library_path>$LD_LIBRARY_PATH:$DEPLOY/lib:$DEPLOY/lib64</ld_library_path>
       <arch>x86_64</arch>
       <cross>x86_64-pc-linux-gnu</cross>
     </step>
@@ -90,7 +89,6 @@
       <cpath/>
       <c_include_path/>
       <cplus_include_path/>
-      <ld_library_path/>
       <arch>x86_64</arch>
       <cross>arm-none-eabi</cross>
     </step>
@@ -113,7 +111,6 @@
       <cpath/>
       <c_include_path/>
       <cplus_include_path/>
-      <ld_library_path/>
       <arch>x86_64</arch>
       <cross>arm-linux-gnueabi</cross>
     </step>

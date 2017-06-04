@@ -18,21 +18,21 @@
           </pre>
         </path>
         <make id="0">
-          <priority>3</priority>     
+          <priority>3</priority>
           <rule id="0">
-	     <pre id="0">
-			<mode>code</mode>
-			<value>cp $REPO/busybox_defconfig_arm $BUILD/.config</value>
-	     </pre>
+            <pre id="0">
+              
+              <code>cp $REPO/busybox_defconfig_arm $BUILD/.config</code>
+            </pre>
             <name> CROSS_COMPILE=$CROSS_COMPILE  all </name>
-          </rule>          
+          </rule>
           <rule id="1">
             <name> CROSS_COMPILE=$CROSS_COMPILE  install </name>
             <thread> 1 </thread>
-	    <post id="0">
-			<mode>code</mode>
-			<value>cp -a $BUILD/tmp_install/* $DEPLOY/.</value>
-	    </post>
+            <post id="0">
+              
+              <code>cp -a $BUILD/tmp_install/* $DEPLOY/.</code>
+            </post>
           </rule>
         </make>
       </step>

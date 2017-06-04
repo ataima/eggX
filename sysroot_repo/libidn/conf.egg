@@ -30,8 +30,7 @@
             <name>install-strip</name>
             <thread>1</thread>
             <post id="0">
-              <mode>code</mode>
-              <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
+              <code> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</code>
             </post>
           </rule>
         </make>

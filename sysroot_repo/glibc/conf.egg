@@ -18,13 +18,11 @@
           </pre>
         </path>
         <configure>
-          <pre id="0">
-            <mode>code</mode>
-            <value>mkdir -p $DEPLOY/$CROSS/lib</value>
+          <pre id="0">            
+            <code>mkdir -p $DEPLOY/$CROSS/lib</code>
           </pre>
-          <pre id="1">
-            <mode>code</mode>
-            <value>mkdir -p $DEPLOY/$CROSS/include</value>
+          <pre id="1">            
+            <code>mkdir -p $DEPLOY/$CROSS/include</code>
           </pre>
           <extra id="0">--prefix=$DEPLOY/$CROSS</extra>
           <extra id="1"> --build=$NATIVE</extra>
@@ -44,17 +42,14 @@
           </rule>
           <rule id="1">
             <name>csu/subdir_lib</name>
-            <post id="0">
-              <mode>code</mode>
-              <value>install $BUILD/csu/crt1.o $BUILD/csu/crti.o $BUILD/csu/crtn.o $DEPLOY/$CROSS/lib</value>
+            <post id="0">              
+              <code>install $BUILD/csu/crt1.o $BUILD/csu/crti.o $BUILD/csu/crtn.o $DEPLOY/$CROSS/lib</code>
             </post>
             <post id="1">
-              <mode>code</mode>
-              <value>$CROSS-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $DEPLOY/$CROSS/lib/libc.so</value>
+              <code>$CROSS-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $DEPLOY/$CROSS/lib/libc.so</code>
             </post>
             <post id="2">
-              <mode>code</mode>
-              <value>touch $DEPLOY/$CROSS/include/gnu/stubs.h</value>
+              <code>touch $DEPLOY/$CROSS/include/gnu/stubs.h</code>
             </post>
           </rule>
           <rule id="2">
@@ -76,25 +71,20 @@
           </pre>
         </path>
         <configure>
-          <pre id="0">
-            <mode>code</mode>
-            <value>mkdir -p $DEPLOY/$CROSS/lib</value>
+          <pre id="0">            
+            <code>mkdir -p $DEPLOY/$CROSS/lib</code>
           </pre>
-          <pre id="1">
-            <mode>code</mode>
-            <value>mkdir -p $DEPLOY/$CROSS/include</value>
+          <pre id="1">            
+            <code>mkdir -p $DEPLOY/$CROSS/include</code>
           </pre>
           <pre id="2">
-            <mode>code</mode>
-            <value>export CFLAGS="-O3 -fPIC"</value>
+            <code>export CFLAGS="-O3 -fPIC"</code>
           </pre>
-          <pre id="3">
-            <mode>code</mode>
-            <value>export CXXFLAGS="-O3 -fPIC"</value>
+          <pre id="3">            
+            <code>export CXXFLAGS="-O3 -fPIC"</code>
           </pre>
-          <pre id="4">
-            <mode>code</mode>
-            <value>export CPPFLAGS="-O3 -fPIC"</value>
+          <pre id="4">            
+            <code>export CPPFLAGS="-O3 -fPIC"</code>
           </pre>
           <extra id="0">--prefix=$DEPLOY/$CROSS</extra>
           <extra id="1"> --build=$NATIVE</extra>
@@ -112,17 +102,14 @@
           </rule>
           <rule id="1">
             <name>csu/subdir_lib</name>
-            <post id="0">
-              <mode>code</mode>
-              <value>install $BUILD/csu/crt1.o $BUILD/csu/crti.o $BUILD/csu/crtn.o $DEPLOY/$CROSS/lib</value>
+            <post id="0">              
+              <code>install $BUILD/csu/crt1.o $BUILD/csu/crti.o $BUILD/csu/crtn.o $DEPLOY/$CROSS/lib</code>
             </post>
-            <post id="1">
-              <mode>code</mode>
-              <value>$CROSS-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $DEPLOY/$CROSS/lib/libc.so</value>
+            <post id="1">              
+              <code>$CROSS-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $DEPLOY/$CROSS/lib/libc.so</code>
             </post>
-            <post id="2">
-              <mode>code</mode>
-              <value>touch $DEPLOY/$CROSS/include/gnu/stubs.h</value>
+            <post id="2">              
+              <code>touch $DEPLOY/$CROSS/include/gnu/stubs.h</code>
             </post>
           </rule>
         </make>

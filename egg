@@ -1207,12 +1207,36 @@ if [ $? -eq 1 ]; then
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/value")	
+				# rebuild 				
+				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/code"
+				NUM=$?
+				if [ $NUM -ne 0 ]; then
+					VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/code")
+					MODE="CODE"
+				else
+					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/script"
+					NUM=$?
+					if [ $NUM -ne 0 ]; then
+						VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/script")
+						MODE="SCRIPTS"
+					else
+						xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/source"
+						NUM=$?
+						if [ $NUM -ne 0 ]; then
+							VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/source")
+							MODE="SOURCE"
+						else
+						     error_c "Missing pre mode id=$i  Phase $2" "project : $1"  
+						fi		
+					fi				
+				fi
+				#end 				
+				#VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre conf id=$i value Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/mode")	
+				#MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre conf id=$i mode Phase $2" "project : $1"
@@ -1279,12 +1303,36 @@ if [ $? -eq 1 ]; then
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/value")	
+				# rebuild 				
+				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/code"
+				NUM=$?
+				if [ $NUM -ne 0 ]; then
+					VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/code")
+					MODE="CODE"
+				else
+					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/script"
+					NUM=$?
+					if [ $NUM -ne 0 ]; then
+						VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/script")
+						MODE="SCRIPTS"
+					else
+						xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/source"
+						NUM=$?
+						if [ $NUM -ne 0 ]; then
+							VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/source")
+							MODE="SOURCE"
+						else
+						     error_c "Missing  mode post conf id=$i  Phase $2" "project : $1"  
+						fi		
+					fi				
+				fi
+				#end 
+				#VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post conf id=$i Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/mode")	
+				#MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post conf id=$i mode Phase $2" "project : $1"
@@ -1700,12 +1748,36 @@ if [ $? -eq 1 ]; then
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/value")	
+				# rebuild 
+				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/code"
+				NUM=$?
+				if [ $NUM -ne 0 ]; then
+					VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/code")
+					MODE="CODE"
+				else
+					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/script"
+					NUM=$?
+					if [ $NUM -ne 0 ]; then
+						VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/script")
+						MODE="SCRIPTS"
+					else
+						xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/source"
+						NUM=$?
+						if [ $NUM -ne 0 ]; then
+							VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/source")
+							MODE="SOURCE"
+						else
+						     error_c "Missing  mode pre conf id=$i  Phase $2" "project : $1"  
+						fi		
+					fi				
+				fi
+				#end				
+				#VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre build id=$i value Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/mode")	
+				#MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  pre build id=$i mode Phase $2" "project : $1"
@@ -1775,12 +1847,36 @@ if [ $? -eq 1 ]; then
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/value")	
+				# rebuild 
+				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/code"
+				NUM=$?
+				if [ $NUM -ne 0 ]; then
+					VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/code")
+					MODE="CODE"
+				else
+					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/script"
+					NUM=$?
+					if [ $NUM -ne 0 ]; then
+						VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/script")
+						MODE="SCRIPTS"
+					else
+						xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/source"
+						NUM=$?
+						if [ $NUM -ne 0 ]; then
+							VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/source")
+							MODE="SOURCE"
+						else
+						     error_c "Missing mode post conf id=$i  Phase $2" "project : $1"  
+						fi		
+					fi				
+				fi
+				#end									
+				#VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/value")	
 				equs "$VALUE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post build id=$i Phase $2" "project : $1"
 				fi
-				MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/mode")	
+				#MODE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/mode")	
 				equs "$MODE"  
 				if [ $? -eq 1 ]; then 
 					error_c "Missing  post build id=$i mode Phase $2" "project : $1"
