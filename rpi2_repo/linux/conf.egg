@@ -15,7 +15,7 @@
         <threads>8</threads>
         <path>
           <pre>
-            <set id="0">$USER_PATH</set>
+            <set >$USER_PATH</set>
           </pre>
         </path>
         <make id="0">

@@ -2898,6 +2898,19 @@ if [ $? -eq 1 ]; then
 				REMOTE="$tmp"
 			fi
 		fi
+		if [ "MODE" == "SVN" ]; then
+			xml_count $1 "/egg/project/remote/revision"	
+			NUM=$?
+			if [ $NUM -ne 0 ]; then 
+				BRANCH=$(xml_value $1 "/egg/project/remote/revision")
+				equs "$BRANCH" 
+				if [ $? -eq 1 ]; then 
+					error_c "Missing  revision  " "project : $1"
+				fi
+				tmp="-r$BRANCH $REMOTE"
+				REMOTE="$tmp"
+			fi
+		fi
 		prepare_script_download "$1" "$2"  "$4" "$3" 
 		create_download_source "$4"  "$MODE"  "$REMOTE" "$PACKET"  "$1"  "$1_$2" "$KEY_URL" "$KEY_FILE" 
 	else
