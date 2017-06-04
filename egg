@@ -303,7 +303,7 @@ function xml_get_env(){
 HW_ARCH=$(uname -m)
 local MAINFILE="$REPO/conf.egg"
 declare -A XNAME="root  repo sources images store  build editor \
-				 start_path"
+				 path ld_library_path"
 local II=""
 local VV=""
 local NUM=0
@@ -321,7 +321,7 @@ if [ $NUM -ne 0 ]; then
 		eval $VV="$VALUE"
 		export $VV
 		USER_ENV+="  $VV"		
-		#print_s_ita "Add user env var" "$VV"   "$VALUE"
+		print_s_ita "Add user env var" "$VV"   "$VALUE"
 	else
 		error_c "XML file $MAINFILE" "node user_env id=\"$ID\" fail, check xml"
 	fi
@@ -339,7 +339,6 @@ for II in $XNAME; do
 		error_c "XML file $MAINFILE" "node $II fail, check xml"
 	fi	
 done
-
 }
 
 
@@ -430,7 +429,6 @@ REPOBACKUP="$ROOT/backup"
 BUILD="$ROOT/build"
 EDITOR="vim"
 #initial value PATH
-START_PATH="/usr/bin:/sbin:/bin"
 MYPATH=""
 CPATH=""
 C_INCLUDE_PATH=""
@@ -2750,6 +2748,7 @@ local PACKET=""
 local NUM=0
 local KEY_URL=""
 local KEY_FILE=""
+local BRANCH=""
 check_project $1
 if [ $? -eq 1 ]; then
 #exist project name <name> in repo 
@@ -2770,7 +2769,7 @@ if [ $? -eq 1 ]; then
 		equs "$PACKET" 
 		if [ $? -eq 1 ]; then 
 			error_c "Missing  packet name " "project : $1"
-		fi	
+		fi			
 		xml_count $1 "/egg/project/remote/key"
 		NUM=$?
 		if [ $NUM -ne 0 ]; then 
@@ -2786,6 +2785,20 @@ if [ $? -eq 1 ]; then
 			fi
 		fi
 		MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]')
+		#check  git for branch...
+		if [ "MODE" == "GIT" ]; then
+			xml_count $1 "/egg/project/remote/branch"	
+			NUM=$?
+			if [ $NUM -ne 0 ]; then 
+				BRANCH=$(xml_value $1 "/egg/project/remote/branch")
+				equs "$BRANCH" 
+				if [ $? -eq 1 ]; then 
+					error_c "Missing  branch  " "project : $1"
+				fi
+				tmp="-b $BRANCH $REMOTE"
+				REMOTE="$tmp"
+			fi
+		fi
 		prepare_script_download "$1" "$2"  "$4" "$3" 
 		create_download_source "$4"  "$MODE"  "$REMOTE" "$PACKET"  "$1"  "$1_$2" "$KEY_URL" "$KEY_FILE" 
 	else
@@ -2997,7 +3010,7 @@ local VV=""
 local VALUE=""
 local VAR=""
 local NAMES="step_name info cc cxx as ld nm ar strip asflags cflags cppflags cxxflags \
-			ldflags libs cpath c_include_path cplus_include_path ld_library_path\
+			ldflags libs cpath c_include_path cplus_include_path \
 			arch cross cross_compile"
 VV=$(getFileSize $REPO/conf.egg)
 if [ $VV -ne 0 ]; then
@@ -3062,7 +3075,7 @@ fi
 
 prepare_seq_download "$ID" "$PRJS"
 
-MYPATH=$START_PATH
+MYPATH=$PATH
 V=${SORTREQ[0]}
 if [ "$V" ]; then	
 	if [ ! -e "$BUILD/$STEP_NAME" ]; then
@@ -3112,7 +3125,7 @@ fi
 
 prepare_seq_download "$ID" "$PRJS"
 
-MYPATH=$START_PATH
+MYPATH=$PATH
 V=${SORTREQ[0]}
 if [ "$V" ]; then	
 	if [ ! -e "$BUILD/$STEP_NAME" ]; then
@@ -3162,7 +3175,7 @@ fi
 
 prepare_seq_priority "$ID" "$PRJS"
 
-MYPATH=$START_PATH
+MYPATH=$PATH
 V=${SORTREQ[0]}
 if [ "$V" ]; then
 	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
@@ -4585,9 +4598,9 @@ fi
 local RES=""
 RES=$(ls -d $1)
 if [ "$RES" ]; then 
+	rm -rf $REPO
 	rm -f $OROOT/repo
-	ln -s $1 $OROOT/repo
-	sync
+	ln -s $1 $OROOT/repo	
 	main list
 else
 	error_c "setrepo : direcory $1 " "not exist!"
@@ -4709,7 +4722,7 @@ function usage(){
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "pack : create a tar of the output "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "multi <file.egg list of repos >: sequence building of projects"
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "list : list work repo (... more)"
-	print_c  "$YELLOW" "COMMAND" "$GREEN" "setrepo <path with new repo> : set a new work repo and list  "
+	print_c  "$YELLOW" "COMMAND" "$GREEN" "setrepo <opt path with new repo> : set a new work repo and list  "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "freeze nn < step number> : set status stable "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "hot nn < step number> : set status to configure "
 	print_c  "$YELLOW" "COMMAND" "$GREEN" "clone <src> <new> : clone an existing prj to a new prj"
@@ -4909,7 +4922,7 @@ help_c "command : list" \
 
 function help_setrepo(){
 help_c "command : setrepo" \
-"\$1 : file : request " \
+"\$1 : file : optional  " \
 "set file to current repo (set repo lnk in eggX folder to file)" \
 "and call list" \
 "ex ./egg setrepo x86_64_toolkit_repo"

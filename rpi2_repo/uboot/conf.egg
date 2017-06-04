@@ -10,7 +10,7 @@
     </remote>
     <build>
       <step id="0">
-        <silent>no</silent>
+        <silent>yes</silent>
         <threads>8</threads>
         <path>
           <pre>
@@ -26,7 +26,11 @@
             <name>DEVICE_TREE=bcm2836-rpi-2-b  all</name>
             <post id="0">
               <mode>code</mode>
-              <value>mkdir -p $DEPLOY/boot; install $BUILD/u-boot.bin $BUILD/u-boot-*.bin $DEPLOY/boot</value>
+              <value>
+		mkdir -p $DEPLOY/boot; 
+		install $BUILD/u-boot.bin $BUILD/u-boot-*.bin $DEPLOY/boot;
+		ln -s $DEPLOY/u-boot.bin $DEPLOY/kernel7.img;
+		</value>
             </post>
           </rule>
         </make>

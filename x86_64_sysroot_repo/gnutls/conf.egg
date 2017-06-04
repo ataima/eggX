@@ -34,6 +34,10 @@
               <mode>code</mode>
               <value> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</value>
             </post>
+	    <post id="1">
+              <mode>code</mode>
+              <value> ln -s $DEPLOY/bin/gpg2 $DEPLOY/bin/gpg</value>
+            </post>
           </rule>
         </make>
       </step>

@@ -4,17 +4,14 @@
     <name>linux</name>
     <download>check</download>
     <remote>
-      <method>wget</method>
-      <url>https://cdn.kernel.org/pub/linux/kernel/v4.x</url>
-      <file>linux-4.10.9.tar.xz</file>
-      <key>
-        <url>https://cdn.kernel.org/pub/linux/kernel/v4.x</url>
-        <file>linux-4.10.9.tar.sign</file>
-      </key>
+      <method>git</method>
+      <url>https://github.com/raspberrypi</url>
+      <file>linux.git </file>
+      <branch>rpi-4.12.y</branch>
     </remote>
     <build>
       <step id="1">
-        <silent>no</silent>
+        <silent>yes</silent>
         <threads>8</threads>
         <path>
           <pre>
@@ -24,11 +21,15 @@
         <make id="0">
           <priority>2</priority>
           <rule id="0">
-            <name> mrproper</name>
+            <name> distclean </name>
             <thread> 1 </thread>
           </rule>
           <rule id="1">
-            <name> bcm2835_defconfig </name>
+            <pre id="0">
+              <mode>code</mode>
+              <value>export KERNEL=kernel7</value>
+            </pre>
+            <name> bcm2709_defconfig </name>
             <thread> 1 </thread>
           </rule>
           <rule id="2">
@@ -50,11 +51,11 @@
             </post>
             <post id="1">
               <mode>code</mode>
-              <value>install arch/arm/boot/dts/overlays/*.dtb* $DEPLOY/boot/overlays/.</value>
+              <value>mkdir $DEPLOY/boot/overlays;install arch/arm/boot/dts/overlays/*.dtb* $DEPLOY/boot/overlays/.</value>
             </post>
             <post id="2">
               <mode>code</mode>
-              <value>install arch/arm/boot/zImage $DEPLOY/boot/kernel7.img</value>
+              <value>install arch/arm/boot/zImage $DEPLOY/boot/zImage</value>
             </post>
           </rule>
         </make>

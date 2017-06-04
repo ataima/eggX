@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<egg>
+  <project>
+    <name>busybox</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url> https://busybox.net/downloads</url>
+      <file>  busybox-1.26.2.tar.bz2</file>
+    </remote>
+    <build>
+      <step id="1">
+        <silent>no</silent>
+        <threads>8</threads>
+        <path>
+          <pre>
+            <set id="0">$USER_PATH</set>
+          </pre>
+        </path>
+        <make id="0">
+          <priority>3</priority>     
+          <rule id="0">
+	     <pre id="0">
+			<mode>code</mode>
+			<value>cp $REPO/busybox_defconfig_arm $BUILD/.config</value>
+	     </pre>
+            <name> CROSS_COMPILE=$CROSS_COMPILE  all </name>
+          </rule>          
+          <rule id="1">
+            <name> CROSS_COMPILE=$CROSS_COMPILE  install </name>
+            <thread> 1 </thread>
+	    <post id="0">
+			<mode>code</mode>
+			<value>cp -a $BUILD/tmp_install/* $DEPLOY/.</value>
+	    </post>
+          </rule>
+        </make>
+      </step>
+    </build>
+  </project>
+</egg>
