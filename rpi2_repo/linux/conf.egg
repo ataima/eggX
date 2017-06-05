@@ -15,7 +15,7 @@
         <threads>8</threads>
         <path>
           <pre>
-            <set >$USER_PATH</set>
+            <set>$USER_PATH</set>
           </pre>
         </path>
         <make id="0">
@@ -26,7 +26,6 @@
           </rule>
           <rule id="1">
             <pre id="0">
-              
               <code>export KERNEL=kernel7</code>
             </pre>
             <name> bcm2709_defconfig </name>
@@ -46,15 +45,12 @@
             <name>  modules_install INSTALL_MOD_PATH=$DEPLOY/lib/modules</name>
             <thread> 1 </thread>
             <post id="0">
-              
               <code>install arch/arm/boot/dts/*.dtb $DEPLOY/boot/.</code>
             </post>
             <post id="1">
-              
               <code>mkdir $DEPLOY/boot/overlays;install arch/arm/boot/dts/overlays/*.dtb* $DEPLOY/boot/overlays/.</code>
             </post>
             <post id="2">
-              
               <code>install arch/arm/boot/zImage $DEPLOY/boot/zImage</code>
             </post>
           </rule>

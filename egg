@@ -2311,6 +2311,7 @@ fi
 # $2 link
 # $3 filename 
 function git_packet(){ #EX
+local GRES=""
 local RES=0
 print_c "$GREEN_LIGHT" "   - Git  source" "$YELLOW" $1
 local PNAME="$2/$3"
@@ -2329,9 +2330,30 @@ if [ ! -d "$SOURCES/$1" ]; then
 				error_c "Git source :cannot restore from tar backup " "   project $1"
 			fi 
 			cd "$SOURCES/$1"
-			git pull --no-edit --commit origin master
+			GRES=$(git pull --no-edit --commit origin master)
 			if [ $? -ne 0 ]; then 
 				error_c "Git Update error " "   project $1"
+			else
+			GRES=$(echo $GRES | grep "Already up-to-date")
+				if [ "$GRES" != "" ];then 
+					# update soure from pull  regenerate tar ball
+					cd "$PWD"
+					if [ -e "$STORE/$3.tar.bz2" ]; then
+						chmod 666 "$STORE/$3.tar.bz2"
+						chmod 666 "$STORE/$3.tar.bz2.md5"
+					fi
+					rm -rf "$STORE/$3.tar.bz2"
+					rm -rf "$STORE/$3.tar.bz2.md5"
+					cd "$SOURCES"
+					tar -cjvSf "$STORE/$3.tar.bz2"  "$1" >/dev/null
+					if [ $? -ne 0 ]; then 
+						error_c "Git source :cannot create tar backup " "   project $1"
+					fi 
+					cd "$PWD"
+					md5sum "$STORE/$3.tar.bz2" > "$STORE/$3.tar.bz2.md5"				
+					chmod 444 "$STORE/$3.tar.bz2"
+					chmod 444 "$STORE/$3.tar.bz2.md5"
+				fi
 			fi 			
 			RES=1
 		fi
@@ -3000,6 +3022,33 @@ if [ $? -eq 1 ]; then
 					DEST_DIR=""
 				fi
 				MODE=$(echo $MODE  | tr '[:lower:]' '[:upper:]') 
+				#check  git for branch...
+				if [ "MODE" == "GIT" ]; then
+					xml_count $1 "/egg/project/patch[@id='$i']/branch"	
+					NUM=$?
+					if [ $NUM -ne 0 ]; then 
+						BRANCH=$(xml_value $1 "/egg/project/patch[@id='$i']/branch")
+						equs "$BRANCH" 
+						if [ $? -eq 1 ]; then 
+							error_c "Missing  branch  " "project : $1"
+						fi
+						tmp="-b $BRANCH $REMOTE"
+						REMOTE="$tmp"
+					fi
+				fi
+				if [ "MODE" == "SVN" ]; then
+					xml_count $1 "/egg/project/patch[@id='$i']/revision"	
+					NUM=$?
+					if [ $NUM -ne 0 ]; then 
+						BRANCH=$(xml_value $1 "/egg/project/patch[@id='$i']/revision")
+						equs "$BRANCH" 
+						if [ $? -eq 1 ]; then 
+							error_c "Missing  revision  " "project : $1"
+						fi
+						tmp="-r$BRANCH $REMOTE"
+						REMOTE="$tmp"
+					fi
+				fi
 				prepare_script_download "$1" "$2"  "$4" "$3"
 				create_download_source "$4"  "$MODE"  "$REMOTE" "$PACKET"  "$1"  "$1_$2" "$KEY_URL" "$KEY_FILE"
 				if [ "$PATCH_DIR" ] ; then
@@ -5083,10 +5132,12 @@ function help_pri(){
 help_c "command : pri manage projects priority" \
 "\$1 : step number " \
 "\$2... : argv" \
-"if \$2=move -> start stop offset" \
-"if \$2=swap -> src dest " \
+"if \$2=move -> start stop offset mode priority" \
+"if \$2=swap -> src dest  swap priority"  \
+"if \$2=space -> step space  space prioriy" \
 "./egg pri 1 mode 25 30 5" \
-"./egg pri 1 swap 25 30 " 
+"./egg pri 1 swap 25 30 " \
+"./egg pri 1 space 1 5 " 
 }
 
 function help_options(){

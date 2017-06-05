@@ -21,7 +21,6 @@
           <priority>3</priority>
           <rule id="0">
             <pre id="0">
-              
               <code>cp $REPO/busybox_defconfig_arm $BUILD/.config</code>
             </pre>
             <name> CROSS_COMPILE=$CROSS_COMPILE  all </name>
@@ -30,7 +29,7 @@
             <name> CROSS_COMPILE=$CROSS_COMPILE  install </name>
             <thread> 1 </thread>
             <post id="0">
-			<code>
+              <code>
 			cp -a $BUILD/tmp_install/* $DEPLOY/.;
 			cp $REPO/busybox_init $DEPLOY/init;
 			chmod +rx  $DEPLOY/init;
