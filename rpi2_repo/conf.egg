@@ -7,12 +7,12 @@
     <store>$ROOT/store</store>
     <images>$ROOT/images</images>
     <build>$ROOT/build</build>
-    <editor>vim</editor>
+    <editor>nano</editor>
     <path>$USER_PATH</path>
     <ld_library_path>$USER_LIB_PATH</ld_library_path>
     <user_env id="0">
       <name>USER_PATH</name>
-      <value>$ROOT/images/x86_64_sysroot/bin:$ROOT/images/x86_64_sysroot/x86_64-pc-linux-gnu/bin</value>
+      <value>$ROOT/images/x86_64_sysroot/bin:$ROOT/images/x86_64_sysroot/x86_64-pc-linux-gnu/bin:/bin/usr/bin</value>
     </user_env>
     <user_env id="1">
       <name>USER_LIB_PATH</name>

@@ -4173,13 +4173,13 @@ fi
 local ALL_FILES=$(get_priority_list "$1")
 local VV=""
 format_xml "$OREPO/conf.egg"
-$EDITOR "$OREPO/conf.egg"
+/usr/bin/gnome-terminal -x bash -c '$EDITOR $OREPO/conf.egg'
 for VV in $ALL_FILES;  do
 if [ "$VV" == "." ]; then continue; fi
 if [ "$VV" == ".." ]; then continue; fi
 if [ -d "$OREPO/$VV" ]; then 
 	format_xml "$OREPO/$VV/conf.egg"
-	$EDITOR "$OREPO/$VV/conf.egg" 
+	/usr/bin/gnome-terminal -x bash -c '$EDITOR $OREPO/$VV/conf.egg' 
 fi
 done
 }
@@ -4230,16 +4230,18 @@ fi
 check_project "$1"
 if [ $? -ne 0 ]; then
 	format_xml "$OREPO/$1/conf.egg"
-	$EDITOR "$OREPO/$1/conf.egg" > /dev/null  &
+	/usr/bin/gnome-terminal -x bash -c '$EDITOR  $OREPO/$1/conf.egg' 
 else
 	case $1 in
 		self)
 		format_xml "$OROOT/egg"
-		$EDITOR "$OROOT/egg" > /dev/null  &
+		set  -x
+		V="$EDITOR $OROOT/egg"
+		/usr/bin/gnome-terminal -x bash -c "$V"
 		;;
 		self.conf)
 		format_xml "$OREPO/conf.egg"
-		$EDITOR "$OREPO/conf.egg" > /dev/null  &
+		/usr/bin/gnome-terminal -x bash -c '$EDITOR $OREPO/conf.egg' 
 		;;
 		self.repo)
 		edit_repo_files "$2"
@@ -4865,7 +4867,7 @@ function usage(){
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -D or --debug : set debug mode" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option +W or --warning : print also warnings" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -B or --break : break and debug function" 
-	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -X or --debug : break and debug functions into" 
+	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -X or --deepdebug : break and debug functions into" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -S or --step : debug functions into step by step" 
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "option -T or --test : call direct a function and debug step by step"
 	print_c  "$YELLOW" "OPTIONS" "$GREEN" "cat project : print project/conf.egg"
@@ -5274,7 +5276,7 @@ fi
 xmlstarlet  ed --inplace -u "/egg/project/name" -v "$2" "$OREPO/$2/conf.egg"
 xmlstarlet  ed --inplace -u "/egg/project/remote/url" -v "  " "$OREPO/$2/conf.egg"
 xmlstarlet  ed --inplace -u "/egg/project/remote/file" -v "  " "$OREPO/$2/conf.egg"
-./egg edit "$2"
+/usr/bin/gnome-terminal -x bash -c '$EDITOR $2'
 }
 
 
