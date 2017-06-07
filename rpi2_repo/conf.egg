@@ -12,11 +12,11 @@
     <ld_library_path>$USER_LIB_PATH</ld_library_path>
     <user_env id="0">
       <name>USER_PATH</name>
-      <value>$ROOT/images/x86_64_sysroot/bin:$ROOT/images/x86_64_sysroot/x86_64-pc-linux-gnu/bin:/bin/usr/bin</value>
+      <value>$IMAGES/arm-toolkit/bin:$PATH</value>
     </user_env>
     <user_env id="1">
       <name>USER_LIB_PATH</name>
-      <value>$ROOT/images/x86_64_sysroot/lib64:$ROOT/images/x86_64_sysroot/lib</value>
+      <value>$IMAGES/arm-toolkit/lib64:$IMAGES/arm-toolkit/lib</value>
     </user_env>
   </conf>
   <defaults>
@@ -46,13 +46,13 @@
     <step id="1">
       <step_name>rpi2_image</step_name>
       <info>build all for rpi 2 image</info>
-      <cc/>
-      <cxx/>
-      <as/>
-      <ld/>
-      <nm/>
-      <ar/>
-      <strip/>
+      <cc>gcc</cc>
+      <cxx>g++</cxx>
+      <as>as</as>
+      <ld>ld</ld>
+      <nm>nm</nm>
+      <ar>ar</ar>
+      <strip>strip</strip>
       <asflags>-mfpu=neon-vfpv4  -march=armv7ve</asflags>
       <cflags>-O3 -mfpu=neon-vfpv4  -march=armv7ve -mtune=cortex-a7</cflags>
       <cppflags>-O3 -mfpu=neon-vfpv4  -march=armv7ve -mtune=cortex-a7</cppflags>

@@ -308,6 +308,7 @@ local II=""
 local VV=""
 local NUM=0
 local ID=0
+echo "--> $PATH : $OROOT $HOME $REPO $IMAGES"
 #load user defined variable globals
 NUM=$(xmlstarlet sel -t  -v "count(egg/conf/user_env)" -n $MAINFILE)
 if [ "$NUM" == "" ]; then
@@ -324,7 +325,7 @@ if [ $NUM -ne 0 ]; then
 		eval $VV="$VALUE"
 		export $VV
 		USER_ENV+="  $VV"		
-		#print_s_ita "Add user env var" "$VV"   "$VALUE"
+		#print_s_ita "Add user env var" "$VV"  $(echo -n "$VALUE")
 	else
 		error_c "XML file $MAINFILE" "node user_env id=\"$ID\" fail, check xml"
 	fi
@@ -338,17 +339,20 @@ for II in $XNAME; do
 		VV=$(echo $II |   tr '[:lower:]' '[:upper:]')
 		eval $VV="$VALUE"
 		export $VV
+		#print_s_ita "env var" "$VV"   $(echo -n "$VALUE")
 	else
 		error_c "XML file $MAINFILE" "node $II fail, check xml"
 	fi	
 done
 #load optional global variable
+
 for II in $ONAME; do
 	local VALUE=$(xmlstarlet sel -t  -v egg/conf/$II -n $MAINFILE)	
 	if [ "$VALUE" ]; then
 		VV=$(echo $II |   tr '[:lower:]' '[:upper:]')
 		eval $VV="$VALUE"
 		export $VV	
+		#print_s_ita "main var" "$VV"   $(echo -n "$VALUE")
 	fi	
 done
 }
@@ -3690,14 +3694,14 @@ fi
 local PRI=$1
 local NAME=$2
 local PRJ=$3
-local PATH=$4
+local EPATH=$4
 print_build_msg "$PRI" "$NAME" "$PRJ"
-cd "$PATH"
-"$PATH/bootstrap.sh"
+cd "$EPATH"
+"$EPATH/bootstrap.sh"
 if [ $? -ne 0 ] ; then
 	error_c "configure step" " FAIL !!";
 fi
-"$PATH/build_$PRI.sh"
+"$EPATH/build_$PRI.sh"
 if [ $? -ne 0 ] ; then
 	error_c "build step" " FAIL !!";
 fi
@@ -3730,10 +3734,10 @@ fi
 local PRI=$1
 local NAME=$2
 local PRJ=$3
-local PATH=$4
+local EPATH=$4
 print_download_msg "$PRI" "$NAME" "$PRJ"
-cd "$PATH"
-"$PATH/download.sh"
+cd "$EPATH"
+"$EPATH/download.sh"
 if [ $? -ne 0 ] ; then
 	error_c "download step" " FAIL !!";
 fi
@@ -3765,10 +3769,10 @@ fi
 local PRI=$1
 local NAME=$2
 local PRJ=$3
-local PATH=$4
+local EPATH=$4
 print_patch_msg "$PRI" "$NAME" "$PRJ"
-cd "$PATH"
-"$PATH/patch.sh"
+cd "$EPATH"
+"$EPATH/patch.sh"
 if [ $? -ne 0 ] ; then
 	error_c "patch step" " FAIL !!";
 fi
@@ -3799,10 +3803,10 @@ fi
 local PRI=$1
 local NAME=$2
 local PRJ=$3
-local PATH=$4
+local EPATH=$4
 print_build_msg "$PRI" "$NAME" "$PRJ"
-cd "$PATH"
-"$PATH/build_$PRI.sh"
+cd "$EPATH"
+"$EPATH/build_$PRI.sh"
 if [ $? -ne 0 ] ; then
 	error_c "build step" " FAIL !!";
 fi
@@ -3834,10 +3838,10 @@ fi
 local PRI=$1
 local NAME=$2
 local PRJ=$3
-local PATH=$4
+local EPATH=$4
 print_clean_msg "$PRI" "$NAME" "$PRJ"
-cd "$PATH"
-"$PATH/clean.sh"
+cd "$EPATH"
+"$EPATH/clean.sh"
 if [ $? -ne 0 ] ; then
 	error_c "clean step" " FAIL !!";
 fi
@@ -3868,10 +3872,10 @@ fi
 local PRI=$1
 local NAME=$2
 local PRJ=$3
-local PATH=$4
+local EPATH=$4
 print_clean_msg "$PRI" "$NAME" "$PRJ"
-cd "$PATH"
-"$PATH/distclean.sh"
+cd "$EPATH"
+"$EPATH/distclean.sh"
 if [ $? -ne 0 ] ; then
 	error_c "distclean step" " FAIL !!";
 fi
@@ -4211,7 +4215,6 @@ local SCR="/tmp/edit.sh"
 rm -f $SCR
 echo "#!/bin/bash" > "$SCR"
 echo "$EDITOR $1" >> "$SCR"
-set -x
 chmod +x "$SCR"
 bash "$SCR"
 }
@@ -5625,6 +5628,7 @@ get_max_step
 EGG_RES=0
 EGG_START_TIME=$(date  +%s)
 legal
+echo "--->PATH:$PATH"
 if [ $# -eq 0 ] ; then		
 	iterative
 else
