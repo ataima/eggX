@@ -1,26 +1,28 @@
 <?xml version="1.0"?>
 <egg>
   <project>
-    <name>openssh</name>
+    <name>ssh</name>
     <download>check</download>
     <remote>
       <method>wget</method>
-      <url>  </url>
-      <file>  </file>
+      <url>http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable</url>
+      <file>openssh-7.4p1.tar.gz</file>
     </remote>
     <build>
       <step id="1">
-        <silent>yes</silent>
+        <silent>no</silent>
         <threads>8</threads>
         <configure>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
+	  <extra id="2">--sysconfdir=/etc/ssh</extra>
+	  <extra id="3">--with-md5-passwords</extra>
+	  <extra id="4"> --with-privsep-path=/var/lib/sshd</extra>		
         </configure>
         <make id="0">
-          <priority>340</priority>
+          <priority>345</priority>
           <rule id="0">
             <name>all</name>
-            <thread>1</thread>
           </rule>
           <rule id="1">
             <name>install</name>

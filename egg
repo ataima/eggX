@@ -4154,6 +4154,18 @@ if [ $? -eq 0 ]; then
 fi
 }
 
+
+#$1  filename to edit
+function run_editor(){
+local SCR="/tmp/edit.sh"
+rm -f $SCR
+echo "#!/bin/bash" > "$SCR"
+echo "$EDITOR $1" >> "$SCR"
+set -x
+chmod +x "$SCR"
+bash "$SCR"
+}
+
 #recussive edit on repo project
 #$1 optnional step : if presente edit only projects in this step
 function edit_repo_files(){
@@ -4173,13 +4185,13 @@ fi
 local ALL_FILES=$(get_priority_list "$1")
 local VV=""
 format_xml "$OREPO/conf.egg"
-/usr/bin/gnome-terminal -x bash -c '$EDITOR $OREPO/conf.egg'
+run_editor $OREPO/conf.egg
 for VV in $ALL_FILES;  do
 if [ "$VV" == "." ]; then continue; fi
 if [ "$VV" == ".." ]; then continue; fi
 if [ -d "$OREPO/$VV" ]; then 
 	format_xml "$OREPO/$VV/conf.egg"
-	/usr/bin/gnome-terminal -x bash -c '$EDITOR $OREPO/$VV/conf.egg' 
+	run_editor $OREPO/$VV/conf.egg
 fi
 done
 }
@@ -4230,18 +4242,16 @@ fi
 check_project "$1"
 if [ $? -ne 0 ]; then
 	format_xml "$OREPO/$1/conf.egg"
-	/usr/bin/gnome-terminal -x bash -c '$EDITOR  $OREPO/$1/conf.egg' 
+	run_editor   $OREPO/$1/conf.egg 
 else
 	case $1 in
 		self)
 		format_xml "$OROOT/egg"
-		set  -x
-		V="$EDITOR $OROOT/egg"
-		/usr/bin/gnome-terminal -x bash -c "$V"
+		run_editor $OROOT/egg
 		;;
 		self.conf)
 		format_xml "$OREPO/conf.egg"
-		/usr/bin/gnome-terminal -x bash -c '$EDITOR $OREPO/conf.egg' 
+		run_editor  $OREPO/conf.egg
 		;;
 		self.repo)
 		edit_repo_files "$2"
@@ -5276,7 +5286,7 @@ fi
 xmlstarlet  ed --inplace -u "/egg/project/name" -v "$2" "$OREPO/$2/conf.egg"
 xmlstarlet  ed --inplace -u "/egg/project/remote/url" -v "  " "$OREPO/$2/conf.egg"
 xmlstarlet  ed --inplace -u "/egg/project/remote/file" -v "  " "$OREPO/$2/conf.egg"
-/usr/bin/gnome-terminal -x bash -c '$EDITOR $2'
+run_editor $2
 }
 
 

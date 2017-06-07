@@ -10,11 +10,15 @@
     </remote>
     <build>
       <step id="1">
-        <silent>yes</silent>
+        <silent>no</silent>
         <threads>8</threads>
-        <configure>          
+        <configure>
+          <pre id="0">
+            <code> export CFLAGS="-I$DEPLOY/include/ncurses $CFLAGS"</code>
+          </pre>
           <extra id="0">--prefix=$DEPLOY</extra>
           <extra id="1">--target=$CROSS</extra>
+	  <extra id="2">--enable-nanorc</extra>
         </configure>
         <make id="0">
           <priority>340</priority>

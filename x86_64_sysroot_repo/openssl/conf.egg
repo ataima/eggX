@@ -30,15 +30,12 @@
             <name>install</name>
             <thread>1</thread>
             <post id="0">
-              
               <code>strip $DEPLOY/lib64/libcrypto.*</code>
             </post>
             <post id="1">
-              
               <code>strip $DEPLOY/lib64/libssl.*</code>
             </post>
             <post id="2">
-              
               <code> mkdir -p $PKGCONF ;  cp $(find $BUILD -name "*.pc")  $PKGCONF</code>
             </post>
           </rule>
