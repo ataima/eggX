@@ -12,5 +12,13 @@
       <step id="0">
       </step>
     </build>
+        <build>
+      <step id="2">
+      </step>
+    </build>   
+    <build>
+      <step id="3">
+      </step>
+    </build>
   </project>
 </egg>

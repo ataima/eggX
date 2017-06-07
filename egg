@@ -302,8 +302,8 @@ echo $RES
 function xml_get_env(){
 HW_ARCH=$(uname -m)
 local MAINFILE="$REPO/conf.egg"
-declare -A XNAME="root  repo sources images store  build editor \
-				 path ld_library_path"
+declare -A XNAME="root  repo sources images store  build editor "
+declare -A ONAME="path ld_library_path"
 local II=""
 local VV=""
 local NUM=0
@@ -340,6 +340,15 @@ for II in $XNAME; do
 		export $VV
 	else
 		error_c "XML file $MAINFILE" "node $II fail, check xml"
+	fi	
+done
+#load optional global variable
+for II in $ONAME; do
+	local VALUE=$(xmlstarlet sel -t  -v egg/conf/$II -n $MAINFILE)	
+	if [ "$VALUE" ]; then
+		VV=$(echo $II |   tr '[:lower:]' '[:upper:]')
+		eval $VV="$VALUE"
+		export $VV	
 	fi	
 done
 }
@@ -436,7 +445,7 @@ MYPATH=""
 CPATH=""
 C_INCLUDE_PATH=""
 CPLUS_INCLUDE_PATH=""
-LD_LIBRARY_PATH=""
+MY_LD_LIBRARY_PATH=""
 ARCH=""
 CROSS=""
 NATIVE=""
@@ -458,6 +467,7 @@ declare -A SORTREQ
 
 
 declare -i MAX_STEP=0
+declare -i START_STEP=0
 
 
 function forcestop(){
@@ -906,7 +916,7 @@ fi
 	echo "#current CPLUS_INCLUDE_PATH this project">> "$3"
 	echo "export CPLUS_INCLUDE_PATH=\"$CPLUS_INCLUDE_PATH\"" >> "$3"
 	echo "#current LD_LIBRARY_PATH this project">> "$3"
-	echo "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\"" >> "$3"
+	echo "export LD_LIBRARY_PATH=\"$MY_LD_LIBRARY_PATH\"" >> "$3"
 	echo "#current CC this project">> "$3"
 	echo "export CC=$CC" >> "$3"
 	echo "#current CXX this project">> "$3"
@@ -1200,6 +1210,8 @@ fi
 declare -i i=0
 local VALUE=""
 local MODE=""
+local NUM=0
+local M_NUM=0
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
@@ -1210,22 +1222,22 @@ if [ $? -eq 1 ]; then
 			NUM=$?
 			if [ $NUM -ne 0 ]; then
 				while  [ $i -lt $NUM ]; do
-				# rebuild 				
+				# rebuild 			
 				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/code"
-				NUM=$?
-				if [ $NUM -ne 0 ]; then
+				M_NUM=$?
+				if [ $M_NUM -ne 0 ]; then
 					VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/code")
 					MODE="CODE"
 				else
 					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/script"
-					NUM=$?
-					if [ $NUM -ne 0 ]; then
+					M_NUM=$?
+					if [ $M_NUM -ne 0 ]; then
 						VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/script")
 						MODE="SCRIPTS"
 					else
 						xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/source"
-						NUM=$?
-						if [ $NUM -ne 0 ]; then
+						M_NUM=$?
+						if [ $M_NUM -ne 0 ]; then
 							VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/pre[@id=\"$i\"]/source")
 							MODE="SOURCE"
 						else
@@ -1296,6 +1308,8 @@ fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 declare -i i=0
 local VALUE=""
+local NUM=0
+local M_NUM=0
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
@@ -1308,20 +1322,20 @@ if [ $? -eq 1 ]; then
 				while  [ $i -lt $NUM ]; do
 				# rebuild 				
 				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/code"
-				NUM=$?
-				if [ $NUM -ne 0 ]; then
+				M_NUM=$?
+				if [ $M_NUM -ne 0 ]; then
 					VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/code")
 					MODE="CODE"
 				else
 					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/script"
-					NUM=$?
-					if [ $NUM -ne 0 ]; then
+					M_NUM=$?
+					if [ $M_NUM -ne 0 ]; then
 						VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/script")
 						MODE="SCRIPTS"
 					else
 						xml_count $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/source"
-						NUM=$?
-						if [ $NUM -ne 0 ]; then
+						M_NUM=$?
+						if [ $M_NUM-ne 0 ]; then
 							VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/configure/post[@id=\"$i\"]/source")
 							MODE="SOURCE"
 						else
@@ -1741,6 +1755,8 @@ fi
 declare -i i=0
 local VALUE=""
 local MODE=""
+local NUM=0
+local M_NUM=0
 check_project $1
 if [ $? -eq 1 ]; then
 	if [ -f $REPO/$1/conf.egg ]; then
@@ -1753,20 +1769,20 @@ if [ $? -eq 1 ]; then
 				while  [ $i -lt $NUM ]; do
 				# rebuild 
 				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/code"
-				NUM=$?
-				if [ $NUM -ne 0 ]; then
+				M_NUM=$?
+				if [ $M_NUM -ne 0 ]; then
 					VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/code")
 					MODE="CODE"
 				else
 					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/script"
-					NUM=$?
-					if [ $NUM -ne 0 ]; then
+					M_NUM=$?
+					if [ $M_NUM -ne 0 ]; then
 						VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/script")
 						MODE="SCRIPTS"
 					else
 						xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/source"
-						NUM=$?
-						if [ $NUM -ne 0 ]; then
+						M_NUM=$?
+						if [ $M_NUM -ne 0 ]; then
 							VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/pre[@id=\"$i\"]/source")
 							MODE="SOURCE"
 						else
@@ -1852,20 +1868,20 @@ if [ $? -eq 1 ]; then
 				while  [ $i -lt $NUM ]; do
 				# rebuild 
 				xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/code"
-				NUM=$?
-				if [ $NUM -ne 0 ]; then
+				M_NUM=$?
+				if [ $M_NUM -ne 0 ]; then
 					VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/code")
 					MODE="CODE"
 				else
 					xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/script"
-					NUM=$?
-					if [ $NUM -ne 0 ]; then
+					M_NUM=$?
+					if [ $M_NUM -ne 0 ]; then
 						VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/script")
 						MODE="SCRIPTS"
 					else
 						xml_count $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/source"
-						NUM=$?
-						if [ $NUM -ne 0 ]; then
+						M_NUM=$?
+						if [ $M_NUM -ne 0 ]; then
 							VALUE=$(xml_value $1 "/egg/project/build/step[@id=\"$2\"]/make[@id=\"$7\"]/rule[@id=\"$6\"]/post[@id=\"$i\"]/source")
 							MODE="SOURCE"
 						else
@@ -2511,15 +2527,24 @@ echo "  esac">> "$1"
 echo "fi">> "$1"
 echo "">> "$1"
 echo "">> "$1"
+echo "#current eggx folder">>"$1"
 echo "ROOT=$ROOT">> "$1"
+echo "#current repo folder">>"$1"
 echo "REPO=$REPO">> "$1"
+echo "#current sources folder">>"$1"
 echo "SOURCES=$SOURCES">> "$1"
+echo "#current images folder">>"$1"
 echo "IMAGES=$IMAGES/$STEP_NAME">> "$1"
+echo "#current repobackup folder">>"$1"
 echo "REPOBACKUP=$REPOBACKUP">> "$1"
+echo "#current build folder">>"$1"
 echo "BUILD=$BUILD/$STEP_NAME">> "$1"
+echo "#current store folder">>"$1"
 echo "STORE=$STORE">> "$1"
+echo "#current path folder">>"$1"
+echo "PATH=$MYPATH">> "$1"
+echo "#current status">>"$1"
 echo "STATUS=$BUILD/$STEP_NAME/$6/status">> "$1"
-echo "export PATH=$MYPATH">> "$1"
 echo "check_exist \$STATUS">> "$1"
 echo "if [ \$? -eq 0 ]; then ">> "$1"
 echo "   chmod +w \$STATUS" >> "$1"
@@ -3160,6 +3185,7 @@ sync
 
 #$1 build phase number 0,1,2.....
 function read_default_for_step(){
+local RES=0
 if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
@@ -3192,6 +3218,7 @@ if [ $VV -ne 0 ]; then
 	else
 		if [ $NUM -eq 0 ]; then
 			warning_c "missing defaults conf for step $1"
+			RES=1
 		else
 			error_c "errata conf in main conf.egg" "Step id=$1 duplicate" 
 		fi
@@ -3200,6 +3227,7 @@ else
 	error_c "Missing conf.egg file " "on repo"
 fi
 NATIVE=$(gcc -dumpmachine)
+return $RES
 }
 
 
@@ -3237,6 +3265,7 @@ fi
 prepare_seq_download "$ID" "$PRJS"
 
 MYPATH=$PATH
+MY_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 V=${SORTREQ[0]}
 if [ "$V" ]; then	
 	if [ ! -e "$BUILD/$STEP_NAME" ]; then
@@ -3287,6 +3316,7 @@ fi
 prepare_seq_download "$ID" "$PRJS"
 
 MYPATH=$PATH
+MY_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 V=${SORTREQ[0]}
 if [ "$V" ]; then	
 	if [ ! -e "$BUILD/$STEP_NAME" ]; then
@@ -3337,6 +3367,7 @@ fi
 prepare_seq_priority "$ID" "$PRJS"
 
 MYPATH=$PATH
+MY_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 V=${SORTREQ[0]}
 if [ "$V" ]; then
 	PRJS=$(echo -n $V | sed 's/%/ /g' | awk '{print $2}')
@@ -3373,10 +3404,15 @@ local V=""
 unset BSEQ
 declare -A BSEQ
 read_default_for_step "$1"
-for V in $2; do
-	insert_packet $V $1
-done	
-SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
+if [  $? -eq 0 ] ; then 
+	for V in $2; do
+		insert_packet $V $1
+	done	
+	SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
+else
+	unset SORTREQ
+	declare -A SORTREQ
+fi
 }
 
 
@@ -3395,15 +3431,30 @@ local V=""
 unset BSEQ
 declare -A BSEQ
 read_default_for_step "$1"
-for V in $2; do
-	insert_packet_download  $V $1
-done	
-SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
+if [  $? -eq 0 ] ; then 
+	for V in $2; do
+		insert_packet_download  $V $1
+	done	
+	SORTREQ=$(echo ${BSEQ[*]}| tr " " "\n" | sort -n )
+else
+	unset SORTREQ
+	declare -A SORTREQ
+fi
 }
 
 #set numero massimo di step a disposizone
 function get_max_step(){
+local  II=0
+while [ $II -lt 10000 ]; do
+START_STEP=$(xmlstarlet sel -t  -v "count(/egg/defaults/step[@id=\"$II\"])" -n $REPO/conf.egg)
+	if [ $START_STEP -ne 0 ]; then 
+		START_STEP=$II
+		break
+	fi
+	II=$((II+1))
+done 
 MAX_STEP=$(xmlstarlet sel -t  -v "count(/egg/defaults/step)" -n $REPO/conf.egg)
+MAX_STEP=$((MAX_STEP+START_STEP))
 }
 
 
@@ -3459,7 +3510,7 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-local ID=0 
+local ID=$START_STEP 
 local V=""
 local PRI=""
 local NAME=""
@@ -3496,7 +3547,7 @@ if [ $RESULT -eq 0 ]; then
 	tar -cjSf $IMAGES/$PRJ.tar.bz2   .
 	md5sum $IMAGES/$PRJ.tar.bz2 > $IMAGES/$PRJ.tar.bz2.md5
 	cd $PWD
-	ID=0;
+	ID=$START_STEP ;
 	while [ $ID -lt $MAX_STEP ] ; do
 		prepare_seq_priority "$ID" "$ALL_PACKETS"
 		for V in $SORTREQ; do
@@ -4131,7 +4182,6 @@ else
 		echo "cd $BUILD/$PRJ/$2_$1" >> /tmp/egg_shellrc
 		bash --noprofile --rcfile /tmp/egg_shellrc 
 		#cd $V	
-		set +x
 		fi
 	else
 		error_c "Input step too BIG !!"
@@ -4319,7 +4369,7 @@ patch_all_packet $@
 }
 #$ARGV
 function redoall(){
-local RE_NUM=0
+local RE_NUM=$START_STEP 
 if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1
@@ -4366,7 +4416,7 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
 local PRI_LIST=""
-local ID=0 
+local ID=$START_STEP  
 local V=""
 local NAME=""
 isNumber $1
@@ -4408,7 +4458,7 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-local ID=0 
+local ID=$START_STEP  
 local V=""
 local PRI=""
 local NAME=""
@@ -4611,7 +4661,7 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 	
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-local FNUM=0
+local FNUM=$START_STEP 
 if [ $# -eq 0 ];  then 
 while [ $FNUM -lt $MAX_STEP ] ; do
 	freeze_step $FNUM
@@ -4747,7 +4797,7 @@ if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
 	set -x ; trap read debug 
 fi
 [ $STEP_STEP -eq 1 ] && trap read debug
-local FNUM=0
+local FNUM=$START_STEP 
 if [ $# -eq 0 ];  then 
 while [ $FNUM -lt $MAX_STEP ] ; do
 	hot_step $FNUM
@@ -4923,7 +4973,7 @@ read -r ;
 VV=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
 if [ "$VV" == "Y" ]
 then
-	ID=0
+	ID=$START_STEP 
 	while [ $ID -lt $MAX_STEP ] ; do
 		prepare_seq_priority "$ID" "$ALL_PACKETS"
 		for V in $SORTREQ; do
