@@ -8,64 +8,7 @@
       <url>http://ftp.gnu.org/gnu/glibc</url>
       <file>glibc-2.25.tar.gz</file>
     </remote>
-    <build>
-      <step id="0">
-        <silent>yes</silent>
-        <threads>8</threads>
-        <path>
-          <pre>
-            <set id="0">$USER_PATH</set>
-          </pre>
-        </path>
-        <configure>
-          <pre id="0">
-            
-            <code>mkdir -p $DEPLOY/$CROSS/lib</code>
-          </pre>
-          <pre id="1">
-            
-            <code>mkdir -p $DEPLOY/$CROSS/include</code>
-          </pre>
-          <extra id="0">--prefix=$DEPLOY/$CROSS</extra>
-          <extra id="1"> --build=$NATIVE</extra>
-          <extra id="2"> --host=$CROSS</extra>
-          <extra id="3">--target=$CROSS</extra>
-          <extra id="4">--with-headers=$DEPLOY/$CROSS/include</extra>
-          <extra id="5"> --disable-multilib</extra>
-          <extra id="6"> libc_cv_forced_unwind=yes</extra>
-          <extra id="7">libc_cv_c_cleanup=yes</extra>
-          <extra id="8">libc_cv_ctors_header=yes</extra>
-        </configure>
-        <make id="0">
-          <priority>15</priority>
-          <rule id="0">
-            <name>install-bootstrap-headers=yes install-headers</name>
-            <thread>1 </thread>
-          </rule>
-          <rule id="1">
-            <name>csu/subdir_lib</name>
-            <post id="0">
-              
-              <code>install $BUILD/csu/crt1.o $BUILD/csu/crti.o $BUILD/csu/crtn.o $DEPLOY/$CROSS/lib</code>
-            </post>
-            <post id="1">
-              
-              <code>$CROSS-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $DEPLOY/$CROSS/lib/libc.so</code>
-            </post>
-            <post id="2">
-              
-              <code>touch $DEPLOY/$CROSS/include/gnu/stubs.h</code>
-            </post>
-          </rule>
-          <rule id="2">
-            <name/>
-          </rule>
-          <rule id="3">
-            <name>install</name>
-            <thread>1</thread>
-          </rule>
-        </make>
-      </step>
+    <build>      
       <step id="3">
         <silent>yes</silent>
         <threads>8</threads>
@@ -75,24 +18,19 @@
           </pre>
         </path>
         <configure>
-          <pre id="0">
-            
+          <pre id="0">            
             <code>mkdir -p $DEPLOY/$CROSS/lib</code>
           </pre>
-          <pre id="1">
-            
+          <pre id="1">            
             <code>mkdir -p $DEPLOY/$CROSS/include</code>
           </pre>
-          <pre id="2">
-            
+          <pre id="2">            
             <code>export CFLAGS="-O3 -fPIC"</code>
           </pre>
-          <pre id="3">
-            
+          <pre id="3">            
             <code>export CXXFLAGS="-O3 -fPIC"</code>
           </pre>
-          <pre id="4">
-            
+          <pre id="4">            
             <code>export CPPFLAGS="-O3 -fPIC"</code>
           </pre>
           <extra id="0">--prefix=$DEPLOY/$CROSS</extra>
@@ -111,16 +49,13 @@
           </rule>
           <rule id="1">
             <name>csu/subdir_lib</name>
-            <post id="0">
-              
+            <post id="0">              
               <code>install $BUILD/csu/crt1.o $BUILD/csu/crti.o $BUILD/csu/crtn.o $DEPLOY/$CROSS/lib</code>
             </post>
-            <post id="1">
-              
+            <post id="1">              
               <code>$CROSS-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $DEPLOY/$CROSS/lib/libc.so</code>
             </post>
-            <post id="2">
-              
+            <post id="2">              
               <code>touch $DEPLOY/$CROSS/include/gnu/stubs.h</code>
             </post>
           </rule>
