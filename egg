@@ -308,7 +308,7 @@ local II=""
 local VV=""
 local NUM=0
 local ID=0
-echo "--> $PATH : $OROOT $HOME $REPO $IMAGES"
+#echo "--> $PATH : $OROOT $HOME $REPO $IMAGES"
 #load user defined variable globals
 NUM=$(xmlstarlet sel -t  -v "count(egg/conf/user_env)" -n $MAINFILE)
 if [ "$NUM" == "" ]; then
@@ -2048,29 +2048,38 @@ if [ -e $SRC/configure ]; then
 	echo -n "$SRC/configure ">> $C_FILE
 	add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 else
-	if [ -e $SRC/configure.ac ]; then
-		# add <pre> autoconf...
+	if [ -e $SRC/autogen.sh ]; then
 		mkdir -p "$C_BUILD/build"
 		echo "pushd $SRC">> $C_FILE
-		echo "autoconf">> $C_FILE
+		echo "./autogen.sh">> $C_FILE
 		echo "popd">> $C_FILE
 		echo -n "$SRC/configure  ">> $C_FILE
 		add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
-		else
-			if [ -e $SRC/Configure ]; then
-			#perl
-				mkdir -p "$C_BUILD/build"
-				echo -n "$SRC/Configure ">> $C_FILE
-				add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
+	else
+		if [ -e $SRC/configure.ac ]; then
+			# add <pre> autoconf...
+			mkdir -p "$C_BUILD/build"
+			echo "pushd $SRC">> $C_FILE
+			echo "autoconf">> $C_FILE
+			echo "popd">> $C_FILE
+			echo -n "$SRC/configure  ">> $C_FILE
+			add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
 			else
-				if [ -e $SRC/Makefile ]; then
-					rm -rf $C_BUILD/build
-					ln -s  "$SRC" "$C_BUILD/build"
-					echo  "#no configure is needed .... ">> $C_FILE
-			else
-				warning_c "Configure / Makefile missing" "Addjust path in the conf.egg"
-			fi							
-		fi		
+				if [ -e $SRC/Configure ]; then
+				#perl
+					mkdir -p "$C_BUILD/build"
+					echo -n "$SRC/Configure ">> $C_FILE
+					add_extra_conf "$1" "$2" "$C_FILE"  "$SILENT" 
+				else
+					if [ -e $SRC/Makefile ]; then
+						rm -rf $C_BUILD/build
+						ln -s  "$SRC" "$C_BUILD/build"
+						echo  "#no configure is needed .... ">> $C_FILE
+				else
+					warning_c "Configure / Makefile missing" "Addjust path in the conf.egg"
+				fi							
+			fi		
+		fi	
 	fi	
 fi	
 ##
@@ -4216,7 +4225,7 @@ rm -f $SCR
 echo "#!/bin/bash" > "$SCR"
 echo "$EDITOR $1" >> "$SCR"
 chmod +x "$SCR"
-bash "$SCR"
+bash "$SCR" 
 }
 
 #recussive edit on repo project
@@ -4295,16 +4304,16 @@ fi
 check_project "$1"
 if [ $? -ne 0 ]; then
 	format_xml "$OREPO/$1/conf.egg"
-	run_editor   $OREPO/$1/conf.egg 
+	run_editor   $OREPO/$1/conf.egg &
 else
 	case $1 in
 		self)
 		format_xml "$OROOT/egg"
-		run_editor $OROOT/egg
+		run_editor $OROOT/egg &
 		;;
 		self.conf)
 		format_xml "$OREPO/conf.egg"
-		run_editor  $OREPO/conf.egg
+		run_editor  $OREPO/conf.egg &
 		;;
 		self.repo)
 		edit_repo_files "$2"
@@ -5184,11 +5193,11 @@ help_c "command : cat " \
 }
 
 function help_clone(){
-help_c "command : source" \
-"\$1 : source project to clone"\
-"\$2 : new project"\
+help_c "command : clone" \
+"\$1 : source project to clone" \
+"\$2 : new project" \
 "clone an existing project to a new project" \
-"ex ./egg source"
+"ex ./egg clone coreutils util-linux"
 }
 
 
@@ -5323,7 +5332,6 @@ if [ "$1" != "" ]; then
 		error_c "Not Found" "$1 not found in this repo"
 	fi
 fi
-
 if [ "$2" != "" ]; then 
 	VV=$(echo $ALL | grep "\<$2\>" )
 	if [ "$VV" != "" ]; then 
@@ -5339,7 +5347,8 @@ fi
 xmlstarlet  ed --inplace -u "/egg/project/name" -v "$2" "$OREPO/$2/conf.egg"
 xmlstarlet  ed --inplace -u "/egg/project/remote/url" -v "  " "$OREPO/$2/conf.egg"
 xmlstarlet  ed --inplace -u "/egg/project/remote/file" -v "  " "$OREPO/$2/conf.egg"
-run_editor $2
+rsync -ry $OREPO $REPO
+run_editor $OREPO/$2/conf.egg &
 }
 
 
@@ -5396,6 +5405,61 @@ else
 fi
 
 done 
+}
+
+#$1 STEP ELSE -> START_STEP
+function try_to_mount_command(){
+if [ $BREAK_BREAK -ne 0 ] && [ "${FUNCNAME[0]}" == "$BREAK_FUNCTION" ]; then
+	export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+	[ $BREAK_DEEP -ne 0 ] && STEP_STEP=1		
+	print_ita "ARGV :" "NUM:$#" "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+	set -x ; trap read debug 	
+fi
+[ $STEP_STEP -eq 1 ] && trap read debug
+local ID=0
+local V=""
+local VV=""
+if [ $# -eq  0 ]; then 
+ID=$STEP_START
+else
+ID=$1
+fi
+isNumber $ID
+if [ $? -ne 0 ]; then
+	warning_c "No valid input step number set" "assuming start_step = $START_STEP "
+	ID=$START_STEP
+fi
+prepare_seq_priority "$ID" "$ALL_PACKETS"
+DEPLOY="$IMAGES/""$(echo ${SORTREQ[0]} | sed -e 's/%/ /g' | awk '{print $3}')"
+warning_c "Try to Mount" "At path : $DEPLOY" " You are sure ? Continue ? [s,n]"
+read -r
+RES=$(echo $REPLY  | tr '[:lower:]' '[:upper:]')
+if [ "$RES" == "S" ]; then 
+if  [ "$DEPLOY" != "" ] &&  [ -d $DEPLOY/bin ] && [ -d $DEPLOY/lib ] ; then 
+	print_c "$PURPLE" "Insert" "$YELLOW" "Password :"
+	read -r
+	if [ "$REPLY" != "" ]; then 	
+	rm -rf  $DEPLOY/proc
+	rm -rf  $DEPLOY/dev
+	rm -rf  $DEPLOY/sys
+	rm -rf  $DEPLOY/root
+	mkdir -p $DEPLOY/proc
+	mkdir -p $DEPLOY/dev
+	mkdir -p $DEPLOY/sys
+	mkdir -p $DEPLOY/root
+	echo $REPLY | sudo -S mount --bind /proc $DEPLOY/proc
+	echo $REPLY | sudo -S mount --bind /dev $DEPLOY/dev
+	echo $REPLY | sudo -S mount --bind /sys $DEPLOY/sys
+	echo $REPLY | sudo -S cp /root/.bashrc $DEPLOY/root/.
+	echo $REPLY | sudo -S cp /root/.profile $DEPLOY/root/.
+	echo $REPLY | sudo -S /usr/sbin/chroot $DEPLOY	
+	else
+		errror_c "no password" "not a valid password inserted :$REPLY"
+	fi
+else
+error_c "not defined !" "$DEPLOY/bin and $DEPLOY/lib not exist !"
+fi
+fi
 }
 
 #$1 build id number
@@ -5567,6 +5631,11 @@ case $1 in
 	shift
 	break
 	;;	
+	chroot)
+	torun=try_to_mount_command		
+	shift
+	break
+	;;	
 	*)	
 	usage
 	error_c "Command line" " unknow  $1"
@@ -5628,7 +5697,7 @@ get_max_step
 EGG_RES=0
 EGG_START_TIME=$(date  +%s)
 legal
-echo "--->PATH:$PATH"
+#echo "--->PATH:$PATH"
 if [ $# -eq 0 ] ; then		
 	iterative
 else
