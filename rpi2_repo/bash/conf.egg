@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<egg>
+  <project>
+    <name>bash</name>
+    <download>check</download>
+    <remote>
+      <method>wget</method>
+      <url>ftp://ftp.gnu.org/gnu/bash</url>
+      <file>bash-4.3.tar.gz</file>
+    </remote>
+    <build>
+      <step id="1">
+        <silent>yes</silent>
+        <threads>8</threads>
+        <path>
+          <pre>
+            <set id="0">$USER_PATH</set>
+          </pre>
+        </path>
+        <configure>
+          <extra id="0">--prefix=$DEPLOY</extra>
+          <extra id="1">--target=$CROSS</extra>
+	  <extra id="2">--host=$CROSS</extra>
+        </configure>
+        <make id="0">
+          <priority>4</priority>
+          <rule id="0">
+            <name>CROSS_COMPILE=$CROSS_COMPILE  all</name>
+          </rule>
+          <rule id="1">
+            <name>CROSS_COMPILE=$CROSS_COMPILE install</name>
+            <thread>1</thread>
+            <post id="0">
+              <code>ln -s $DEPLOY/bin/bash $DEPLOY/bin/sh</code>
+            </post>
+          </rule>
+        </make>
+      </step>
+    </build>
+  </project>
+</egg>

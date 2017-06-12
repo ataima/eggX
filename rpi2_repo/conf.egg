@@ -7,7 +7,7 @@
     <store>$ROOT/store</store>
     <images>$ROOT/images</images>
     <build>$ROOT/build</build>
-    <editor>vim</editor>
+    <editor>scite</editor>
     <path>$USER_PATH</path>
     <ld_library_path>$USER_LIB_PATH</ld_library_path>
     <user_env id="0">
